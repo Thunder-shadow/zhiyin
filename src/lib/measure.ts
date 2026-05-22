@@ -12,13 +12,14 @@ const toNumber = (v: unknown) => {
     return 0
 }
 
-const normalizeRect = (r: Record<string, unknown> | null | undefined): Rect | null => {
+const normalizeRect = (r: Partial<Rect> | Record<string, unknown> | null | undefined): Rect | null => {
     if (!r) return null
+    const rect = r as Record<string, unknown>
     return {
-        left: toNumber(r.left),
-        top: toNumber(r.top),
-        width: toNumber(r.width),
-        height: toNumber(r.height),
+        left: toNumber(rect.left),
+        top: toNumber(rect.top),
+        width: toNumber(rect.width),
+        height: toNumber(rect.height),
     }
 }
 
