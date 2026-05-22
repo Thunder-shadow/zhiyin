@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #3A4A44;
+      --color-primary-container:    #E7EEE9;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F8F9F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FAFBF9;
+      --color-surface-container:          #F0F2EF;
+      --color-surface-container-high:     #E7EEE9;
+      --color-surface-container-highest:  #DEE5E0;
+      /* === 文字 === */
+      --color-on-surface:           #212121;
+      --color-on-surface-variant:   #6B7B74;
+      /* === 功能色 === */
+      --color-success:  #5B9A6F;
+      --color-error:    #E26A5C;
+      --color-warning:  #D4A574;
+      /* === 成就徽章色 === */
+      --color-badge-gold:    #FDF6E3;
+      --color-badge-green:   #E8F5E9;
+      --color-on-badge-gold: #D4A574;
+      --color-on-badge-green:#5B9A6F;
+      /* === 边框 === */
+      --color-outline:          #B8C2BB;
+      --color-outline-variant:  #C8CFC9;
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;
+      --radius-md:   0.75rem;
+      --radius-lg:   1rem;
+      --radius-xl:   1.25rem;
+      --radius-2xl:  1.5rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
+      --shadow-float:  0 4px 12px rgba(0,0,0,0.08);
+      --shadow-dialog: 0 10px 25px rgba(0,0,0,0.12);
+      /* === 字体 === */
+      --font-sans: system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: system-ui, sans-serif;
+    }
+    /* 成就横向滚动 - 隐藏滚动条 */
+    .achievement-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .achievement-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- 顶部 Header -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <h1 class="text-lg font-semibold text-on-surface">职引</h1>
+    <button id="btn-notification" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container transition-colors">
+      <i data-lucide="bell" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- @main-content:start -->
+  <main class="overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+
+    <!-- 用户信息区 -->
+    <div class="mx-4 mt-3 mb-6 bg-surface-container-lowest rounded-2xl shadow-card p-4">
+      <div class="flex items-center gap-3">
+        <!-- 头像圆圈 "初" -->
+        <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+          <span class="text-lg font-bold text-on-primary">初</span>
+        </div>
+        <!-- 用户名和等级 -->
+        <div class="flex-1 min-w-0">
+          <h2 class="text-base font-semibold text-on-surface">小初</h2>
+          <span class="inline-flex items-center mt-0.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-container text-primary">Lv.5 求职达人</span>
+        </div>
+        <!-- 设置齿轮图标 -->
+        <button id="btn-settings" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container transition-colors">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <!-- 统计行 -->
+      <div class="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-outline-variant/15">
+        <a id="stat-delivered" href="#" class="flex items-center gap-1.5 text-sm text-on-surface">
+          <span class="font-semibold text-base">12</span>
+          <span class="text-on-surface-variant">投递</span>
+        </a>
+        <span class="w-px h-4 bg-outline-variant/30"></span>
+        <a id="stat-interview" href="#" class="flex items-center gap-1.5 text-sm text-on-surface">
+          <span class="font-semibold text-base">5</span>
+          <span class="text-on-surface-variant">面试</span>
+        </a>
+        <span class="w-px h-4 bg-outline-variant/30"></span>
+        <a id="stat-offer" href="#" class="flex items-center gap-1.5 text-sm text-on-surface">
+          <span class="font-semibold text-base">2</span>
+          <span class="text-on-surface-variant">Offer</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 成就展示 -->
+    <div class="px-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-semibold text-on-surface">成就墙</h3>
+        <a id="link-achievements" href="#" class="text-sm text-on-surface-variant hover:text-primary transition-colors">查看全部<span class="ml-0.5">&gt;</span></a>
+      </div>
+      <div class="achievement-scroll flex gap-3 overflow-x-auto pb-1">
+        <!-- 成就-初出茅庐（已解锁） -->
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0" data-achievement="first-step">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center bg-badge-gold">
+            <i data-lucide="footprints" class="w-7 h-7 text-on-badge-gold"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">初出茅庐</span>
+        </div>
+        <!-- 成就-面霸（已解锁） -->
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0" data-achievement="interview-king">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center bg-badge-green">
+            <i data-lucide="mic" class="w-7 h-7 text-on-badge-green"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">面霸</span>
+        </div>
+        <!-- 成就-投递达人（已解锁） -->
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0" data-achievement="deliver-master">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center bg-primary-container">
+            <i data-lucide="send" class="w-7 h-7 text-primary"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">投递达人</span>
+        </div>
+        <!-- 成才-offer收割机（未解锁） -->
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0" data-achievement="offer-harvester">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed border-outline-variant/40 bg-surface-container">
+            <i data-lucide="trophy" class="w-7 h-7 text-on-surface-variant/40"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface-variant">offer收割机</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 功能菜单列表 -->
+    <div class="mx-4 mb-6 bg-surface-container-lowest rounded-2xl shadow-card overflow-hidden">
+      <!-- 菜单-简历库 -->
+      <div id="menu-resume" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container-high transition-colors cursor-pointer">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
+          <i data-lucide="file-text" class="w-4.5 h-4.5 text-primary"></i>
+        </div>
+        <span class="flex-1 text-sm font-medium text-on-surface">简历库</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/50"></i>
+      </div>
+      <div class="mx-4 h-px bg-outline-variant/10"></div>
+      <!-- 菜单-职业规划 -->
+      <div id="menu-career" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container-high transition-colors cursor-pointer">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
+          <i data-lucide="sparkles" class="w-4.5 h-4.5 text-primary"></i>
+        </div>
+        <span class="flex-1 text-sm font-medium text-on-surface">职业规划</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/50"></i>
+      </div>
+      <div class="mx-4 h-px bg-outline-variant/10"></div>
+      <!-- 菜单-训练记录 -->
+      <div id="menu-training" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container-high transition-colors cursor-pointer">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
+          <i data-lucide="swords" class="w-4.5 h-4.5 text-primary"></i>
+        </div>
+        <span class="flex-1 text-sm font-medium text-on-surface">训练记录</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/50"></i>
+      </div>
+      <div class="mx-4 h-px bg-outline-variant/10"></div>
+      <!-- 菜单-求职笔记 -->
+      <div id="menu-notes" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container-high transition-colors cursor-pointer">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
+          <i data-lucide="book-open" class="w-4.5 h-4.5 text-primary"></i>
+        </div>
+        <span class="flex-1 text-sm font-medium text-on-surface">求职笔记</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/50"></i>
+      </div>
+      <div class="mx-4 h-px bg-outline-variant/10"></div>
+      <!-- 菜单-设置与帮助 -->
+      <div id="menu-settings" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container-high transition-colors cursor-pointer">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
+          <i data-lucide="settings" class="w-4.5 h-4.5 text-primary"></i>
+        </div>
+        <span class="flex-1 text-sm font-medium text-on-surface">设置与帮助</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-on-surface-variant/50"></i>
+      </div>
+    </div>
+
+    <!-- 版本信息 -->
+    <div class="text-center pb-6 pt-2">
+      <p class="text-xs text-on-surface-variant/60">职引 v1.0.0 · 让求职成为一场冒险</p>
+    </div>
+
+  </main>
+  <!-- @main-content:end -->
+
+  <!-- 底部 TabBar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)] border-t border-outline-variant/20">
+    <a id="nav-home" href="home.html" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">驾驶舱</span>
+    </a>
+    <a id="nav-company" href="company-hall.html" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="building" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">副本</span>
+    </a>
+    <a id="nav-interview" href="interview-lobby.html" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">训练场</span>
+    </a>
+    <a id="nav-profile" href="profile.html" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary" aria-current="page">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的</span>
+    </a>
+  </nav>
+
+  <script>lucide.createIcons();</script>
+
+  <script>
+    // 导航辅助函数
+    function navPush(route) {
+      console.log(`[原型演示] PUSH 到: ${route}`);
+      window.location.href = route;
+    }
+
+    function navReplace(route) {
+      console.log(`[原型演示] REPLACE 为: ${route}`);
+      window.location.replace(route);
+    }
+
+    function navReset(route) {
+      console.log(`[原型演示] RESET 到: ${route}`);
+      window.location.href = route;
+    }
+
+    function navBack() {
+      console.log(`[原型演示] BACK 返回上一页`);
+      if (window.history.length > 1) window.history.back();
+    }
+
+    $(function () {
+      // TabBar 导航 - 使用 navReset 切换一级页面
+      $('#nav-home').on('click', function (e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+      $('#nav-company').on('click', function (e) {
+        e.preventDefault();
+        navReset('company-hall.html');
+      });
+      $('#nav-interview').on('click', function (e) {
+        e.preventDefault();
+        navReset('interview-lobby.html');
+      });
+      $('#nav-profile').on('click', function (e) {
+        e.preventDefault();
+        navReset('profile.html');
+      });
+
+      // 顶部通知按钮
+      $('#btn-notification').on('click', function () {
+        console.log('[原型演示] 打开通知页面');
+        // 后续应实现：跳转到通知列表页，展示系统通知、面试提醒等消息
+      });
+
+      // 用户信息区设置齿轮
+      $('#btn-settings').on('click', function () {
+        console.log('[原型演示] 打开设置页面');
+        // 后续应实现：跳转到账号设置页，包含头像编辑、昵称修改、隐私设置等功能
+      });
+
+      // 统计行点击
+      $('#stat-delivered').on('click', function (e) {
+        e.preventDefault();
+        console.log('[原型演示] 查看投递记录');
+        // 后续应实现：跳转到投递记录列表页，展示所有投递的公司和状态
+      });
+      $('#stat-interview').on('click', function (e) {
+        e.preventDefault();
+        console.log('[原型演示] 查看面试记录');
+        // 后续应实现：跳转到面试记录页，展示已面试和待面试的记录
+      });
+      $('#stat-offer').on('click', function (e) {
+        e.preventDefault();
+        console.log('[原型演示] 查看Offer记录');
+        // 后续应实现：跳转到Offer记录页，展示已获得的Offer详情
+      });
+
+      // 成就查看全部
+      $('#link-achievements').on('click', function (e) {
+        e.preventDefault();
+        console.log('[原型演示] 查看全部成就');
+        // 后续应实现：跳转到成就墙完整页面，展示所有已解锁和未解锁成就，包含成就详情和解锁条件
+      });
+
+      // 成就徽章点击
+      $('[data-achievement]').on('click', function () {
+        const achievement = $(this).data('achievement');
+        console.log(`[原型演示] 点击成就: ${achievement}`);
+        // 后续应实现：弹出成就详情弹窗，展示成就名称、解锁条件、获得时间等信息
+      });
+
+      // 功能菜单项点击
+      $('#menu-resume').on('click', function () {
+        console.log('[原型演示] 进入简历库');
+        // 后续应实现：跳转到简历库页面，展示用户创建的简历列表，支持新建和编辑简历
+      });
+
+      $('#menu-career').on('click', function () {
+        console.log('[原型演示] 进入职业规划');
+        // 后续应实现：跳转到职业规划页面，展示职业发展路径、目标设定和进度追踪
+      });
+
+      $('#menu-training').on('click', function () {
+        console.log('[原型演示] 进入训练记录');
+        // 后续应实现：跳转到训练记录页面，展示面试训练、笔试练习等历史记录
+      });
+
+      $('#menu-notes').on('click', function () {
+        console.log('[原型演示] 进入求职笔记');
+        // 后续应实现：跳转到求职笔记页面，展示用户记录的面试经验、公司调研等笔记列表
+      });
+
+      $('#menu-settings').on('click', function () {
+        console.log('[原型演示] 进入设置与帮助');
+        // 后续应实现：跳转到设置与帮助页面，包含账号安全、消息通知设置、帮助中心、关于等
+      });
+    });
+  </script>
+
+</body>
+
+</html>

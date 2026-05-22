@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #3A4A44;
+      --color-primary-container:    #E7EEE9;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F8F9F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FAFBF9;
+      --color-surface-container:          #F0F2EF;
+      --color-surface-container-high:     #E7EEE9;
+      --color-surface-container-highest:  #DEE5E0;
+      /* === 文字 === */
+      --color-on-surface:           #212121;
+      --color-on-surface-variant:   #6B7B74;
+      /* === 功能色 === */
+      --color-success:  #5B9A6F;
+      --color-error:    #E26A5C;
+      --color-warning:  #D4A574;
+      /* === 漏斗/装饰色 === */
+      --color-funnel-deliver:    #E26A5C;
+      --color-funnel-interview:  #3A4A44;
+      --color-funnel-offer:      #5B9A6F;
+      --color-exp-gradient-end:  #D4A574;
+      /* === 快捷入口背景/图标色 === */
+      --color-entry-sandbox-bg:      #F5F0FF;
+      --color-entry-sandbox-icon-bg: #E8DEFF;
+      --color-entry-sandbox-icon:    #7C5CFC;
+      --color-entry-dungeon-bg:      #F0F5F2;
+      --color-entry-dungeon-icon-bg: #DAE8E0;
+      --color-entry-training-bg:      #FFF5EE;
+      --color-entry-training-icon-bg: #FFE8D6;
+      --color-entry-training-icon:    #E8864A;
+      --color-entry-resume-bg:      #FAF8F3;
+      --color-entry-resume-icon-bg: #F0EBE0;
+      --color-entry-resume-icon:    #A89060;
+      /* === 边框 === */
+      --color-outline:          #B8C2BB;
+      --color-outline-variant:  #C8CFC9;
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;
+      --radius-md:   0.75rem;
+      --radius-lg:   1rem;
+      --radius-xl:   1.25rem;
+      --radius-2xl:  1.5rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
+      --shadow-float:  0 4px 12px rgba(0,0,0,0.08);
+      --shadow-dialog: 0 10px 25px rgba(0,0,0,0.12);
+      /* === 字体 === */
+      --font-sans: system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- 顶部 Header -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <h1 class="text-lg font-semibold text-on-surface">职引</h1>
+    <button id="btn-notification" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container transition-colors">
+      <i data-lucide="bell" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- @main-content:start -->
+  <main class="overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+    <div class="flex flex-col gap-5 px-4 py-4">
+
+      <!-- ====== 1. 用户概览区 ====== -->
+      <section id="section-user-overview" class="bg-surface-container-lowest rounded-xl shadow-card p-4">
+        <div class="flex items-center gap-3">
+          <!-- 左侧头像圆圈 -->
+          <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+            <span class="text-lg font-bold text-on-primary">初</span>
+          </div>
+          <!-- 中间信息 -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-base font-semibold text-on-surface">小初</span>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-primary/15 text-primary">Lv.5</span>
+            </div>
+            <p class="text-sm text-on-surface-variant mt-0.5">称号：求职达人</p>
+            <!-- 经验进度条 -->
+            <div class="mt-2 flex items-center gap-2">
+              <div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full rounded-full" style="width: 56%; background: linear-gradient(90deg, var(--color-primary), var(--color-exp-gradient-end));"></div>
+              </div>
+              <span class="text-xs text-on-surface-variant whitespace-nowrap">280/500 EXP</span>
+            </div>
+          </div>
+          <!-- 右侧连续活跃徽章 -->
+          <div class="flex-shrink-0 flex flex-col items-center gap-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold bg-warning/20 text-warning">
+              <i data-lucide="flame" class="w-3.5 h-3.5 mr-0.5"></i>7天
+            </span>
+            <span class="text-[10px] text-on-surface-variant">连续活跃</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 2. 求职漏斗看板 ====== -->
+      <section id="section-funnel" class="bg-surface-container-lowest rounded-xl shadow-card p-4">
+        <h2 class="text-base font-semibold text-on-surface mb-3">求职漏斗</h2>
+
+        <!-- 漏斗-投递 -->
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-sm font-medium w-10 text-right text-funnel-deliver">投递</span>
+          <div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-funnel-deliver" style="width: 100%;"></div>
+          </div>
+          <span class="text-base font-bold text-on-surface w-6 text-right">12</span>
+        </div>
+
+        <!-- 漏斗-面试 -->
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-sm font-medium w-10 text-right text-funnel-interview">面试</span>
+          <div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-funnel-interview" style="width: 42%;"></div>
+          </div>
+          <span class="text-base font-bold text-on-surface w-6 text-right">5</span>
+        </div>
+
+        <!-- 漏斗-Offer -->
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-medium w-10 text-right text-funnel-offer">Offer</span>
+          <div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+            <div class="h-full rounded-full bg-funnel-offer" style="width: 17%;"></div>
+          </div>
+          <span class="text-base font-bold text-on-surface w-6 text-right">2</span>
+        </div>
+      </section>
+
+      <!-- ====== 3. 快捷入口 2x2 ====== -->
+      <section id="section-quick-entry" class="grid grid-cols-2 gap-3">
+        <!-- 快捷入口-职业沙盘 -->
+        <div id="card-career-sandbox" class="bg-entry-sandbox-bg rounded-xl shadow-card p-4 flex flex-col items-start gap-2 cursor-pointer hover:shadow-float active:scale-[0.98] transition-all">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-entry-sandbox-icon-bg">
+            <i data-lucide="sparkles" class="w-5 h-5 text-entry-sandbox-icon"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-on-surface">职业沙盘</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">AI帮你规划</p>
+          </div>
+        </div>
+
+        <!-- 快捷入口-副本大厅 -->
+        <div id="card-dungeon-hall" class="bg-entry-dungeon-bg rounded-xl shadow-card p-4 flex flex-col items-start gap-2 cursor-pointer hover:shadow-float active:scale-[0.98] transition-all">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-entry-dungeon-icon-bg">
+            <i data-lucide="building" class="w-5 h-5 text-primary"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-on-surface">副本大厅</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">浏览岗位</p>
+          </div>
+        </div>
+
+        <!-- 快捷入口-训练场 -->
+        <div id="card-training-ground" class="bg-entry-training-bg rounded-xl shadow-card p-4 flex flex-col items-start gap-2 cursor-pointer hover:shadow-float active:scale-[0.98] transition-all">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-entry-training-icon-bg">
+            <i data-lucide="swords" class="w-5 h-5 text-entry-training-icon"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-on-surface">训练场</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">模拟面试</p>
+          </div>
+        </div>
+
+        <!-- 快捷入口-简历库 -->
+        <div id="card-resume-vault" class="bg-entry-resume-bg rounded-xl shadow-card p-4 flex flex-col items-start gap-2 cursor-pointer hover:shadow-float active:scale-[0.98] transition-all">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-entry-resume-icon-bg">
+            <i data-lucide="file-text" class="w-5 h-5 text-entry-resume-icon"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-on-surface">简历库</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">管理简历</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 4. HR反向模拟入口 ====== -->
+      <section id="section-hr-sim" class="bg-surface-container-lowest rounded-xl shadow-card p-4 flex items-center gap-3 cursor-pointer hover:shadow-float active:scale-[0.98] transition-all">
+        <div class="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center flex-shrink-0">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 text-primary"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-on-surface">HR反向模拟</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">扮演HR面试候选人，训练选人眼光</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-on-surface-variant/50 flex-shrink-0"></i>
+      </section>
+
+    </div>
+  </main>
+  <!-- @main-content:end -->
+
+  <!-- 底部 TabBar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)] border-t border-outline-variant/20">
+    <a href="home.html" id="nav-home" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary" aria-current="page">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">驾驶舱</span>
+    </a>
+    <a href="company-hall.html" id="nav-dungeon" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="building" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">副本</span>
+    </a>
+    <a href="interview-lobby.html" id="nav-training" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">训练场</span>
+    </a>
+    <a href="profile.html" id="nav-profile" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的</span>
+    </a>
+  </nav>
+
+  <script>lucide.createIcons();</script>
+
+  <script>
+    // === 导航辅助函数 ===
+    function navPush(route) {
+      console.log(`[原型演示] PUSH 到: ${route}`);
+      window.location.href = route;
+    }
+    function navReplace(route) {
+      console.log(`[原型演示] REPLACE 为: ${route}`);
+      window.location.replace(route);
+    }
+    function navReset(route) {
+      console.log(`[原型演示] RESET 到: ${route}`);
+      window.location.href = route;
+    }
+    function navBack() {
+      console.log('[原型演示] BACK 返回上一页');
+      if (window.history.length > 1) window.history.back();
+    }
+
+    $(function () {
+      // === TabBar 导航（使用 navReset） ===
+      $('#nav-home').on('click', function (e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+      $('#nav-dungeon').on('click', function (e) {
+        e.preventDefault();
+        navReset('company-hall.html');
+      });
+      $('#nav-training').on('click', function (e) {
+        e.preventDefault();
+        navReset('interview-lobby.html');
+      });
+      $('#nav-profile').on('click', function (e) {
+        e.preventDefault();
+        navReset('profile.html');
+      });
+
+      // === 快捷入口跳转 ===
+      // 职业沙盘 - 跳转到副本大厅（岗位浏览页），标记来源为沙盘
+      $('#card-career-sandbox').on('click', function () {
+        navPush('company-hall.html?from=sandbox');
+      });
+
+      // 副本大厅 - 跳转到岗位列表
+      $('#card-dungeon-hall').on('click', function () {
+        navPush('company-hall.html');
+      });
+
+      // 训练场 - 跳转到面试训练大厅
+      $('#card-training-ground').on('click', function () {
+        navPush('interview-lobby.html');
+      });
+
+      // 简历库 - 跳转到个人中心简历管理
+      $('#card-resume-vault').on('click', function () {
+        navPush('profile.html?tab=resume');
+      });
+
+      // === HR反向模拟入口 ===
+      // 点击后应跳转到HR反向模拟页面（当前跳转到训练场，后续新增独立页面）
+      $('#section-hr-sim').on('click', function () {
+        navPush('interview-lobby.html?mode=hr-sim');
+      });
+
+      // === 通知按钮 ===
+      $('#btn-notification').on('click', function () {
+        console.log('[原型演示] 打开通知中心 - 后续应实现通知列表弹窗，展示面试提醒、Offer状态变更等消息');
+      });
+    });
+  </script>
+
+</body>
+
+</html>

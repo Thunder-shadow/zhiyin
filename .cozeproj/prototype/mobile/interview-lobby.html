@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #3A4A44;
+      --color-primary-container:    #E7EEE9;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F8F9F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FAFBF9;
+      --color-surface-container:          #F0F2EF;
+      --color-surface-container-high:     #E7EEE9;
+      --color-surface-container-highest:  #DEE5E0;
+      /* === 文字 === */
+      --color-on-surface:           #212121;
+      --color-on-surface-variant:   #6B7B74;
+      /* === 功能色 === */
+      --color-success:  #5B9A6F;
+      --color-error:    #E26A5C;
+      --color-warning:  #D4A574;
+      /* === 边框 === */
+      --color-outline:          #B8C2BB;
+      --color-outline-variant:  #C8CFC9;
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;
+      --radius-md:   0.75rem;
+      --radius-lg:   1rem;
+      --radius-xl:   1.25rem;
+      --radius-2xl:  1.5rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
+      --shadow-float:  0 4px 12px rgba(0,0,0,0.08);
+      --shadow-dialog: 0 10px 25px rgba(0,0,0,0.12);
+      /* === 字体 === */
+      --font-sans: system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: system-ui, sans-serif;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- 顶部 Header -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <h1 class="text-lg font-semibold text-on-surface">职引</h1>
+    <button id="btn-notification" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container transition-colors">
+      <i data-lucide="bell" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- @main-content:start -->
+  <main class="overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+
+    <!-- 训练概览卡片 -->
+    <section class="px-4 pt-2 pb-2">
+      <div id="card-training-overview" class="bg-surface-container-lowest rounded-xl shadow-card p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-base font-semibold text-on-surface">今日已训练</span>
+            <span class="text-xl font-bold text-primary">2</span>
+            <span class="text-sm font-normal text-on-surface">次</span>
+          </div>
+          <div class="w-9 h-9 bg-error/15 rounded-lg flex items-center justify-center">
+            <i data-lucide="flame" class="w-5 h-5 text-error"></i>
+          </div>
+        </div>
+        <p class="text-xs text-on-surface-variant mt-2">坚持训练，面试更从容</p>
+      </div>
+    </section>
+
+    <!-- 模式选择区域 -->
+    <section class="px-4 pt-4 pb-2">
+      <h2 class="text-base font-semibold text-on-surface mb-3">选择训练模式</h2>
+
+      <!-- 模式卡片1：单人模拟面 -->
+      <div id="card-mode-solo" class="bg-surface-container-lowest rounded-xl shadow-card p-4 mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user" class="w-6 h-6 text-primary"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-semibold text-on-surface">单人模拟面</p>
+            <p class="text-sm text-on-surface-variant mt-0.5">AI扮演面试官，1对1对话训练</p>
+          </div>
+          <button id="btn-start-solo" class="bg-primary text-on-primary px-5 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all flex-shrink-0">
+            开始
+          </button>
+        </div>
+      </div>
+
+      <!-- 模式卡片2：压力面试 -->
+      <div id="card-mode-stress" class="bg-surface-container-lowest rounded-xl shadow-card p-4 mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-error/12 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i data-lucide="flame" class="w-6 h-6 text-error"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-semibold text-on-surface">压力面试</p>
+            <p class="text-sm text-on-surface-variant mt-0.5">高压追问，锻炼临场反应</p>
+          </div>
+          <button id="btn-start-stress" class="bg-primary text-on-primary px-5 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all flex-shrink-0">
+            开始
+          </button>
+        </div>
+      </div>
+
+      <!-- 模式卡片3：AI群面 -->
+      <div id="card-mode-group" class="bg-surface-container-lowest rounded-xl shadow-card p-4 mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-base font-semibold text-on-surface">AI群面</p>
+            <p class="text-sm text-on-surface-variant mt-0.5">多位AI面试官轮流提问</p>
+          </div>
+          <button id="btn-start-group" class="bg-primary text-on-primary px-5 py-2.5 rounded-md text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all flex-shrink-0">
+            开始
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 最近训练记录 -->
+    <section class="px-4 pt-4 pb-6">
+      <h2 class="text-base font-semibold text-on-surface mb-3">最近训练</h2>
+
+      <div class="bg-surface-container-lowest rounded-xl shadow-card overflow-hidden">
+        <!-- 训练记录1 -->
+        <div id="record-item-1" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container transition-colors cursor-pointer" data-id="rec-1">
+          <div class="w-2.5 h-2.5 bg-primary rounded-full flex-shrink-0"></div>
+          <div class="flex-1 min-w-0 ml-3">
+            <p class="text-sm font-medium text-on-surface truncate">字节跳动·产品经理</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-xs text-on-surface-variant">综合评分</span>
+              <span class="text-xs font-semibold text-primary">82</span>
+            </div>
+          </div>
+          <span class="text-xs text-on-surface-variant mr-2 flex-shrink-0">2小时前</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-on-surface-variant/50 flex-shrink-0"></i>
+        </div>
+
+        <!-- 分隔线 -->
+        <div class="h-px bg-outline-variant/15 mx-4"></div>
+
+        <!-- 训练记录2 -->
+        <div id="record-item-2" class="flex items-center px-4 py-3.5 hover:bg-surface-container active:bg-surface-container transition-colors cursor-pointer" data-id="rec-2">
+          <div class="w-2.5 h-2.5 bg-primary rounded-full flex-shrink-0"></div>
+          <div class="flex-1 min-w-0 ml-3">
+            <p class="text-sm font-medium text-on-surface truncate">腾讯·前端开发</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-xs text-on-surface-variant">综合评分</span>
+              <span class="text-xs font-semibold text-primary">76</span>
+            </div>
+          </div>
+          <span class="text-xs text-on-surface-variant mr-2 flex-shrink-0">昨天</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-on-surface-variant/50 flex-shrink-0"></i>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <!-- @main-content:end -->
+
+  <!-- 底部 TabBar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)] border-t border-outline-variant/20">
+    <a href="home.html" id="nav-home" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">驾驶舱</span>
+    </a>
+    <a href="company-hall.html" id="nav-company" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="building" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">副本</span>
+    </a>
+    <a href="interview-lobby.html" id="nav-interview" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary" aria-current="page">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">训练场</span>
+    </a>
+    <a href="profile.html" id="nav-profile" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的</span>
+    </a>
+  </nav>
+
+  <script>lucide.createIcons();</script>
+
+  <script>
+    // 导航辅助函数
+    function navPush(route) {
+      console.log(`[原型演示] PUSH 到: ${route}`);
+      window.location.href = route;
+    }
+
+    function navReplace(route) {
+      console.log(`[原型演示] REPLACE 为: ${route}`);
+      window.location.replace(route);
+    }
+
+    function navReset(route) {
+      console.log(`[原型演示] RESET 到: ${route}`);
+      window.location.href = route;
+    }
+
+    function navBack() {
+      console.log(`[原型演示] BACK 返回上一页`);
+      if (window.history.length > 1) window.history.back();
+    }
+
+    $(function () {
+      // TabBar 导航
+      $('#nav-home').on('click', function (e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+
+      $('#nav-company').on('click', function (e) {
+        e.preventDefault();
+        navReset('company-hall.html');
+      });
+
+      $('#nav-profile').on('click', function (e) {
+        e.preventDefault();
+        navReset('profile.html');
+      });
+
+      // 通知按钮
+      $('#btn-notification').on('click', function () {
+        console.log('点击通知按钮 - 应跳转到通知列表页');
+      });
+
+      // 单人模拟面 - 开始按钮
+      // 点击后应跳转到单人模拟面试页面：
+      // 1. 携带模式参数 mode=solo
+      // 2. 目标页面根据参数加载对应面试流程
+      $('#btn-start-solo').on('click', function () {
+        console.log('[原型演示] 开始单人模拟面');
+        navPush('interview-lobby.html?mode=solo');
+      });
+
+      // 压力面试 - 开始按钮
+      // 点击后应跳转到压力面试页面：
+      // 1. 携带模式参数 mode=stress
+      // 2. 目标页面加载高压追问场景
+      $('#btn-start-stress').on('click', function () {
+        console.log('[原型演示] 开始压力面试');
+        navPush('interview-lobby.html?mode=stress');
+      });
+
+      // AI群面 - 开始按钮
+      // 点击后应跳转到群面页面：
+      // 1. 携带模式参数 mode=group
+      // 2. 目标页面加载多位AI面试官轮流提问场景
+      $('#btn-start-group').on('click', function () {
+        console.log('[原型演示] 开始AI群面');
+        navPush('interview-lobby.html?mode=group');
+      });
+
+      // 训练记录点击 - 进入训练详情
+      // 点击后应跳转到训练详情页：
+      // 1. 通过 URL 参数传递记录ID
+      // 2. 详情页展示该次训练的完整数据（评分详情、问答记录、AI点评等）
+      $('#record-item-1').on('click', function () {
+        var id = $(this).data('id');
+        console.log('[原型演示] 查看训练记录:', id);
+        navPush('interview-lobby.html?record_id=' + id);
+      });
+
+      $('#record-item-2').on('click', function () {
+        var id = $(this).data('id');
+        console.log('[原型演示] 查看训练记录:', id);
+        navPush('interview-lobby.html?record_id=' + id);
+      });
+    });
+  </script>
+</body>
+
+</html>

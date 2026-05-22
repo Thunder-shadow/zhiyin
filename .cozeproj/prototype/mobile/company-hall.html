@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 === */
+      --color-primary:              #3A4A44;
+      --color-primary-container:    #E7EEE9;
+      --color-on-primary:           #ffffff;
+      /* === 背景 / 表面 === */
+      --color-background:                 #F8F9F7;
+      --color-surface-container-lowest:   #FFFFFF;
+      --color-surface:                    #FAFBF9;
+      --color-surface-container:          #F0F2EF;
+      --color-surface-container-high:     #E7EEE9;
+      --color-surface-container-highest:  #DEE5E0;
+      /* === 文字 === */
+      --color-on-surface:           #212121;
+      --color-on-surface-variant:   #6B7B74;
+      /* === 功能色 === */
+      --color-success:  #5B9A6F;
+      --color-error:    #E26A5C;
+      --color-warning:  #D4A574;
+      /* === 边框 === */
+      --color-outline:          #B8C2BB;
+      --color-outline-variant:  #C8CFC9;
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;
+      --radius-md:   0.75rem;
+      --radius-lg:   1rem;
+      --radius-xl:   1.25rem;
+      --radius-2xl:  1.5rem;
+      --radius-full: 9999px;
+      /* === 阴影 === */
+      --shadow-card:   0 1px 4px rgba(0,0,0,0.08);
+      --shadow-float:  0 4px 12px rgba(0,0,0,0.08);
+      --shadow-dialog: 0 10px 25px rgba(0,0,0,0.12);
+      /* === 字体 === */
+      --font-sans: system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: system-ui, sans-serif;
+    }
+    /* 隐藏横向滚动条 */
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans">
+
+  <!-- @nav:start 导航组件 -->
+  <!-- 顶部 Header -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <h1 class="text-lg font-semibold text-on-surface">职引</h1>
+    <button id="btn-notification" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container transition-colors">
+      <i data-lucide="bell" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- @main-content:start -->
+  <main class="overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom))]">
+
+    <!-- 搜索栏 -->
+    <div class="px-4 pt-2 pb-3">
+      <div class="relative">
+        <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-on-surface-variant"></i>
+        <input id="search-input" type="text" placeholder="搜索公司或岗位"
+               class="w-full bg-surface-container border-none rounded-xl pl-10 pr-4 py-3 text-sm
+                      text-on-surface placeholder:text-on-surface-variant/50
+                      focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors" />
+      </div>
+    </div>
+
+    <!-- 筛选标签栏 -->
+    <div class="px-4 pb-3">
+      <div id="filter-bar" class="filter-scroll flex gap-2 overflow-x-auto">
+        <!-- 筛选标签-全部 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-primary text-on-primary transition-colors" data-filter="all">全部</button>
+        <!-- 筛选标签-互联网 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-surface-container text-on-surface-variant transition-colors" data-filter="internet">互联网</button>
+        <!-- 筛选标签-金融 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-surface-container text-on-surface-variant transition-colors" data-filter="finance">金融</button>
+        <!-- 筛选标签-教育 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-surface-container text-on-surface-variant transition-colors" data-filter="education">教育</button>
+        <!-- 筛选标签-医疗 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-surface-container text-on-surface-variant transition-colors" data-filter="medical">医疗</button>
+        <!-- 筛选标签-制造业 -->
+        <button class="filter-tag flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold
+                       bg-surface-container text-on-surface-variant transition-colors" data-filter="manufacturing">制造业</button>
+      </div>
+    </div>
+
+    <!-- 岗位卡片列表 -->
+    <div id="job-list" class="px-4 flex flex-col gap-3">
+
+      <!-- 列表-岗位卡片1 -->
+      <div class="job-card bg-surface-container-lowest rounded-xl shadow-card p-4 relative" data-category="internet" data-job-id="job-1">
+        <!-- 右上角状态标签 -->
+        <span class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-success/15 text-success">攻略中</span>
+        <!-- 公司名称 + 行业标签 -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-bold text-on-surface">字节跳动</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-container text-primary">互联网</span>
+        </div>
+        <!-- 岗位名称 -->
+        <h3 class="text-base font-semibold text-on-surface mb-1.5">高级前端工程师</h3>
+        <!-- 薪资范围 -->
+        <p class="text-sm font-bold text-error mb-3">30K-50K</p>
+        <!-- 底部标签 -->
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">北京</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">本科及以上</span>
+        </div>
+      </div>
+
+      <!-- 列表-岗位卡片2 -->
+      <div class="job-card bg-surface-container-lowest rounded-xl shadow-card p-4 relative" data-category="finance" data-job-id="job-2">
+        <!-- 右上角状态标签 -->
+        <span class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-high text-on-surface-variant">已投递</span>
+        <!-- 公司名称 + 行业标签 -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-bold text-on-surface">招商银行</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-container text-primary">金融</span>
+        </div>
+        <!-- 岗位名称 -->
+        <h3 class="text-base font-semibold text-on-surface mb-1.5">数据分析师</h3>
+        <!-- 薪资范围 -->
+        <p class="text-sm font-bold text-error mb-3">25K-40K</p>
+        <!-- 底部标签 -->
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">深圳</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">硕士及以上</span>
+        </div>
+      </div>
+
+      <!-- 列表-岗位卡片3 -->
+      <div class="job-card bg-surface-container-lowest rounded-xl shadow-card p-4 relative" data-category="internet" data-job-id="job-3">
+        <!-- 右上角状态标签 -->
+        <span class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#DBEAFE] text-[#3B82F6]">面试中</span>
+        <!-- 公司名称 + 行业标签 -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-bold text-on-surface">腾讯科技</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-container text-primary">互联网</span>
+        </div>
+        <!-- 岗位名称 -->
+        <h3 class="text-base font-semibold text-on-surface mb-1.5">产品经理</h3>
+        <!-- 薪资范围 -->
+        <p class="text-sm font-bold text-error mb-3">35K-55K</p>
+        <!-- 底部标签 -->
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">深圳</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">本科及以上</span>
+        </div>
+      </div>
+
+      <!-- 列表-岗位卡片4 -->
+      <div class="job-card bg-surface-container-lowest rounded-xl shadow-card p-4 relative" data-category="education" data-job-id="job-4">
+        <!-- 右上角状态标签 -->
+        <span class="absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-success/15 text-success">攻略中</span>
+        <!-- 公司名称 + 行业标签 -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm font-bold text-on-surface">新东方教育</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary-container text-primary">教育</span>
+        </div>
+        <!-- 岗位名称 -->
+        <h3 class="text-base font-semibold text-on-surface mb-1.5">课程运营专员</h3>
+        <!-- 薪资范围 -->
+        <p class="text-sm font-bold text-error mb-3">12K-20K</p>
+        <!-- 底部标签 -->
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">北京</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-container text-on-surface-variant">本科及以上</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+  <!-- @main-content:end -->
+
+  <!-- 底部悬浮按钮 -->
+  <button id="btn-accept-mission"
+          class="fixed z-50 left-1/2 -translate-x-1/2 bottom-[calc(4.5rem+env(safe-area-inset-bottom))]
+                 px-8 py-3 rounded-full text-sm font-bold text-on-primary
+                 bg-primary shadow-float
+                 hover:opacity-90 active:scale-[0.97] transition-all">
+    领任务
+  </button>
+
+  <!-- 底部 TabBar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface-container-lowest flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)] border-t border-outline-variant/20">
+    <a href="home.html" id="nav-home" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">驾驶舱</span>
+    </a>
+    <a href="company-hall.html" id="nav-hall" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary" aria-current="page">
+      <i data-lucide="building" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">副本</span>
+    </a>
+    <a href="interview-lobby.html" id="nav-lobby" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">训练场</span>
+    </a>
+    <a href="profile.html" id="nav-profile" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的</span>
+    </a>
+  </nav>
+  <!-- @nav:end 导航组件 -->
+
+  <script>
+    // 导航辅助函数
+    function navPush(route) {
+      console.log('[原型演示] PUSH 到: ' + route);
+      window.location.href = route;
+    }
+    function navReplace(route) {
+      console.log('[原型演示] REPLACE 为: ' + route);
+      window.location.replace(route);
+    }
+    function navReset(route) {
+      console.log('[原型演示] RESET 到: ' + route);
+      window.location.href = route;
+    }
+    function navBack() {
+      console.log('[原型演示] BACK 返回上一页');
+      if (window.history.length > 1) window.history.back();
+    }
+
+    $(function () {
+      // 筛选标签栏交互
+      $('#filter-bar').on('click', '.filter-tag', function () {
+        // 切换选中态样式
+        $('.filter-tag').removeClass('bg-primary text-on-primary').addClass('bg-surface-container text-on-surface-variant');
+        $(this).removeClass('bg-surface-container text-on-surface-variant').addClass('bg-primary text-on-primary');
+
+        var filter = $(this).data('filter');
+
+        // 根据筛选条件显示/隐藏卡片
+        if (filter === 'all') {
+          $('.job-card').show();
+        } else {
+          $('.job-card').each(function () {
+            if ($(this).data('category') === filter) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          });
+        }
+      });
+
+      // 岗位卡片点击 - 跳转到面试大厅（带参数）
+      $('#job-list').on('click', '.job-card', function () {
+        var jobId = $(this).data('job-id');
+        navPush('interview-lobby.html?job_id=' + jobId);
+      });
+
+      // 领任务按钮
+      $('#btn-accept-mission').on('click', function () {
+        // 领任务按钮 - 点击后应实现：
+        // 1. 弹出底部模态框，展示当前可领取的任务列表（基于筛选条件匹配的岗位）
+        // 2. 用户选择任务后，将该岗位状态更新为"攻略中"
+        // 3. 添加一条新的任务记录到用户任务列表
+        // 4. 模态框关闭后显示 toast 提示"任务领取成功"
+        console.log('[原型演示] 点击领任务按钮');
+      });
+
+      // 搜索框交互
+      $('#search-input').on('input', function () {
+        var keyword = $(this).val().trim().toLowerCase();
+        if (keyword === '') {
+          $('.job-card').show();
+          return;
+        }
+        $('.job-card').each(function () {
+          var text = $(this).text().toLowerCase();
+          if (text.indexOf(keyword) > -1) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+      });
+
+      // 通知按钮
+      $('#btn-notification').on('click', function () {
+        console.log('[原型演示] 点击通知按钮');
+      });
+
+      // TabBar 导航
+      $('#nav-home').on('click', function (e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+      $('#nav-lobby').on('click', function (e) {
+        e.preventDefault();
+        navReset('interview-lobby.html');
+      });
+      $('#nav-profile').on('click', function (e) {
+        e.preventDefault();
+        navReset('profile.html');
+      });
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>
