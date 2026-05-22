@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Trophy, ChevronRight } from 'lucide-react-taro'
+import { Trophy, ChevronRight, Shield, Star } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Network } from '@/network'
@@ -15,6 +15,7 @@ export default function Profile() {
     title: '求职新手',
     badges: [] as string[],
   })
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     loadProfile()
@@ -36,19 +37,23 @@ export default function Profile() {
       }
     } catch (err) {
       console.log('Load profile error:', err)
+    } finally {
+      setTimeout(() => setLoaded(true), 80)
     }
   }
 
   const menuItems = [
     { label: '成就中心', path: '/pages/profile/achievements', icon: Trophy, color: '#FF6B35' },
+    { label: '战斗记录', path: '/pages/dashboard/index', icon: Shield, color: '#3B82F6' },
+    { label: '我的简历', path: '/pages/resume/list', icon: Star, color: '#10B981' },
   ]
 
   return (
     <View className="min-h-full bg-background">
       {/* 用户信息头部 */}
-      <View className="bg-primary px-4 pt-6 pb-8 rounded-b-3xl">
-        <View className="flex flex-row items-center gap-4">
-          <View className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+      <View className="bg-gradient-to-br from-primary to-indigo-800 px-4 pt-6 pb-10 rounded-b-3xl">
+        <View className={`flex flex-row items-center gap-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View className="w-16 h-16 rounded-full bg-accent flex items-center justify-center badge-glow">
             <Text className="text-white text-2xl font-bold">{userInfo.nick_name[0]}</Text>
           </View>
           <View>
@@ -62,7 +67,7 @@ export default function Profile() {
       </View>
 
       {/* 统计卡片 */}
-      <View className="px-4 -mt-4">
+      <View className={`px-4 -mt-4 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
         <Card className="shadow-lg">
           <CardContent className="p-4">
             <View className="flex flex-row justify-around">
@@ -85,12 +90,16 @@ export default function Profile() {
 
       {/* 功能菜单 */}
       <View className="px-4 mt-4">
-        {menuItems.map((item) => (
-          <Card key={item.label} className="shadow-sm mb-3" onClick={() => Taro.navigateTo({ url: item.path })}>
+        {menuItems.map((item, idx) => (
+          <Card
+            key={item.label}
+            className={`shadow-sm mb-3 card-hover ${loaded ? `anim-fade-in-up anim-delay-${idx + 2}` : 'opacity-0'}`}
+            onClick={() => Taro.navigateTo({ url: item.path })}
+          >
             <CardContent className="p-4">
               <View className="flex flex-row items-center justify-between">
                 <View className="flex flex-row items-center gap-3">
-                  <View className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${item.color}15` }}>
+                  <View className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${item.color}15` }}>
                     <item.icon size={18} color={item.color} />
                   </View>
                   <Text className="block text-foreground font-semibold">{item.label}</Text>

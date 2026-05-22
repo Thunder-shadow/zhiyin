@@ -99,58 +99,151 @@ root-portal {
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --color-selection: var(--selection);
-  --color-selection-foreground: var(--selection-foreground);
-  --color-code: var(--code);
-  --radius-full: 9999px;
+/* ========== 全局动画 & 交互增强 ========== */
+
+/* 关键帧动画 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-page,
-view,
-text,
-button,
-input,
-textarea,
-label,
-scroll-view,
-image {
-  border-color: var(--border);
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-::selection {
-  background-color: var(--selection);
-  color: var(--selection-foreground);
+@keyframes pulseBreath {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.08); }
+  70% { transform: scale(0.96); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+}
+
+@keyframes btnPulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(255, 107, 53, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+}
+
+/* 通用动画类 */
+.anim-fade-in-up { animation: fadeInUp 0.4s ease-out both; }
+.anim-fade-in-scale { animation: fadeInScale 0.35s ease-out both; }
+.anim-bounce-in { animation: bounceIn 0.5s ease-out both; }
+
+.anim-delay-1 { animation-delay: 0.06s; }
+.anim-delay-2 { animation-delay: 0.12s; }
+.anim-delay-3 { animation-delay: 0.18s; }
+.anim-delay-4 { animation-delay: 0.24s; }
+.anim-delay-5 { animation-delay: 0.30s; }
+.anim-delay-6 { animation-delay: 0.36s; }
+
+/* 按钮按下缩放 */
+.btn-press { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.btn-press:active { transform: scale(0.95); }
+
+/* 按钮微光效果 */
+.btn-shimmer {
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* 脉冲按钮 */
+.btn-pulse { position: relative; overflow: hidden; }
+.btn-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4);
+  animation: btnPulseRing 2s ease-out infinite;
+}
+
+/* 卡片按压 */
+.card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.card-hover:active { transform: scale(0.97); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+
+/* AI思考指示器 */
+.ai-thinking-dots { display: flex; flex-direction: row; gap: 4px; align-items: center; padding: 4px 0; }
+.ai-thinking-dots .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background-color: #9CA3AF;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.ai-thinking-dots .dot:nth-child(2) { animation-delay: 0.16s; }
+.ai-thinking-dots .dot:nth-child(3) { animation-delay: 0.32s; }
+
+/* AI流式打字光标 */
+.ai-streaming-cursor::after {
+  content: '\25AE';
+  animation: cursorBlink 0.8s step-end infinite;
+  color: #FF6B35;
+  font-weight: 300;
+  margin-left: 1px;
+}
+
+/* 消息气泡入场 */
+.msg-bubble-enter { animation: fadeInUp 0.3s ease-out both; }
+
+/* 消息左右滑入 */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.anim-slide-in-left { animation: slideInLeft 0.3s ease-out both; }
+.anim-slide-in-right { animation: slideInRight 0.3s ease-out both; }
+
+/* 打字光标（inline元素用） */
+.cursor-blink { animation: cursorBlink 0.8s step-end infinite; }
+
+/* 打字点动画 */
+.dot-typewriter { animation: dotBounce 1.4s ease-in-out infinite; }
+
+/* 按钮hover上浮 */
+.btn-hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.btn-hover-lift:active { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+/* 进度条动画 */
+.progress-animated { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.progress-gradient {
+  background: linear-gradient(90deg, #FF6B35, #FFB347, #FF6B35);
+  background-size: 200% 100%;
+  animation: gradientFlow 3s ease infinite;
+}
+
+/* 快捷入口图标 */
+.icon-entrance { transition: transform 0.2s ease; }
+.icon-entrance:active { transform: scale(0.9); }
+
+/* 徽章发光 */
+.badge-glow { box-shadow: 0 0 8px rgba(255, 107, 53, 0.3); }

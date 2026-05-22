@@ -1,185 +1,263 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, ScrollView } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send, ChevronLeft } from 'lucide-react-taro'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Swords, Send, ArrowLeft, Zap } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
-import { Network } from '@/network'
+import { useState, useRef, useEffect } from 'react'
+import { fetchStream } from '@/utils/stream'
 
-interface Message {
-  role: 'ai' | 'user'
+interface ChatMessage {
+  role: 'user' | 'assistant'
   content: string
-  timestamp: number
+  streaming?: boolean
 }
 
-/** 面试房间 - 全屏沉浸式AI面试 */
 export default function InterviewRoom() {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputText, setInputText] = useState('')
+  const params = Taro.getCurrentInstance().router?.params || {}
+  const type = (params.type as string) || 'single'
+
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [interviewId, setInterviewId] = useState('')
-  const interviewType = Taro.getCurrentInstance().router?.params?.type || 'single'
+  const scrollRef = useRef('')
+  const [roundCount, setRoundCount] = useState(0)
+
+  const typeLabel = type === 'stress' ? '压力面' : type === 'group' ? '群面' : '单面'
 
   useEffect(() => {
     startInterview()
   }, [])
 
+  const scrollToBottom = () => {
+    scrollRef.current = Date.now().toString()
+  }
+
+  /** 开始面试 - 流式 */
   const startInterview = async () => {
     setIsLoading(true)
-    try {
-      const res = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: { action: 'interview_start', type: interviewType }
-      })
-      console.log('Interview start:', res.data)
-      if (res.data?.code === 0 && res.data?.data) {
-        setInterviewId(res.data.data.interview_id || '')
-        setMessages([{
-          role: 'ai',
-          content: res.data.data.message || '你好，我是今天的面试官，请先做一个简单的自我介绍吧。',
-          timestamp: Date.now()
-        }])
+    const newMessages: ChatMessage[] = []
+    setMessages([])
+    setRoundCount(0)
+
+    await fetchStream(
+      '/api/ai/chat/stream',
+      { action: 'interview_start', type, conversation: [] },
+      {
+        onChunk: (content) => {
+          if (newMessages.length === 0) {
+            newMessages.push({ role: 'assistant', content, streaming: true })
+          } else {
+            newMessages[0].content += content
+          }
+          setMessages([...newMessages])
+          scrollToBottom()
+        },
+        onDone: () => {
+          if (newMessages.length > 0) newMessages[0].streaming = false
+          setMessages([...newMessages])
+          setIsLoading(false)
+
+        },
+        onError: (_msg) => {
+          if (newMessages.length === 0) {
+            newMessages.push({ role: 'assistant', content: '面试官似乎走神了，请再试一次...' })
+          }
+          setMessages([...newMessages])
+          setIsLoading(false)
+
+        },
       }
-    } catch (err) {
-      console.log('Start interview error:', err)
-      setMessages([{
-        role: 'ai',
-        content: '你好，我是今天的面试官，请先做一个简单的自我介绍吧。',
-        timestamp: Date.now()
-      }])
-    } finally {
-      setIsLoading(false)
-    }
+    )
+
   }
 
+  /** 发送消息 - 流式 */
   const sendMessage = async () => {
-    if (!inputText.trim() || isLoading) return
-    const userMsg: Message = { role: 'user', content: inputText.trim(), timestamp: Date.now() }
-    setMessages(prev => [...prev, userMsg])
-    setInputText('')
+    const trimmed = input.trim()
+    if (!trimmed || isLoading) return
+
+    const userMsg: ChatMessage = { role: 'user', content: trimmed }
+    const currentConversation = [...messages, userMsg]
+    setMessages(currentConversation)
+    setInput('')
     setIsLoading(true)
 
-    try {
-      const conversationHistory = [...messages, userMsg].map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content }))
-      const res = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: {
-          action: 'interview_follow_up',
-          conversation: conversationHistory,
-          interview_id: interviewId,
-        }
-      })
-      console.log('Follow up response:', res.data)
-      if (res.data?.code === 0 && res.data?.data) {
-        setMessages(prev => [...prev, {
-          role: 'ai',
-          content: res.data.data.message || '请继续。',
-          timestamp: Date.now()
-        }])
+    setRoundCount(prev => prev + 1)
+
+    const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
+    const newMessages = [...currentConversation, aiMsg]
+    setMessages([...newMessages])
+
+    await fetchStream(
+      '/api/ai/chat/stream',
+      {
+        action: 'interview_follow_up',
+        type,
+        conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
+      },
+      {
+        onChunk: (content) => {
+          aiMsg.content += content
+          newMessages[newMessages.length - 1] = { ...aiMsg }
+          setMessages([...newMessages])
+          scrollToBottom()
+        },
+        onDone: () => {
+          aiMsg.streaming = false
+          newMessages[newMessages.length - 1] = { ...aiMsg }
+          setMessages([...newMessages])
+          setIsLoading(false)
+
+        },
+        onError: (_msg) => {
+          aiMsg.content = '面试官似乎走神了，请再试一次...'
+          aiMsg.streaming = false
+          newMessages[newMessages.length - 1] = { ...aiMsg }
+          setMessages([...newMessages])
+          setIsLoading(false)
+
+        },
       }
-    } catch (err) {
-      console.log('Follow up error:', err)
-    } finally {
-      setIsLoading(false)
-    }
+    )
   }
 
-  const endInterview = async () => {
-    setIsLoading(true)
-    try {
-      const conversationHistory = messages.map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.content }))
-      const res = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: {
-          action: 'interview_report',
-          conversation: conversationHistory,
-          interview_id: interviewId,
-        }
-      })
-      console.log('Report response:', res.data)
-      if (res.data?.code === 0 && res.data?.data) {
-        const report = res.data.data
-        Taro.navigateTo({ url: `/pages/interview/report?data=${encodeURIComponent(JSON.stringify(report))}` })
-      }
-    } catch (err) {
-      console.log('End interview error:', err)
-    } finally {
-      setIsLoading(false)
-    }
+  /** 结束面试 */
+  const endInterview = () => {
+    Taro.navigateTo({
+      url: `/pages/interview/report?type=${type}&rounds=${roundCount}`
+    })
   }
 
   return (
-    <View className="h-full flex flex-col bg-background">
-      {/* AI面试官头部 */}
-      <View className="bg-primary px-4 py-3 flex flex-row items-center gap-3">
-        <View onClick={() => Taro.navigateBack()}>
-          <ChevronLeft size={20} color="#fff" />
-        </View>
-        <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-          <Text className="text-white text-xs font-bold">AI</Text>
-        </View>
-        <View>
-          <Text className="block text-white font-semibold text-sm">AI面试官</Text>
-          <Text className="block text-gray-300 text-xs">{interviewType === 'stress' ? '压力面试' : interviewType === 'group' ? '群面模拟' : '单面模拟'}</Text>
+    <View className="flex flex-col h-screen bg-background">
+      {/* 顶部导航栏 */}
+      <View className="bg-primary px-4 pt-4 pb-3 rounded-b-2xl">
+        <View className="flex flex-row items-center gap-3">
+          <View onClick={() => Taro.navigateBack()} className="p-1">
+            <ArrowLeft size={20} color="#fff" />
+          </View>
+          <View className="flex-1">
+            <Text className="block text-white font-bold text-base">面试训练</Text>
+            <Text className="block text-gray-300 text-xs">{typeLabel}模式 · 第{roundCount + 1}轮</Text>
+          </View>
+          <Badge className="bg-accent text-white border-none text-xs badge-glow">
+            <Swords size={12} color="#fff" /> 训练中
+          </Badge>
         </View>
       </View>
 
-      {/* 对话流 */}
-      <View className="flex-1 overflow-y-auto px-4 py-4">
+      {/* 聊天区域 */}
+      <ScrollView
+        className="flex-1 px-4 pt-4 pb-2"
+        scrollY
+        scrollIntoView={scrollRef.current}
+        scrollWithAnimation
+      >
         {messages.map((msg, idx) => (
-          <View key={idx} className={`flex flex-col mb-4 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            {msg.role === 'ai' && (
+          <View
+            key={idx}
+            id={`msg-${idx}`}
+            className={`mb-3 ${msg.role === 'user' ? 'anim-slide-in-right' : 'anim-slide-in-left'}`}
+          >
+            {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2 max-w-[85%]">
-                <View className="w-7 h-7 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
-                  <Text className="text-white text-xs">AI</Text>
+                <View className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+                  <Swords size={14} color="#fff" />
                 </View>
-                <View className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
-                  <Text className="block text-sm text-foreground leading-relaxed">{msg.content}</Text>
-                </View>
+                <Card className="shadow-sm">
+                  <CardContent className="p-3">
+                    <Text className="block text-sm text-foreground leading-relaxed">
+                      {msg.content}
+                      {msg.streaming && <Text className="inline-block w-2 h-4 bg-primary ml-1 align-middle cursor-blink" />}
+                    </Text>
+                  </CardContent>
+                </Card>
               </View>
-            )}
-            {msg.role === 'user' && (
-              <View className="max-w-[85%]">
-                <View className="bg-primary rounded-2xl rounded-tr-sm p-3">
-                  <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
+            ) : (
+              <View className="flex flex-row items-start gap-2 max-w-[85%] ml-auto flex-row-reverse">
+                <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
+                  <Text className="text-white text-xs font-bold">我</Text>
                 </View>
+                <Card className="shadow-sm bg-primary">
+                  <CardContent className="p-3">
+                    <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
+                  </CardContent>
+                </Card>
               </View>
             )}
           </View>
         ))}
-        {isLoading && (
-          <View className="flex flex-row items-start gap-2">
-            <View className="w-7 h-7 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-              <Text className="text-white text-xs">AI</Text>
-            </View>
-            <View className="bg-white rounded-2xl p-3 shadow-sm">
-              <Text className="block text-sm text-gray-400">思考中...</Text>
+
+        {isLoading && messages[messages.length - 1]?.role === 'user' && (
+          <View className="mb-3 anim-slide-in-left">
+            <View className="flex flex-row items-start gap-2 max-w-[85%]">
+              <View className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
+                <Swords size={14} color="#fff" />
+              </View>
+              <Card className="shadow-sm">
+                <CardContent className="p-3">
+                  <View className="flex flex-row items-center gap-1">
+                    <View className="w-2 h-2 bg-primary rounded-full dot-typewriter" />
+                    <View className="w-2 h-2 bg-primary rounded-full dot-typewriter" style={{ animationDelay: '0.2s' }} />
+                    <View className="w-2 h-2 bg-primary rounded-full dot-typewriter" style={{ animationDelay: '0.4s' }} />
+                  </View>
+                </CardContent>
+              </Card>
             </View>
           </View>
         )}
-      </View>
 
-      {/* 底部操作区 */}
-      <View className="bg-white border-t border-gray-100 px-4 py-3 flex flex-row items-center gap-2">
-        <View className="flex-1 bg-gray-50 rounded-full px-4 py-2">
+        {/* 底部锚点 */}
+        <View id="msg-bottom" />
+      </ScrollView>
+
+      {/* 底部输入区 */}
+      <View
+        style={{
+          display: 'flex', flexDirection: 'row', gap: '8px',
+          padding: '12px', backgroundColor: '#fff',
+          borderTop: '1px solid #e5e5e5', alignItems: 'center'
+        }}
+      >
+        <View style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '20px', padding: '8px 12px' }}>
           <Input
-            style={{ width: '100%', fontSize: '14px', backgroundColor: 'transparent' }}
+            style={{ width: '100%', fontSize: '14px' }}
             placeholder="输入你的回答..."
-            value={inputText}
-            onInput={(e) => setInputText(e.detail.value)}
+            value={input}
+            onInput={(e) => setInput(e.detail.value)}
             onConfirm={sendMessage}
+            confirmType="send"
+            disabled={isLoading}
           />
         </View>
-        <Button size="sm" className="bg-primary text-white border-none rounded-full" onClick={sendMessage} disabled={isLoading || !inputText.trim()}>
-          <Send size={16} color="#fff" />
-        </Button>
-        <Button size="sm" className="bg-accent text-white border-none rounded-full" onClick={endInterview} disabled={isLoading || messages.length < 3}>
-          <Text className="text-white text-xs">结束</Text>
-        </Button>
+        <View style={{ flexShrink: 0 }}>
+          <Button
+            size="sm"
+            className="btn-shimmer"
+            onClick={sendMessage}
+            disabled={!input.trim() || isLoading}
+          >
+            <Send size={16} color="#fff" />
+          </Button>
+        </View>
       </View>
+
+      {/* 结束面试按钮 */}
+      {roundCount > 0 && (
+        <View
+          style={{
+            padding: '8px 16px 16px', backgroundColor: '#fff',
+            display: 'flex', justifyContent: 'center'
+          }}
+        >
+          <Button variant="outline" className="w-full btn-hover-lift" onClick={endInterview}>
+            <Zap size={14} color="#6366F1" />
+            <Text>结束面试 · 查看报告</Text>
+          </Button>
+        </View>
+      )}
     </View>
   )
 }

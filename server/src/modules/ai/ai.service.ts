@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
+interface StreamChunk {
+  type: 'content' | 'done' | 'error';
+  content?: string;
+  data?: any;
+  message?: string;
+}
+
 @Injectable()
 export class AiService {
   async handleChat(body: { action: string; [key: string]: any }, headers: Record<string, string>) {
@@ -14,11 +21,230 @@ export class AiService {
       case 'strategy':
         return this.handleStrategy(body, headers);
       case 'interview_chat':
+      case 'interview_start':
+      case 'interview_follow_up':
+      case 'interview_report':
         return this.handleInterviewChat(body, headers);
       case 'hr_sim_response':
         return this.handleHrSim(body, headers);
       default:
         return { message: '未知操作类型' };
+    }
+  }
+
+  /** 流式聊天接口 */
+  async *handleChatStream(body: { action: string; [key: string]: any }, headers: Record<string, string>): AsyncGenerator<StreamChunk> {
+    const { action } = body;
+
+    switch (action) {
+      case 'career_plan':
+        yield* this.handleCareerPlanStream(body, headers);
+        break;
+      case 'interview_chat':
+      case 'interview_start':
+      case 'interview_follow_up':
+        yield* this.handleInterviewChatStream(body, headers);
+        break;
+      case 'hr_sim_response':
+        yield* this.handleHrSimStream(body, headers);
+        break;
+      case 'interview_report':
+        // 面试报告使用非流式
+        try {
+          const result = await this.handleInterviewChat(body, headers);
+          yield { type: 'content', content: result.message || '' };
+          yield { type: 'done', data: result };
+        } catch (err) {
+          yield { type: 'error', message: '生成报告失败' };
+        }
+        break;
+      case 'resume_match':
+      case 'strategy':
+        // 需要结构化输出的场景使用非流式
+        try {
+          const result = await this.handleChat(body, headers);
+          yield { type: 'content', content: JSON.stringify(result) };
+          yield { type: 'done', data: result };
+        } catch (err) {
+          yield { type: 'error', message: '处理失败' };
+        }
+        break;
+      default:
+        yield { type: 'error', message: '未知操作类型' };
+    }
+  }
+
+  /** 职业规划沙盘 - 流式 */
+  private async *handleCareerPlanStream(body: { conversation?: any[]; [key: string]: any }, headers: Record<string, string>): AsyncGenerator<StreamChunk> {
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(headers);
+    const client = new LLMClient(config, customHeaders);
+
+    const conversation = body.conversation || [];
+    const systemPrompt = `你是"职引"App的职业导航师，帮助大学生规划职业路径。
+你的风格：像一个RPG游戏的向导NPC，用游戏化的语言鼓励用户。
+
+对话策略：
+1. 前几轮：了解用户的专业、兴趣、性格特点、目标行业
+2. 中间轮：基于信息给出职业画像和路径推荐
+3. 当信息足够时，返回结构化数据
+
+当信息足够丰富时（通常3-5轮对话后），在回复的最后附带JSON数据块：
+[PROFILE]
+{"strengths":["优势1","优势2"],"interests":["兴趣1","兴趣2"]}
+[/PROFILE]
+[PATHS]
+[{"name":"路径名","fit_score":85,"description":"描述","milestones":["里程碑1","里程碑2"]}]
+[/PATHS]
+
+注意：fit_score是匹配度百分比(0-100)。路径数量2-3条。`;
+
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...conversation.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content) }))
+    ];
+
+    try {
+      const stream = client.stream(messages, { temperature: 0.7 });
+      let fullContent = '';
+      for await (const chunk of stream) {
+        if (chunk.content) {
+          const text = chunk.content.toString();
+          fullContent += text;
+          yield { type: 'content', content: text };
+        }
+      }
+
+      // 提取结构化数据
+      const profileMatch = fullContent.match(/\[PROFILE\]\s*([\s\S]*?)\s*\[\/PROFILE\]/);
+      const pathsMatch = fullContent.match(/\[PATHS\]\s*([\s\S]*?)\s*\[\/PATHS\]/);
+      let profile = null;
+      let paths = null;
+      if (profileMatch) { try { profile = JSON.parse(profileMatch[1]); } catch { /* ignore */ } }
+      if (pathsMatch) { try { paths = JSON.parse(pathsMatch[1]); } catch { /* ignore */ } }
+
+      // 清理文本中的结构化标记
+      const message = fullContent
+        .replace(/\[PROFILE\][\s\S]*?\[\/PROFILE\]/, '')
+        .replace(/\[PATHS\][\s\S]*?\[\/PATHS\]/, '')
+        .trim();
+
+      yield { type: 'done', data: { message, profile, paths } };
+    } catch (err) {
+      console.error('Career plan stream error:', err);
+      yield { type: 'error', message: '导航师思考中，请稍后再试...' };
+    }
+  }
+
+  /** 面试对话 - 流式 */
+  private async *handleInterviewChatStream(body: { conversation?: any[]; type?: string; [key: string]: any }, headers: Record<string, string>): AsyncGenerator<StreamChunk> {
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(headers);
+    const client = new LLMClient(config, customHeaders);
+
+    const interviewType = body.type || 'single';
+    const typePrompt = interviewType === 'stress'
+      ? '你正在进行压力面试，语气比平时更严厉，连续追问不给喘息空间，考验求职者的抗压能力。'
+      : interviewType === 'group'
+        ? '你在模拟群面场景，提醒求职者注意团队协作和发言时机。'
+        : '';
+
+    const conversation = body.conversation || [];
+    const isFirst = conversation.length === 0;
+
+    const systemPrompt = `你是一个专业的面试官，正在面试一位求职者。
+${typePrompt}
+规则：
+- 每次只提一个问题或给出一个反馈
+- 根据回答追问细节
+- 偶尔施加压力测试
+- 保持专业但友善的态度
+- 用中文回复
+${isFirst ? '这是面试开始，请先做简短的自我介绍引入，然后请求职者做自我介绍。' : ''}`;
+
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...conversation.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content) }))
+    ];
+
+    try {
+      const stream = client.stream(messages, { temperature: 0.7 });
+      let fullContent = '';
+      for await (const chunk of stream) {
+        if (chunk.content) {
+          const text = chunk.content.toString();
+          fullContent += text;
+          yield { type: 'content', content: text };
+        }
+      }
+      yield { type: 'done', data: { message: fullContent } };
+    } catch (err) {
+      console.error('Interview stream error:', err);
+      yield { type: 'error', message: '面试官思考中，请稍后再试...' };
+    }
+  }
+
+  /** HR反向模拟 - 流式 */
+  private async *handleHrSimStream(body: { conversation?: any[]; resume_index?: number; end?: boolean; [key: string]: any }, headers: Record<string, string>): AsyncGenerator<StreamChunk> {
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(headers);
+    const client = new LLMClient(config, customHeaders);
+
+    const resumeProfiles = [
+      { name: '张明', school: '北京大学·计算机', background: '3段大厂实习，GPA 3.8，算法竞赛省一', personality: '技术宅，不善社交但专业扎实', real_level: 'A' },
+      { name: '李华', school: '中山大学·市场营销', background: '1段创业经历，学生会主席，社会实践丰富', personality: '外向能说，但技术基础弱', real_level: 'B' },
+      { name: '王芳', school: '复旦·金融学', background: '2段投行实习，英语专八，CPA在考', personality: '沉稳干练，偶尔过于保守', real_level: 'A' },
+    ];
+
+    const selectedResume = resumeProfiles[body.resume_index || 0];
+
+    // 结束模拟 - 生成HR笔记（非流式更好）
+    if (body.end) {
+      try {
+        const result = await this.handleHrSim(body, headers);
+        yield { type: 'content', content: result.hr_notes || result.message || '' };
+        yield { type: 'done', data: result };
+      } catch (err) {
+        yield { type: 'error', message: '招聘笔记生成失败' };
+      }
+      return;
+    }
+
+    const conversation = body.conversation || [];
+    const isFirstMessage = conversation.length === 0;
+
+    const systemPrompt = `你在HR反向模拟中扮演候选人"${selectedResume.name}"。
+背景：${selectedResume.school}，${selectedResume.background}
+性格：${selectedResume.personality}
+真实水平：${selectedResume.real_level}级
+
+规则：
+- 完全沉浸角色，不要出戏
+- 回答要符合你的背景和性格
+- 偶尔露出与真实水平相符的表现
+- 如果HR问得尖锐，按你的性格做出反应
+- 用中文回复
+${isFirstMessage ? '这是面试开始，请做简短的自我介绍。' : ''}`;
+
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...conversation.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content) }))
+    ];
+
+    try {
+      const stream = client.stream(messages, { temperature: 0.8 });
+      let fullContent = '';
+      for await (const chunk of stream) {
+        if (chunk.content) {
+          const text = chunk.content.toString();
+          fullContent += text;
+          yield { type: 'content', content: text };
+        }
+      }
+      yield { type: 'done', data: { message: fullContent } };
+    } catch (err) {
+      console.error('HR sim stream error:', err);
+      yield { type: 'error', message: '候选人思考中...' };
     }
   }
 
@@ -56,7 +282,6 @@ export class AiService {
       const response = await client.invoke(messages, { temperature: 0.7 });
       const content = response.content;
 
-      // 尝试提取结构化数据
       const profileMatch = content.match(/\[PROFILE\]\s*([\s\S]*?)\s*\[\/PROFILE\]/);
       const pathsMatch = content.match(/\[PATHS\]\s*([\s\S]*?)\s*\[\/PATHS\]/);
 
@@ -70,7 +295,6 @@ export class AiService {
         try { paths = JSON.parse(pathsMatch[1]); } catch { /* ignore */ }
       }
 
-      // 移除结构化标记后返回文本
       const message = content
         .replace(/\[PROFILE\][\s\S]*?\[\/PROFILE\]/, '')
         .replace(/\[PATHS\][\s\S]*?\[\/PATHS\]/, '')
@@ -153,19 +377,30 @@ export class AiService {
   }
 
   /** 面试对话 */
-  private async handleInterviewChat(body: { conversation?: any[]; job_card_id?: string; [key: string]: any }, headers: Record<string, string>) {
-    const conversation = body.conversation || [];
+  private async handleInterviewChat(body: { conversation?: any[]; type?: string; [key: string]: any }, headers: Record<string, string>) {
     const config = new Config();
     const customHeaders = HeaderUtils.extractForwardHeaders(headers);
     const client = new LLMClient(config, customHeaders);
 
+    const interviewType = body.type || 'single';
+    const typePrompt = interviewType === 'stress'
+      ? '你正在进行压力面试，语气比平时更严厉，连续追问不给喘息空间，考验求职者的抗压能力。'
+      : interviewType === 'group'
+        ? '你在模拟群面场景，提醒求职者注意团队协作和发言时机。'
+        : '';
+
+    const conversation = body.conversation || [];
+    const isFirst = conversation.length === 0;
+
     const systemPrompt = `你是一个严格的面试官，正在面试一位求职者。
+${typePrompt}
 规则：
 - 每次只提一个问题或给出一个反馈
 - 根据回答追问细节
 - 偶尔施加压力测试
 - 保持专业但友善的态度
-- 用中文回复`;
+- 用中文回复
+${isFirst ? '这是面试开始，请先做简短开场，然后请求职者做自我介绍。' : ''}`;
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },
@@ -195,7 +430,6 @@ export class AiService {
 
     const selectedResume = resumeProfiles[body.resume_index || 0];
 
-    // 结束模拟 - 生成HR笔记
     if (body.end) {
       const conversation = body.conversation || [];
       const messages = [
@@ -218,7 +452,6 @@ export class AiService {
       }
     }
 
-    // 正常对话 - 扮演候选人
     const conversation = body.conversation || [];
     const isFirstMessage = conversation.length === 0;
 

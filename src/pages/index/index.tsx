@@ -20,6 +20,7 @@ export default function Index() {
     resumes: 0,
     streak: 0,
   })
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     loadGameState()
@@ -45,6 +46,8 @@ export default function Index() {
       }
     } catch (err) {
       console.log('Load game state error:', err)
+    } finally {
+      setTimeout(() => setLoaded(true), 100)
     }
   }
 
@@ -69,8 +72,8 @@ export default function Index() {
     <View className="min-h-full bg-background">
       {/* 顶部深色区 - 用户信息 + 等级 */}
       <View className="bg-primary px-4 pt-6 pb-8 rounded-b-3xl">
-        <View className="flex flex-row items-center gap-3 mb-4">
-          <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+        <View className={`flex flex-row items-center gap-3 mb-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center badge-glow">
             <Text className="text-white text-lg font-bold">{gameState.title[0]}</Text>
           </View>
           <View>
@@ -82,7 +85,7 @@ export default function Index() {
           </View>
         </View>
         {/* 经验条 */}
-        <View>
+        <View className={`${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
           <View className="flex flex-row justify-between mb-1">
             <Text className="text-gray-300 text-xs">EXP {gameState.exp}/{gameState.exp_to_next}</Text>
             <Text className="text-gray-300 text-xs">{expPercent}%</Text>
@@ -90,24 +93,24 @@ export default function Index() {
           <Progress value={expPercent} className="h-2 bg-primary bg-opacity-80" />
         </View>
         {gameState.streak > 0 && (
-          <View className="mt-2">
-            <Badge className="bg-amber-500 text-white border-none text-xs">连续活跃 {gameState.streak} 天</Badge>
+          <View className={`mt-2 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
+            <Badge className="bg-amber-500 text-white border-none text-xs badge-glow">连续活跃 {gameState.streak} 天</Badge>
           </View>
         )}
       </View>
 
       {/* 漏斗看板 */}
-      <View className="px-4 -mt-4">
+      <View className={`px-4 -mt-4 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
         <Card className="shadow-lg">
           <CardContent className="p-4">
             <Text className="block font-semibold text-foreground mb-3">求职漏斗</Text>
             <View className="flex flex-col gap-2">
-              {funnelStages.map((stage) => (
-                <View key={stage.label} className="flex flex-row items-center gap-3">
+              {funnelStages.map((stage, idx) => (
+                <View key={stage.label} className={`flex flex-row items-center gap-3 ${loaded ? `anim-fade-in-up anim-delay-${idx + 3}` : ''}`}>
                   <Text className="block text-sm text-gray-500 w-10">{stage.label}</Text>
                   <View className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
                     <View
-                      className="h-full rounded-full"
+                      className="h-full rounded-full progress-animated"
                       style={{
                         width: `${funnelStages[0].count > 0 ? Math.max(Math.round((stage.count / funnelStages[0].count) * 100), 8) : 8}%`,
                         backgroundColor: stage.color,
@@ -123,13 +126,13 @@ export default function Index() {
       </View>
 
       {/* 快捷入口 */}
-      <View className="px-4 mt-4">
+      <View className={`px-4 mt-4 ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
         <Text className="block font-semibold text-foreground mb-3">快捷入口</Text>
         <View className="grid grid-cols-4 gap-3">
-          {quickActions.map((action) => (
+          {quickActions.map((action, idx) => (
             <View
               key={action.label}
-              className="flex flex-col items-center gap-1"
+              className={`flex flex-col items-center gap-1 icon-entrance ${loaded ? `anim-fade-in-scale anim-delay-${idx + 2}` : 'opacity-0'}`}
               onClick={() => Taro.navigateTo({ url: action.path })}
             >
               <View
@@ -146,12 +149,12 @@ export default function Index() {
       </View>
 
       {/* 底部导航入口 */}
-      <View className="px-4 mt-6 pb-4">
-        <Card className="shadow-sm" onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/index' })}>
+      <View className={`px-4 mt-6 pb-4 ${loaded ? 'anim-fade-in-up anim-delay-5' : 'opacity-0'}`}>
+        <Card className="shadow-sm card-hover" onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/index' })}>
           <CardContent className="p-4">
             <View className="flex flex-row items-center justify-between">
               <View className="flex flex-row items-center gap-3">
-                <View className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center">
+                <View className="w-10 h-10 rounded-xl bg-violet-500 flex items-center justify-center btn-shimmer">
                   <LayoutDashboard size={20} color="#fff" />
                 </View>
                 <View>

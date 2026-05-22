@@ -190,6 +190,14 @@ export default defineConfig<'vite'>(async (merge, _env) => {
             target: 'http://localhost:3000',
             changeOrigin: true,
           },
+          '/api/ai/chat/stream': {
+            target: 'http://localhost:3000',
+            changeOrigin: true,
+            ws: true,
+            headers: {
+              'Accept': 'text/event-stream',
+            },
+          },
         },
       },
       miniCssExtractPluginOption: {
