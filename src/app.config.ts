@@ -16,14 +16,14 @@ export default defineAppConfig({
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#1A2B4C',
-    navigationBarTitleText: '职引·AI求职教练',
-    navigationBarTextStyle: 'white'
+    navigationBarBackgroundColor: '#F8F9F7',
+    navigationBarTitleText: '职引',
+    navigationBarTextStyle: 'black'
   },
   tabBar: {
-    color: '#999999',
-    selectedColor: '#FF6B35',
-    backgroundColor: '#ffffff',
+    color: '#6B7B74',
+    selectedColor: '#3A4A44',
+    backgroundColor: '#FAFBF9',
     borderStyle: 'black',
     list: [
       {
