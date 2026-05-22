@@ -18,7 +18,7 @@ export class JobController {
   }
 
   @Post()
-  async create(@Body() body: { company: string; position: string; jd_text?: string; jd_url?: string }) {
+  async create(@Body() body: { company: string; position: string; jd_text?: string; jd_url?: string; industry?: string; salary?: string; location?: string; education?: string }) {
     const data = await this.jobService.create('default_user_openid', body);
     return { code: 0, msg: 'success', data };
   }

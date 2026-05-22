@@ -30,7 +30,7 @@ export class JobService {
     return data;
   }
 
-  async create(openid: string, body: { company: string; position: string; jd_text?: string; jd_url?: string }) {
+  async create(openid: string, body: { company: string; position: string; jd_text?: string; jd_url?: string; industry?: string; salary?: string; location?: string; education?: string }) {
     const { data: user } = await this.client.from('users').select('id').eq('openid', openid).single();
     if (!user) throw new Error('User not found');
 

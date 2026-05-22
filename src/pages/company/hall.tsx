@@ -2,8 +2,8 @@ import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Search, Building } from 'lucide-react-taro'
-import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { useState } from 'react'
 import { Network } from '@/network'
 
 /** 副本大厅 - 岗位浏览 */
@@ -29,13 +29,13 @@ export default function CompanyHall() {
     rejected: { label: '已结束', color: '#E26A5C', bgColor: 'bg-destructive bg-opacity-15' },
   }
 
-  useEffect(() => {
+  useDidShow(() => {
     loadJobCards()
-  }, [])
+  })
 
   const loadJobCards = async () => {
     try {
-      const res = await Network.request({ url: '/api/job-cards' })
+      const res = await Network.request({ url: '/api/jobs' })
       console.log('JobCards response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         setJobCards(res.data.data)
