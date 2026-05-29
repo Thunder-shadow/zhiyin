@@ -195,15 +195,21 @@ root-portal {
   --color-badge-green: var(--badge-green);
   --color-on-badge-gold: var(--on-badge-gold);
   --color-on-badge-green: var(--on-badge-green);
-  --shadow-card: 0 1px 4px rgba(0,0,0,0.08);
-  --shadow-float: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-float: 0 8px 24px rgba(0,0,0,0.12);
   --shadow-dialog: 0 10px 25px rgba(0,0,0,0.12);
+  --shadow-dropdown: 0 4px 12px rgba(0,0,0,0.10);
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
   --radius-2xl: 1.5rem;
   --font-sans: system-ui, sans-serif;
+  --spacing-page-x: 1rem;
+  --spacing-card: 1rem;
+  --spacing-element: 0.75rem;
+  --spacing-section: 1.25rem;
 
 }
 
@@ -347,6 +353,58 @@ root-portal {
   background: linear-gradient(90deg, #FF6B35, #FFB347, #FF6B35);
   background-size: 200% 100%;
   animation: gradientFlow 3s ease infinite;
+}
+
+/* 数字计数动画辅助 */
+.anim-count-up {
+  animation: fadeInScale 0.4s ease-out both;
+}
+
+/* 漏斗箭头连接符 */
+.funnel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  opacity: 0.4;
+}
+
+/* 卡片渐变头部 */
+.card-gradient-header {
+  background: linear-gradient(135deg, #3A4A44 0%, #5B9A6F 100%);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* 渐变文字辅助 */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #3A4A44, #5B9A6F);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 空状态容器 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+/* 环形进度条辅助 */
+.ring-progress {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 玻璃态效果 */
+.glass-effect {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* 快捷入口图标 */

@@ -18,9 +18,11 @@ export default function Index() {
     resumes: 0,
     streak: 0,
   })
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     loadGameState()
+    setTimeout(() => setLoaded(true), 80)
   }, [])
 
   const loadGameState = async () => {
@@ -53,9 +55,9 @@ export default function Index() {
     : 0
 
   const funnelStages = [
-    { label: '投递', count: gameState.total_battles, color: 'bg-funnel-deliver' },
-    { label: '面试', count: gameState.interviews, color: 'bg-funnel-interview' },
-    { label: 'Offer', count: gameState.wins, color: 'bg-funnel-offer' },
+    { label: '投递', count: gameState.total_battles, color: 'bg-funnel-deliver', textColor: 'text-funnel-deliver' },
+    { label: '面试', count: gameState.interviews, color: 'bg-funnel-interview', textColor: 'text-funnel-interview' },
+    { label: 'Offer', count: gameState.wins, color: 'bg-funnel-offer', textColor: 'text-funnel-offer' },
   ]
 
   const quickActions = [
@@ -67,20 +69,25 @@ export default function Index() {
 
   return (
     <View className="min-h-full bg-background">
-      {/* 1. 用户概览区 */}
+      {/* 1. 用户概览区 - 渐变背景 */}
       <View className="px-4 pt-3">
-        <Card className="shadow-card">
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          {/* 渐变顶部装饰条 */}
+          <View className="h-1.5" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F, #D4A574)' }} />
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-3">
-              {/* 头像圆圈 */}
-              <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <Text className="text-lg font-bold text-primary-foreground">{gameState.title[0]}</Text>
+              {/* 头像带光环 */}
+              <View className="relative flex-shrink-0">
+                <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #5B9A6F, #D4A574)', padding: '2px', margin: '-2px' }} />
+                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative">
+                  <Text className="text-lg font-bold text-primary-foreground">{gameState.title[0]}</Text>
+                </View>
               </View>
               {/* 中间信息 */}
               <View className="flex-1 min-w-0">
                 <View className="flex flex-row items-center gap-2">
                   <Text className="text-base font-semibold text-foreground">小初</Text>
-                  <View className="px-2 py-1 rounded bg-primary bg-opacity-15">
+                  <View className="px-2 py-1 rounded-full bg-primary-container">
                     <Text className="text-xs font-bold text-primary">Lv.{gameState.level}</Text>
                   </View>
                 </View>
@@ -89,8 +96,8 @@ export default function Index() {
                 <View className="flex flex-row items-center gap-2 mt-2">
                   <View className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <View
-                      className="h-full rounded-full"
-                      style={{ width: `${expPercent}%`, background: 'linear-gradient(90deg, #3A4A44, #D4A574)' }}
+                      className="h-full rounded-full progress-animated"
+                      style={{ width: `${expPercent}%`, background: 'linear-gradient(90deg, #3A4A44, #5B9A6F)' }}
                     />
                   </View>
                   <Text className="text-xs text-muted-foreground whitespace-nowrap">{gameState.exp}/{gameState.exp_to_next} EXP</Text>
@@ -99,7 +106,7 @@ export default function Index() {
               {/* 右侧连续活跃徽章 */}
               {gameState.streak > 0 && (
                 <View className="flex-shrink-0 flex flex-col items-center gap-1">
-                  <View className="flex flex-row items-center px-2 py-1 rounded-lg bg-warning bg-opacity-20">
+                  <View className="flex flex-row items-center px-2.5 py-1 rounded-lg bg-warning bg-opacity-20 badge-glow">
                     <Flame size={14} color="#D4A574" />
                     <Text className="text-xs font-semibold text-warning ml-1">{gameState.streak}天</Text>
                   </View>
@@ -113,19 +120,28 @@ export default function Index() {
 
       {/* 2. 求职漏斗看板 */}
       <View className="px-4 mt-5">
-        <Card className="shadow-card">
+        <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
           <CardContent className="p-4">
-            <Text className="block text-base font-semibold text-foreground mb-3">求职漏斗</Text>
-            {funnelStages.map((stage) => (
-              <View key={stage.label} className="flex flex-row items-center gap-3 mb-3 last:mb-0">
-                <Text className={`text-sm font-medium w-10 text-right ${stage.color === 'bg-funnel-deliver' ? 'text-funnel-deliver' : stage.color === 'bg-funnel-interview' ? 'text-funnel-interview' : 'text-funnel-offer'}`}>{stage.label}</Text>
-                <View className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                  <View
-                    className={`h-full rounded-full ${stage.color}`}
-                    style={{ width: `${funnelStages[0].count > 0 ? Math.max(Math.round((stage.count / funnelStages[0].count) * 100), 8) : 8}%` }}
-                  />
+            <Text className="block text-base font-semibold text-foreground mb-4">求职漏斗</Text>
+            {/* 漏斗可视化 - 进度条 + 箭头连接 */}
+            {funnelStages.map((stage, idx) => (
+              <View key={stage.label}>
+                <View className="flex flex-row items-center gap-3">
+                  <Text className={`text-sm font-medium w-10 text-right ${stage.textColor}`}>{stage.label}</Text>
+                  <View className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                    <View
+                      className={`h-full rounded-full ${stage.color} progress-animated`}
+                      style={{ width: `${funnelStages[0].count > 0 ? Math.max(Math.round((stage.count / funnelStages[0].count) * 100), 8) : 8}%` }}
+                    />
+                  </View>
+                  <Text className="block text-base font-bold text-foreground w-6 text-right">{stage.count}</Text>
                 </View>
-                <Text className="block text-base font-bold text-foreground w-6 text-right">{stage.count}</Text>
+                {/* 箭头连接符 */}
+                {idx < funnelStages.length - 1 && (
+                  <View className="flex flex-row justify-center my-1.5">
+                    <Text className="text-muted-foreground text-xs" style={{ opacity: 0.4 }}>▼</Text>
+                  </View>
+                )}
               </View>
             ))}
           </CardContent>
@@ -135,17 +151,17 @@ export default function Index() {
       {/* 3. 快捷入口 2x2 */}
       <View className="px-4 mt-5">
         <View className="grid grid-cols-2 gap-3">
-          {quickActions.map((action) => (
+          {quickActions.map((action, idx) => (
             <Card
               key={action.label}
-              className={`shadow-card ${action.bg}`}
+              className={`shadow-card card-hover ${action.bg} ${loaded ? `anim-fade-in-scale anim-delay-${idx + 2}` : 'opacity-0'}`}
               onClick={() => Taro.switchTab({ url: action.path })}
             >
               <CardContent className="p-4">
-                <View className={`w-10 h-10 rounded-lg flex items-center justify-center ${action.iconBg}`}>
-                  <action.Icon size={20} color={action.iconColor} />
+                <View className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.iconBg} icon-entrance`}>
+                  <action.Icon size={22} color={action.iconColor} />
                 </View>
-                <Text className="block text-sm font-semibold text-foreground mt-2">{action.label}</Text>
+                <Text className="block text-sm font-semibold text-foreground mt-3">{action.label}</Text>
                 <Text className="block text-xs text-muted-foreground mt-1">{action.desc}</Text>
               </CardContent>
             </Card>
@@ -156,19 +172,26 @@ export default function Index() {
       {/* 4. HR反向模拟入口 */}
       <View className="px-4 mt-5 pb-4">
         <Card
-          className="shadow-card"
+          className={`shadow-card card-hover ${loaded ? 'anim-fade-in-up anim-delay-5' : 'opacity-0'}`}
           onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/index' })}
         >
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-3">
-              <View className="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center flex-shrink-0">
-                <LayoutDashboard size={20} color="#3A4A44" />
+              <View className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+                <LayoutDashboard size={20} color="#FFFFFF" />
               </View>
               <View className="flex-1 min-w-0">
-                <Text className="block text-sm font-semibold text-foreground">HR反向模拟</Text>
+                <View className="flex flex-row items-center gap-2">
+                  <Text className="block text-sm font-semibold text-foreground">HR反向模拟</Text>
+                  <View className="px-1.5 py-0.5 rounded bg-accent">
+                    <Text className="text-xs font-bold text-accent-foreground" style={{ fontSize: '9px' }}>NEW</Text>
+                  </View>
+                </View>
                 <Text className="block text-xs text-muted-foreground mt-1">扮演HR面试候选人，训练选人眼光</Text>
               </View>
-              <ChevronRight size={20} color="#6B7B74" />
+              <View className="anim-slide-in-right">
+                <ChevronRight size={20} color="#6B7B74" />
+              </View>
             </View>
           </CardContent>
         </Card>

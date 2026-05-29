@@ -4,9 +4,9 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Send, FileCheck, User, Bot, Eye, BookOpen } from 'lucide-react-taro'
+import { ArrowLeft, Send, FileCheck, User, Bot, Eye, BookOpen, ChevronRight } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Network } from '@/network'
 import { fetchStream } from '@/utils/stream'
 
@@ -29,7 +29,12 @@ export default function HrSim() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [hrNotes, setHrNotes] = useState('')
+  const [loaded, setLoaded] = useState(false)
   const scrollRef = useRef('')
+
+  useEffect(() => {
+    setTimeout(() => setLoaded(true), 80)
+  }, [])
 
   const scrollToBottom = () => {
     scrollRef.current = Date.now().toString()
@@ -150,40 +155,41 @@ export default function HrSim() {
   if (step === 'select') {
     return (
       <View className="min-h-full bg-background px-4 pt-6">
-        <View className="flex flex-row items-center gap-2 mb-6 anim-fade-in-up">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
+        <View className={`flex flex-row items-center gap-2 mb-6 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
             <ArrowLeft size={20} color="#6366F1" />
           </View>
           <Text className="block text-xl font-bold text-foreground">HR反向模拟</Text>
         </View>
 
-        <View className="mb-4 anim-fade-in-up anim-delay-1">
-          <Text className="block text-sm text-gray-500 mb-1">选择候选人简历</Text>
-          <Text className="block text-xs text-gray-400">你将扮演HR面试这位候选人，考察你的选人眼光</Text>
+        <View className={`mb-4 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
+          <Text className="block text-sm text-muted-foreground mb-1">选择候选人简历</Text>
+          <Text className="block text-xs text-muted-foreground" style={{ opacity: 0.6 }}>你将扮演HR面试这位候选人，考察你的选人眼光</Text>
         </View>
 
         {RESUME_PROFILES.map((profile, idx) => (
           <Card
             key={idx}
-            className={`mb-3 shadow-sm card-hover anim-fade-in-up anim-delay-${idx + 2}`}
+            className={`mb-3 shadow-card card-hover ${loaded ? `anim-fade-in-up anim-delay-${idx + 2}` : 'opacity-0'}`}
             onClick={() => startInterview(idx)}
           >
             <CardContent className="p-4">
               <View className="flex flex-row items-center gap-3">
                 <View
-                  className="w-12 h-12 rounded-xl flex items-center justify-center btn-shimmer"
-                  style={{ backgroundColor: `${profile.color}20` }}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: `${profile.color}15` }}
                 >
                   <User size={24} color={profile.color} />
                 </View>
                 <View className="flex-1">
                   <View className="flex flex-row items-center gap-2">
                     <Text className="block font-semibold text-foreground">{profile.name}</Text>
-                    <Badge className="text-xs border-none" style={{ backgroundColor: `${profile.color}20`, color: profile.color }}>{profile.tag}</Badge>
+                    <Badge className="text-xs border-none" style={{ backgroundColor: `${profile.color}15`, color: profile.color }}>{profile.tag}</Badge>
                   </View>
-                  <Text className="block text-xs text-gray-500 mt-1">{profile.school}</Text>
-                  <Text className="block text-xs text-gray-400 mt-1">{profile.summary}</Text>
+                  <Text className="block text-xs text-muted-foreground mt-1">{profile.school}</Text>
+                  <Text className="block text-xs text-muted-foreground mt-1" style={{ opacity: 0.7 }}>{profile.summary}</Text>
                 </View>
+                <ChevronRight size={16} color="#6B7B7480" />
               </View>
             </CardContent>
           </Card>
@@ -196,17 +202,19 @@ export default function HrSim() {
   if (step === 'result') {
     return (
       <View className="min-h-full bg-background px-4 pt-6">
-        <View className="flex flex-row items-center gap-2 mb-6 anim-fade-in-up">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
+        <View className={`flex flex-row items-center gap-2 mb-6 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
             <ArrowLeft size={20} color="#6366F1" />
           </View>
           <Text className="block text-xl font-bold text-foreground">招聘笔记</Text>
         </View>
 
-        <Card className="shadow-sm anim-fade-in-up anim-delay-1">
+        <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-2 mb-3">
-              <FileCheck size={18} color="#10B981" />
+              <View className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <FileCheck size={16} color="#10B981" />
+              </View>
               <Text className="block font-semibold text-foreground">你的评估 vs 真实情况</Text>
             </View>
             <Separator className="mb-3" />
@@ -214,8 +222,8 @@ export default function HrSim() {
           </CardContent>
         </Card>
 
-        <View className="mt-4 anim-fade-in-up anim-delay-2">
-          <Button className="w-full btn-shimmer" onClick={() => { setStep('select'); setMessages([]); setHrNotes('') }}>
+        <View className={`mt-4 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
+          <Button className="w-full btn-shimmer btn-press" onClick={() => { setStep('select'); setMessages([]); setHrNotes('') }}>
             <BookOpen size={16} color="#fff" />
             <Text>再来一轮</Text>
           </Button>
@@ -228,9 +236,13 @@ export default function HrSim() {
   return (
     <View className="flex flex-col h-screen bg-background">
       {/* 顶部 */}
-      <View className="bg-violet-600 px-4 pt-4 pb-3 rounded-b-2xl">
-        <View className="flex flex-row items-center gap-3">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
+      <View
+        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
+      >
+        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
+        <View className="flex flex-row items-center gap-3 relative">
+          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
             <ArrowLeft size={20} color="#fff" />
           </View>
           <View className="flex-1">
@@ -249,10 +261,10 @@ export default function HrSim() {
           <View key={idx} id={`msg-${idx}`} className={`mb-3 ${msg.role === 'user' ? 'anim-slide-in-right' : 'anim-slide-in-left'}`}>
             {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2 max-w-[85%]">
-                <View className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0 mt-1">
+                <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
                   <Bot size={14} color="#fff" />
                 </View>
-                <Card className="shadow-sm">
+                <Card className="shadow-card">
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
@@ -266,7 +278,7 @@ export default function HrSim() {
                 <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
                   <Text className="text-white text-xs font-bold">HR</Text>
                 </View>
-                <Card className="shadow-sm bg-violet-600">
+                <Card className="shadow-card" style={{ background: 'linear-gradient(135deg, #5B21B6, #7C3AED)' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -279,10 +291,10 @@ export default function HrSim() {
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
           <View className="mb-3 anim-slide-in-left">
             <View className="flex flex-row items-start gap-2 max-w-[85%]">
-              <View className="w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0 mt-1">
+              <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
                 <Bot size={14} color="#fff" />
               </View>
-              <Card className="shadow-sm">
+              <Card className="shadow-card">
                 <CardContent className="p-3">
                   <View className="flex flex-row items-center gap-1">
                     <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" />
@@ -298,16 +310,10 @@ export default function HrSim() {
       </ScrollView>
 
       {/* 输入区 */}
-      <View
-        style={{
-          display: 'flex', flexDirection: 'row', gap: '8px',
-          padding: '12px', backgroundColor: '#fff',
-          borderTop: '1px solid #e5e5e5', alignItems: 'center'
-        }}
-      >
-        <View style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '20px', padding: '8px 12px' }}>
+      <View className="flex flex-row items-center gap-2 px-3 py-3 bg-card border-t border-outline-variant border-opacity-15">
+        <View className="flex-1 bg-muted rounded-full px-4 py-2">
           <Input
-            style={{ width: '100%', fontSize: '14px' }}
+            className="w-full text-sm text-foreground"
             placeholder="向候选人提问..."
             value={input}
             onInput={(e) => setInput(e.detail.value)}
@@ -316,10 +322,10 @@ export default function HrSim() {
             disabled={isLoading}
           />
         </View>
-        <View style={{ flexShrink: 0 }}>
+        <View className="flex-shrink-0">
           <Button
             size="sm"
-            className="btn-shimmer"
+            className="bg-primary rounded-full btn-shimmer btn-press"
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
           >
@@ -330,13 +336,8 @@ export default function HrSim() {
 
       {/* 结束模拟按钮 */}
       {messages.length > 1 && (
-        <View
-          style={{
-            padding: '8px 16px 16px', backgroundColor: '#fff',
-            display: 'flex', justifyContent: 'center'
-          }}
-        >
-          <Button variant="outline" className="w-full btn-hover-lift" onClick={endSimulation}>
+        <View className="px-4 pb-4 pt-1 bg-card">
+          <Button variant="outline" className="w-full btn-hover-lift btn-press" onClick={endSimulation}>
             <FileCheck size={14} color="#8B5CF6" />
             <Text>结束面试 · 查看招聘笔记</Text>
           </Button>

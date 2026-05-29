@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Building } from 'lucide-react-taro'
+import { Search, Building, MapPin, GraduationCap, Briefcase, Plus } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
@@ -11,6 +11,7 @@ export default function CompanyHall() {
   const [jobCards, setJobCards] = useState<any[]>([])
   const [filter, setFilter] = useState<string>('all')
   const [searchText, setSearchText] = useState('')
+  const [loaded, setLoaded] = useState(false)
 
   const industryFilters = [
     { key: 'all', label: '全部' },
@@ -31,6 +32,7 @@ export default function CompanyHall() {
 
   useDidShow(() => {
     loadJobCards()
+    setTimeout(() => setLoaded(true), 80)
   })
 
   const loadJobCards = async () => {
@@ -56,8 +58,8 @@ export default function CompanyHall() {
   return (
     <View className="min-h-full bg-background">
       {/* 搜索栏 */}
-      <View className="px-4 pt-2 pb-3">
-        <View className="relative bg-muted rounded-xl">
+      <View className="px-4 pt-3 pb-3">
+        <View className={`relative bg-muted rounded-xl ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <View className="absolute left-4 top-1/2 -translate-y-1/2">
             <Search size={18} color="#6B7B74" />
           </View>
@@ -73,12 +75,12 @@ export default function CompanyHall() {
       </View>
 
       {/* 筛选标签栏 */}
-      <View className="px-4 pb-3">
-        <View className="flex flex-row gap-2 overflow-x-auto">
+      <View className={`px-4 pb-3 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
+        <View className="flex flex-row gap-2 overflow-x-auto pb-1">
           {industryFilters.map((item) => (
             <View
               key={item.key}
-              className={`flex-shrink-0 px-4 py-2 rounded-full ${filter === item.key ? 'bg-primary' : 'bg-muted'}`}
+              className={`flex-shrink-0 px-4 py-2 rounded-full transition-all ${filter === item.key ? 'bg-primary shadow-card' : 'bg-muted'}`}
               onClick={() => setFilter(item.key)}
             >
               <Text className={`text-xs font-semibold ${filter === item.key ? 'text-primary-foreground' : 'text-muted-foreground'}`}>{item.label}</Text>
@@ -90,22 +92,30 @@ export default function CompanyHall() {
       {/* 岗位卡片列表 */}
       {filteredCards.length === 0 ? (
         <View className="px-4">
-          <Card className="shadow-card">
+          <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
             <CardContent className="p-8 flex flex-col items-center">
-              <Building size={40} color="#C8CFC9" />
-              <Text className="block text-muted-foreground text-sm mt-3">这里还没有你的副本</Text>
-              <Text className="block text-muted-foreground text-opacity-60 text-xs mt-1">先去发现心仪公司，立下战书吧</Text>
+              <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
+                <Building size={28} color="#B8C2BB" />
+              </View>
+              <Text className="block text-muted-foreground text-sm font-medium mt-1">这里还没有你的副本</Text>
+              <Text className="block text-muted-foreground text-xs mt-1" style={{ opacity: 0.6 }}>先去发现心仪公司，立下战书吧</Text>
+              <View
+                className="mt-4 px-5 py-2 bg-primary rounded-full btn-press"
+                onClick={() => Taro.navigateTo({ url: '/pages/company/detail?mode=add' })}
+              >
+                <Text className="text-sm font-semibold text-primary-foreground">领任务</Text>
+              </View>
             </CardContent>
           </Card>
         </View>
       ) : (
-        <View className="px-4 flex flex-col gap-3 pb-4">
-          {filteredCards.map((card) => {
+        <View className="px-4 flex flex-col gap-3 pb-20">
+          {filteredCards.map((card, idx) => {
             const status = statusMap[card.status] || statusMap.interested
             return (
               <Card
                 key={card.id}
-                className="shadow-card"
+                className={`shadow-card card-hover ${loaded ? `anim-fade-in-up anim-delay-${Math.min(idx + 2, 6)}` : 'opacity-0'}`}
                 onClick={() => Taro.navigateTo({ url: `/pages/company/detail?id=${card.id}` })}
               >
                 <CardContent className="p-4">
@@ -133,12 +143,14 @@ export default function CompanyHall() {
                   {/* 底部标签 */}
                   <View className="flex flex-row items-center gap-2">
                     {card.location && (
-                      <View className="px-2 py-1 rounded-full bg-muted">
+                      <View className="flex flex-row items-center gap-1 px-2.5 py-1 rounded-full bg-muted">
+                        <MapPin size={10} color="#6B7B74" />
                         <Text className="text-xs font-medium text-muted-foreground" style={{ fontSize: '10px' }}>{card.location}</Text>
                       </View>
                     )}
                     {card.education && (
-                      <View className="px-2 py-1 rounded-full bg-muted">
+                      <View className="flex flex-row items-center gap-1 px-2.5 py-1 rounded-full bg-muted">
+                        <GraduationCap size={10} color="#6B7B74" />
                         <Text className="text-xs font-medium text-muted-foreground" style={{ fontSize: '10px' }}>{card.education}</Text>
                       </View>
                     )}
@@ -152,11 +164,14 @@ export default function CompanyHall() {
 
       {/* 底部悬浮按钮 */}
       <View
-        className="fixed right-4 bg-primary rounded-full shadow-float px-5 py-3"
-        style={{ bottom: 60 }}
+        className="fixed right-4 bg-primary rounded-full shadow-float px-5 py-3 btn-pulse btn-press"
+        style={{ bottom: 80 }}
         onClick={() => Taro.navigateTo({ url: '/pages/company/detail?mode=add' })}
       >
-        <Text className="text-sm font-semibold text-primary-foreground">领任务</Text>
+        <View className="flex flex-row items-center gap-1.5">
+          <Plus size={16} color="#FFFFFF" />
+          <Text className="text-sm font-semibold text-primary-foreground">领任务</Text>
+        </View>
       </View>
     </View>
   )

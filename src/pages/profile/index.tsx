@@ -17,9 +17,11 @@ export default function Profile() {
     wins: 0,
     badges: [] as string[],
   })
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     loadProfile()
+    setTimeout(() => setLoaded(true), 80)
   }, [])
 
   const loadProfile = async () => {
@@ -54,70 +56,75 @@ export default function Profile() {
   ]
 
   const menuItems = [
-    { label: '简历库', path: '/pages/resume/list', Icon: FileText },
-    { label: '职业规划', path: '/pages/plan/sandbox', Icon: Sparkles },
-    { label: '训练记录', path: '/pages/dashboard/index', Icon: Swords },
-    { label: '求职笔记', path: '/pages/profile/achievements', Icon: BookOpen },
-    { label: '设置与帮助', path: '', Icon: Settings },
+    { label: '简历库', path: '/pages/resume/list', Icon: FileText, iconBg: 'bg-emerald-50', iconColor: '#10B981' },
+    { label: '职业规划', path: '/pages/plan/sandbox', Icon: Sparkles, iconBg: 'bg-violet-50', iconColor: '#7C5CFC' },
+    { label: '训练记录', path: '/pages/dashboard/index', Icon: Swords, iconBg: 'bg-orange-50', iconColor: '#E8864A' },
+    { label: '求职笔记', path: '/pages/profile/achievements', Icon: BookOpen, iconBg: 'bg-blue-50', iconColor: '#3B82F6' },
+    { label: '设置与帮助', path: '', Icon: Settings, iconBg: 'bg-gray-50', iconColor: '#6B7B74' },
   ]
 
   return (
     <View className="min-h-full bg-background">
       {/* 用户信息区 */}
       <View className="mx-4 mt-3 mb-6">
-        <Card className="shadow-card">
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          {/* 渐变装饰条 */}
+          <View className="h-1.5" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F)' }} />
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-3">
-              {/* 头像圆圈 */}
-              <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <Text className="text-lg font-bold text-primary-foreground">{userInfo.nick_name[0]}</Text>
+              {/* 头像带光环 */}
+              <View className="relative flex-shrink-0">
+                <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #5B9A6F, #D4A574)', padding: '2px', margin: '-2px' }} />
+                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative">
+                  <Text className="text-lg font-bold text-primary-foreground">{userInfo.nick_name[0]}</Text>
+                </View>
               </View>
               {/* 用户名和等级 */}
               <View className="flex-1 min-w-0">
                 <Text className="block text-base font-semibold text-foreground">{userInfo.nick_name}</Text>
-                <View className="mt-1 px-2 py-1 rounded-full bg-primary-container inline-flex self-start">
+                <View className="mt-1 px-2.5 py-1 rounded-full bg-primary-container inline-flex self-start">
                   <Text className="text-xs font-semibold text-primary">Lv.{userInfo.level} {userInfo.title}</Text>
                 </View>
               </View>
               {/* 设置齿轮图标 */}
-              <View className="w-10 h-10 flex items-center justify-center text-muted-foreground rounded-full">
+              <View className="w-10 h-10 flex items-center justify-center text-muted-foreground rounded-full btn-press">
                 <Settings size={20} color="#6B7B74" />
               </View>
             </View>
             {/* 统计行 */}
-            <View className="flex flex-row items-center justify-center gap-4 mt-4 pt-3 border-t border-outline-variant border-opacity-15">
-              <View className="flex flex-row items-center gap-2">
-                <Text className="text-base font-semibold text-foreground">{userInfo.total_battles}</Text>
-                <Text className="text-sm text-muted-foreground">投递</Text>
-              </View>
-              <View className="w-px h-4 bg-outline-variant bg-opacity-30" />
-              <View className="flex flex-row items-center gap-2">
-                <Text className="text-base font-semibold text-foreground">{userInfo.interviews}</Text>
-                <Text className="text-sm text-muted-foreground">面试</Text>
-              </View>
-              <View className="w-px h-4 bg-outline-variant bg-opacity-30" />
-              <View className="flex flex-row items-center gap-2">
-                <Text className="text-base font-semibold text-foreground">{userInfo.wins}</Text>
-                <Text className="text-sm text-muted-foreground">Offer</Text>
-              </View>
+            <View className="flex flex-row items-center justify-center gap-6 mt-4 pt-3 border-t border-outline-variant border-opacity-15">
+              {[
+                { value: userInfo.total_battles, label: '投递' },
+                { value: userInfo.interviews, label: '面试' },
+                { value: userInfo.wins, label: 'Offer' },
+              ].map((stat, idx) => (
+                <View key={stat.label} className="flex flex-col items-center">
+                  <Text className="text-lg font-bold text-foreground">{stat.value}</Text>
+                  <Text className="text-xs text-muted-foreground mt-0.5">{stat.label}</Text>
+                  {idx < 2 && <View className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-4 bg-outline-variant bg-opacity-20" />}
+                </View>
+              ))}
             </View>
           </CardContent>
         </Card>
       </View>
 
       {/* 成就展示 */}
-      <View className="px-4 mb-6">
+      <View className={`px-4 mb-6 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
         <View className="flex flex-row items-center justify-between mb-3">
           <Text className="block text-base font-semibold text-foreground">成就墙</Text>
-          <View onClick={() => Taro.navigateTo({ url: '/pages/profile/achievements' })}>
+          <View className="btn-press" onClick={() => Taro.navigateTo({ url: '/pages/profile/achievements' })}>
             <Text className="text-sm text-muted-foreground">查看全部{'>'}</Text>
           </View>
         </View>
-        <View className="flex flex-row gap-3 overflow-x-auto">
-          {achievements.map((ach) => (
-            <View key={ach.name} className="flex flex-col items-center gap-2 flex-shrink-0">
+        <View className="flex flex-row gap-3 overflow-x-auto pb-1">
+          {achievements.map((ach, idx) => (
+            <View
+              key={ach.name}
+              className={`flex flex-col items-center gap-2 flex-shrink-0 ${loaded ? `anim-fade-in-scale anim-delay-${idx + 2}` : 'opacity-0'}`}
+            >
               <View
-                className={`w-16 h-16 rounded-full flex items-center justify-center ${ach.unlocked ? ach.bg : 'border-2 border-dashed border-outline-variant border-opacity-40 bg-muted'}`}
+                className={`w-16 h-16 rounded-full flex items-center justify-center ${ach.unlocked ? `${ach.bg} badge-glow` : 'border-2 border-dashed border-outline-variant border-opacity-40 bg-muted'}`}
               >
                 <ach.Icon size={28} color={ach.iconColor} />
               </View>
@@ -129,21 +136,21 @@ export default function Profile() {
 
       {/* 功能菜单列表 */}
       <View className="mx-4 mb-6">
-        <Card className="shadow-card overflow-hidden">
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
           <CardContent className="p-0">
             {menuItems.map((item, idx) => (
               <View key={item.label}>
                 {idx > 0 && <View className="h-px bg-outline-variant bg-opacity-10 mx-4" />}
                 <View
-                  className="flex flex-row items-center px-4 py-4"
+                  className="flex flex-row items-center px-4 py-4 btn-press"
                   onClick={() => {
                     if (item.path) {
                       Taro.navigateTo({ url: item.path })
                     }
                   }}
                 >
-                  <View className="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center mr-3 flex-shrink-0">
-                    <item.Icon size={18} color="#3A4A44" />
+                  <View className={`w-9 h-9 rounded-lg ${item.iconBg} flex items-center justify-center mr-3 flex-shrink-0`}>
+                    <item.Icon size={18} color={item.iconColor} />
                   </View>
                   <Text className="flex-1 text-sm font-medium text-foreground">{item.label}</Text>
                   <ChevronRight size={16} color="#6B7B7480" />
@@ -156,7 +163,7 @@ export default function Profile() {
 
       {/* 版本信息 */}
       <View className="pb-6 pt-2">
-        <Text className="block text-center text-xs text-muted-foreground text-opacity-60">职引 v1.0.0 · 让求职成为一场冒险</Text>
+        <Text className="block text-center text-xs text-muted-foreground" style={{ opacity: 0.6 }}>职引 v1.0.0 · 让求职成为一场冒险</Text>
       </View>
     </View>
   )

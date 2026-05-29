@@ -21,41 +21,53 @@ export default function Achievements() {
   ]
 
   const titleList = [
-    { level: 1, title: '求职新手', minExp: 0, color: '#9CA3AF' },
-    { level: 5, title: '简历游侠', minExp: 1600, color: '#3B82F6' },
-    { level: 10, title: '面试勇者', minExp: 8100, color: '#8B5CF6' },
-    { level: 20, title: 'Offer收割者', minExp: 36100, color: '#FF6B35' },
+    { level: 1, title: '求职新手', minExp: 0, color: '#9CA3AF', bg: 'bg-gray-100' },
+    { level: 5, title: '简历游侠', minExp: 1600, color: '#3B82F6', bg: 'bg-blue-50' },
+    { level: 10, title: '面试勇者', minExp: 8100, color: '#8B5CF6', bg: 'bg-violet-50' },
+    { level: 20, title: 'Offer收割者', minExp: 36100, color: '#FF6B35', bg: 'bg-orange-50' },
   ]
 
   return (
     <View className="min-h-full bg-background">
       {/* 顶部 */}
-      <View className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 pt-4 pb-6 rounded-b-3xl">
-        <View className="flex flex-row items-center gap-2 mb-2">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
+      <View
+        className="px-4 pt-4 pb-6 rounded-b-3xl relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #B45309 0%, #D97706 50%, #F59E0B 100%)' }}
+      >
+        <View className="absolute -top-6 -right-6 w-24 h-24 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)' }} />
+        <View className="absolute bottom-2 left-8 w-16 h-16 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)' }} />
+
+        <View className="flex flex-row items-center gap-2 mb-2 relative">
+          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
             <ArrowLeft size={20} color="#fff" />
           </View>
-          <Text className="block text-white font-bold text-lg">成就中心</Text>
+          <View className="flex-1">
+            <Text className="block text-white font-bold text-lg">成就中心</Text>
+            <Text className="block text-amber-200 text-xs mt-1">解锁成就，见证成长</Text>
+          </View>
+          <Trophy size={24} color="#FEF3C7" />
         </View>
       </View>
 
       <View className="px-4 -mt-3">
         {/* 称号进度 */}
-        <Card className={`shadow-sm mb-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+        <Card className={`shadow-card mb-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <CardContent className="p-4">
             <Text className="block font-semibold text-foreground mb-3">称号进阶</Text>
-            <View className="flex flex-col gap-2">
+            <View className="flex flex-col gap-3">
               {titleList.map((t, idx) => (
-                <View key={t.level} className={`flex flex-row items-center gap-3 ${loaded ? `anim-fade-in-up anim-delay-${idx + 1}` : 'opacity-0'}`}>
+                <View
+                  key={t.level}
+                  className={`flex flex-row items-center gap-3 ${loaded ? `anim-fade-in-up anim-delay-${idx + 1}` : 'opacity-0'}`}
+                >
                   <View
-                    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${t.color}20` }}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${t.bg}`}
                   >
-                    <Text className="text-xs font-bold" style={{ color: t.color }}>{t.level}</Text>
+                    <Text className="text-xs font-bold" style={{ color: t.color }}>Lv.{t.level}</Text>
                   </View>
                   <View className="flex-1">
-                    <Text className="block text-sm text-foreground">{t.title}</Text>
-                    <Text className="block text-xs text-gray-400">需要 {t.minExp} EXP</Text>
+                    <Text className="block text-sm font-medium text-foreground">{t.title}</Text>
+                    <Text className="block text-xs text-muted-foreground mt-0.5">需要 {t.minExp} EXP</Text>
                   </View>
                 </View>
               ))}
@@ -69,7 +81,7 @@ export default function Achievements() {
           {badgeList.map((badge, idx) => (
             <Card
               key={badge.id}
-              className={`shadow-sm card-hover ${badge.unlocked ? '' : 'opacity-50'} ${loaded ? `anim-fade-in-scale anim-delay-${idx + 1}` : 'opacity-0'}`}
+              className={`shadow-card card-hover ${badge.unlocked ? '' : 'opacity-50'} ${loaded ? `anim-fade-in-scale anim-delay-${idx + 1}` : 'opacity-0'}`}
             >
               <CardContent className="p-3 flex flex-col items-center">
                 <View
@@ -79,7 +91,7 @@ export default function Achievements() {
                   <badge.icon size={24} color={badge.unlocked ? '#fff' : '#9CA3AF'} />
                 </View>
                 <Text className="block text-xs text-foreground font-semibold text-center">{badge.name}</Text>
-                <Text className="block text-xs text-gray-400 text-center mt-1">{badge.desc}</Text>
+                <Text className="block text-xs text-muted-foreground text-center mt-1" style={{ opacity: 0.7 }}>{badge.desc}</Text>
               </CardContent>
             </Card>
           ))}

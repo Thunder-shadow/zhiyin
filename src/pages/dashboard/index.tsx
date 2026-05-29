@@ -15,6 +15,7 @@ export default function Dashboard() {
     title: '求职新手',
   })
   const [stats, setStats] = useState({ applied: 0, interviewing: 0, offered: 0 })
+  const [loaded, setLoaded] = useState(false)
 
   // 经验条百分比（Level = floor(sqrt(EXP/100)) + 1）
   const expForCurrentLevel = Math.pow(userInfo.level - 1, 2) * 100
@@ -25,6 +26,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboard()
+    setTimeout(() => setLoaded(true), 80)
   }, [])
 
   const loadDashboard = async () => {
@@ -51,46 +53,64 @@ export default function Dashboard() {
   }
 
   const quickEntries = [
-    { icon: Map, label: 'AI规划', path: '/pages/plan/sandbox', color: '#FF6B35' },
-    { icon: FileText, label: '简历库', path: '/pages/resume/list', color: '#3B82F6' },
-    { icon: Building, label: '我的副本', path: '/pages/company/hall', color: '#10B981' },
-    { icon: Swords, label: '训练场', path: '/pages/interview/lobby', color: '#8B5CF6' },
+    { icon: Map, label: 'AI规划', path: '/pages/plan/sandbox', color: '#FF6B35', bg: 'bg-entry-sandbox-bg', iconBg: 'bg-entry-sandbox-icon-bg' },
+    { icon: FileText, label: '简历库', path: '/pages/resume/list', color: '#3B82F6', bg: 'bg-entry-resume-bg', iconBg: 'bg-entry-resume-icon-bg' },
+    { icon: Building, label: '我的副本', path: '/pages/company/hall', color: '#10B981', bg: 'bg-entry-dungeon-bg', iconBg: 'bg-entry-dungeon-icon-bg' },
+    { icon: Swords, label: '训练场', path: '/pages/interview/lobby', color: '#8B5CF6', bg: 'bg-entry-sandbox-bg', iconBg: 'bg-entry-sandbox-icon-bg' },
+  ]
+
+  const funnelItems = [
+    { label: '已投递', count: stats.applied, bg: 'bg-blue-50', textColor: 'text-blue-500' },
+    { label: '面试中', count: stats.interviewing, bg: 'bg-purple-50', textColor: 'text-purple-500' },
+    { label: '已收获', count: stats.offered, bg: 'bg-emerald-50', textColor: 'text-emerald-500' },
   ]
 
   return (
     <View className="min-h-full bg-background">
       {/* 顶部深蓝区域：用户信息 + 经验条 */}
-      <View className="bg-primary px-4 pt-6 pb-8 rounded-b-3xl">
-        <View className="flex flex-row items-center justify-between mb-4">
+      <View
+        className="px-4 pt-6 pb-8 rounded-b-3xl relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #2D3A35 0%, #3A4A44 50%, #4A6A5C 100%)' }}
+      >
+        {/* 背景装饰圆 */}
+        <View className="absolute -top-8 -right-8 w-32 h-32 rounded-full" style={{ background: 'radial-gradient(circle, rgba(91,154,111,0.2) 0%, transparent 70%)' }} />
+        <View className="absolute bottom-4 -left-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,165,116,0.15) 0%, transparent 70%)' }} />
+
+        <View className="flex flex-row items-center justify-between mb-4 relative">
           <View className="flex flex-row items-center gap-3">
-            <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-              <Text className="text-white text-lg font-bold">{userInfo.nick_name[0]}</Text>
+            {/* 头像带 3D 光圈 */}
+            <View className="relative">
+              <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #FF6B35, #FFB347)', padding: '2px', margin: '-2px' }} />
+              <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative">
+                <Text className="text-white text-lg font-bold">{userInfo.nick_name[0]}</Text>
+              </View>
             </View>
             <View>
               <Text className="block text-white font-bold text-lg">{userInfo.nick_name}</Text>
               <View className="flex flex-row items-center gap-2 mt-1">
-                <Badge variant="secondary" className="bg-orange-500 text-white border-none text-xs">
+                <Badge variant="secondary" className="bg-orange-500 text-white border-none text-xs badge-glow">
                   Lv.{userInfo.level}
                 </Badge>
                 <Text className="text-accent text-xs">{userInfo.title}</Text>
               </View>
             </View>
           </View>
-          <Trophy size={24} color="#FFB347" />
+          <View className="anim-bounce-in">
+            <Trophy size={24} color="#FFB347" />
+          </View>
         </View>
         {/* 经验条 */}
-        <View>
+        <View className="relative">
           <View className="flex flex-row items-center justify-between mb-1">
             <Text className="text-gray-300 text-xs">EXP</Text>
             <Text className="text-accent text-xs font-mono">{userInfo.exp} / {expForNextLevel}</Text>
           </View>
-          <View className="w-full h-2 bg-primary bg-opacity-80 rounded-full overflow-hidden">
+          <View className="w-full h-2 bg-primary-dark rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
             <View
-              className="h-full rounded-full"
+              className="h-full rounded-full progress-animated"
               style={{
                 width: `${expPercent}%`,
                 background: 'linear-gradient(90deg, #FF6B35, #FFB347)',
-                transition: 'width 0.5s ease-in-out',
               }}
             />
           </View>
@@ -99,69 +119,73 @@ export default function Dashboard() {
 
       {/* 漏斗视图：投递 → 面试 → Offer */}
       <View className="px-4 -mt-4">
-        <Card className="shadow-lg">
+        <Card className={`shadow-card-hover ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <CardContent className="p-4">
             <View className="flex flex-row items-center justify-between mb-3">
               <Text className="block font-semibold text-foreground">求职漏斗</Text>
-              <TrendingUp size={16} color="#6B7280" />
+              <TrendingUp size={16} color="#6B7B74" />
             </View>
             <View className="flex flex-row items-center justify-around">
-              <View className="flex flex-col items-center">
-                <View className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mb-1">
-                  <Text className="block text-blue-500 font-bold text-xl font-mono">{stats.applied}</Text>
+              {funnelItems.map((item, idx) => (
+                <View key={item.label} className="flex flex-col items-center">
+                  <View className={`w-14 h-14 rounded-full ${item.bg} flex items-center justify-center mb-1 card-hover`}>
+                    <Text className={`block ${item.textColor} font-bold text-xl font-mono`}>{item.count}</Text>
+                  </View>
+                  <Text className="block text-muted-foreground text-xs">{item.label}</Text>
+                  {/* 连接箭头 */}
+                  {idx < funnelItems.length - 1 && (
+                    <View className="absolute" style={{ right: '-12px', top: '50%', transform: 'translateY(-50%)' }}>
+                      <Text className="text-muted-foreground text-xs" style={{ opacity: 0.4 }}>→</Text>
+                    </View>
+                  )}
                 </View>
-                <Text className="block text-gray-500 text-xs">已投递</Text>
-              </View>
-              <View className="flex flex-col items-center">
-                <View className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mb-1">
-                  <Text className="block text-purple-500 font-bold text-xl font-mono">{stats.interviewing}</Text>
-                </View>
-                <Text className="block text-gray-500 text-xs">面试中</Text>
-              </View>
-              <View className="flex flex-col items-center">
-                <View className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mb-1">
-                  <Text className="block text-emerald-500 font-bold text-xl font-mono">{stats.offered}</Text>
-                </View>
-                <Text className="block text-gray-500 text-xs">已收获</Text>
-              </View>
+              ))}
             </View>
           </CardContent>
         </Card>
       </View>
 
       {/* 快捷入口 */}
-      <View className="px-4 mt-4">
+      <View className="px-4 mt-5">
         <Text className="block font-semibold text-foreground mb-3">快捷入口</Text>
         <View className="grid grid-cols-4 gap-3">
-          {quickEntries.map((entry) => (
+          {quickEntries.map((entry, idx) => (
             <View
               key={entry.label}
-              className="flex flex-col items-center gap-2 p-3 bg-white rounded-xl shadow-sm"
+              className={`flex flex-col items-center gap-2 p-3 bg-card rounded-xl shadow-card card-hover ${loaded ? `anim-fade-in-scale anim-delay-${idx + 1}` : 'opacity-0'}`}
               onClick={() => Taro.navigateTo({ url: entry.path })}
             >
-              <View className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${entry.color}15` }}>
+              <View className={`w-10 h-10 rounded-xl flex items-center justify-center ${entry.iconBg} icon-entrance`}>
                 <entry.icon size={22} color={entry.color} />
               </View>
-              <Text className="block text-xs text-gray-600">{entry.label}</Text>
+              <Text className="block text-xs text-foreground font-medium">{entry.label}</Text>
             </View>
           ))}
         </View>
       </View>
 
       {/* 最近行动 */}
-      <View className="px-4 mt-4 pb-4">
+      <View className="px-4 mt-5 pb-4">
         <View className="flex flex-row items-center justify-between mb-3">
           <Text className="block font-semibold text-foreground">最近行动</Text>
-          <View className="flex flex-row items-center" onClick={() => Taro.switchTab({ url: '/pages/company/hall' })}>
-            <Text className="text-xs text-gray-400">查看全部</Text>
-            <ChevronRight size={14} color="#9CA3AF" />
+          <View className="flex flex-row items-center btn-press" onClick={() => Taro.switchTab({ url: '/pages/company/hall' })}>
+            <Text className="text-xs text-muted-foreground">查看全部</Text>
+            <ChevronRight size={14} color="#6B7B74" />
           </View>
         </View>
-        <Card>
-          <CardContent className="p-4 flex flex-col items-center justify-center min-h-24">
-            <Target size={32} color="#D1D5DB" />
-            <Text className="block text-gray-400 text-sm mt-2">还没有行动记录</Text>
-            <Text className="block text-gray-300 text-xs mt-1">去发现心仪公司，立下战书吧</Text>
+        <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
+          <CardContent className="p-6 flex flex-col items-center justify-center">
+            <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
+              <Target size={28} color="#B8C2BB" />
+            </View>
+            <Text className="block text-muted-foreground text-sm font-medium mt-1">还没有行动记录</Text>
+            <Text className="block text-muted-foreground text-xs mt-1" style={{ opacity: 0.6 }}>去发现心仪公司，立下战书吧</Text>
+            <View
+              className="mt-4 px-5 py-2 bg-primary rounded-full btn-press"
+              onClick={() => Taro.switchTab({ url: '/pages/company/hall' })}
+            >
+              <Text className="text-sm font-semibold text-primary-foreground">去探索</Text>
+            </View>
           </CardContent>
         </Card>
       </View>

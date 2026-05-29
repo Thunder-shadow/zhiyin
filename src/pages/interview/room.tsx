@@ -58,7 +58,6 @@ export default function InterviewRoom() {
           if (newMessages.length > 0) newMessages[0].streaming = false
           setMessages([...newMessages])
           setIsLoading(false)
-
         },
         onError: (_msg) => {
           if (newMessages.length === 0) {
@@ -66,11 +65,9 @@ export default function InterviewRoom() {
           }
           setMessages([...newMessages])
           setIsLoading(false)
-
         },
       }
     )
-
   }
 
   /** 发送消息 - 流式 */
@@ -109,7 +106,6 @@ export default function InterviewRoom() {
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
           setIsLoading(false)
-
         },
         onError: (_msg) => {
           aiMsg.content = '面试官似乎走神了，请再试一次...'
@@ -117,7 +113,6 @@ export default function InterviewRoom() {
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
           setIsLoading(false)
-
         },
       }
     )
@@ -133,9 +128,13 @@ export default function InterviewRoom() {
   return (
     <View className="flex flex-col h-screen bg-background">
       {/* 顶部导航栏 */}
-      <View className="bg-primary px-4 pt-4 pb-3 rounded-b-2xl">
-        <View className="flex flex-row items-center gap-3">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
+      <View
+        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #2D3A35 0%, #3A4A44 50%, #4A6A5C 100%)' }}
+      >
+        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(91,154,111,0.2) 0%, transparent 70%)' }} />
+        <View className="flex flex-row items-center gap-3 relative">
+          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
             <ArrowLeft size={20} color="#fff" />
           </View>
           <View className="flex-1">
@@ -166,7 +165,7 @@ export default function InterviewRoom() {
                 <View className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
                   <Swords size={14} color="#fff" />
                 </View>
-                <Card className="shadow-sm">
+                <Card className="shadow-card">
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
@@ -180,7 +179,7 @@ export default function InterviewRoom() {
                 <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
                   <Text className="text-white text-xs font-bold">我</Text>
                 </View>
-                <Card className="shadow-sm bg-primary">
+                <Card className="shadow-card" style={{ background: 'linear-gradient(135deg, #3A4A44, #4A6A5C)' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -196,7 +195,7 @@ export default function InterviewRoom() {
               <View className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-1">
                 <Swords size={14} color="#fff" />
               </View>
-              <Card className="shadow-sm">
+              <Card className="shadow-card">
                 <CardContent className="p-3">
                   <View className="flex flex-row items-center gap-1">
                     <View className="w-2 h-2 bg-primary rounded-full dot-typewriter" />
@@ -214,16 +213,10 @@ export default function InterviewRoom() {
       </ScrollView>
 
       {/* 底部输入区 */}
-      <View
-        style={{
-          display: 'flex', flexDirection: 'row', gap: '8px',
-          padding: '12px', backgroundColor: '#fff',
-          borderTop: '1px solid #e5e5e5', alignItems: 'center'
-        }}
-      >
-        <View style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '20px', padding: '8px 12px' }}>
+      <View className="flex flex-row items-center gap-2 px-3 py-3 bg-card border-t border-outline-variant border-opacity-15">
+        <View className="flex-1 bg-muted rounded-full px-4 py-2">
           <Input
-            style={{ width: '100%', fontSize: '14px' }}
+            className="w-full text-sm text-foreground"
             placeholder="输入你的回答..."
             value={input}
             onInput={(e) => setInput(e.detail.value)}
@@ -232,10 +225,10 @@ export default function InterviewRoom() {
             disabled={isLoading}
           />
         </View>
-        <View style={{ flexShrink: 0 }}>
+        <View className="flex-shrink-0">
           <Button
             size="sm"
-            className="btn-shimmer"
+            className="bg-primary rounded-full btn-shimmer btn-press"
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
           >
@@ -246,14 +239,9 @@ export default function InterviewRoom() {
 
       {/* 结束面试按钮 */}
       {roundCount > 0 && (
-        <View
-          style={{
-            padding: '8px 16px 16px', backgroundColor: '#fff',
-            display: 'flex', justifyContent: 'center'
-          }}
-        >
-          <Button variant="outline" className="w-full btn-hover-lift" onClick={endInterview}>
-            <Zap size={14} color="#6366F1" />
+        <View className="px-4 pb-4 pt-1 bg-card">
+          <Button variant="outline" className="w-full btn-hover-lift btn-press" onClick={endInterview}>
+            <Zap size={14} color="#5B9A6F" />
             <Text>结束面试 · 查看报告</Text>
           </Button>
         </View>
