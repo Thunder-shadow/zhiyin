@@ -51,7 +51,7 @@ export default function InterviewLobby() {
   return (
     <View className='min-h-full bg-background'>
       {/* 训练概览卡片 */}
-      <View className='px-4 pt-3 pb-2'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '8px' }}>
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <View className='h-2' style={{ background: 'linear-gradient(90deg, #E26A5C, #FF6B35, #D4A574)' }} />
           <CardContent className='p-4'>
@@ -71,7 +71,7 @@ export default function InterviewLobby() {
       </View>
 
       {/* 模式选择区域 */}
-      <View className='px-4 pt-4 pb-2'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '8px' }}>
         <Text className={`block text-base font-semibold text-foreground mb-3 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>选择训练模式</Text>
 
         {modes.map((mode, idx) => (

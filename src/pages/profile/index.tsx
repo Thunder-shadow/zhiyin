@@ -111,7 +111,7 @@ export default function Profile() {
       </View>
 
       {/* 成就展示 */}
-      <View className={`px-4 mb-6 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
+      <View className={`${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`} style={{ paddingLeft: '16px', paddingRight: '16px', marginBottom: '24px' }}>
         <View className='flex flex-row items-center justify-between mb-3'>
           <Text className='block text-base font-semibold text-foreground'>成就墙</Text>
           <View className='btn-press' onClick={() => Taro.navigateTo({ url: '/pages/profile/achievements' })}>

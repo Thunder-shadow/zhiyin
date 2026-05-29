@@ -52,7 +52,7 @@ export default function CompanyHall() {
   return (
     <View className='min-h-full bg-background'>
       {/* 搜索栏 */}
-      <View className='px-4 pt-3 pb-3'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}>
         <View className={`relative bg-muted rounded-xl ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <View className='absolute left-4 top-1/2 -translate-y-1/2'>
             <Search size={18} color='#6B7B74' />
@@ -70,7 +70,7 @@ export default function CompanyHall() {
 
       {/* 任务卡片列表 */}
       {filteredCards.length === 0 ? (
-        <View className='px-4'>
+        <View style={{ paddingLeft: '16px', paddingRight: '16px' }}>
           <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
             <CardContent className='p-8 flex flex-col items-center'>
               <View className='w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3' style={{ overflow: 'hidden' }}>
@@ -88,7 +88,7 @@ export default function CompanyHall() {
           </Card>
         </View>
       ) : (
-        <View className='px-4 flex flex-col gap-3 pb-20'>
+        <View className='flex flex-col gap-3' style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '80px' }}>
           {filteredCards.map((card, idx) => {
             const status = statusMap[card.status] || statusMap.pending
             return (

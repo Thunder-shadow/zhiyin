@@ -108,7 +108,7 @@ export default function Candidates() {
     <View className='min-h-full bg-background pb-safe'>
       {/* 顶部 */}
       <View
-        className='px-4 pb-4 pt-4 rounded-b-2xl relative overflow-hidden'
+        className='rounded-b-2xl relative overflow-hidden' style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px', paddingTop: '16px' }}
         style={{
           background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
         }}
@@ -126,7 +126,7 @@ export default function Candidates() {
         </View>
       </View>
 
-      <View className='px-4 pt-4'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px' }}>
         {/* 新建候选人按钮 - 仅管理模式显示 */}
         {!isSelectMode && (
           <Button className='w-full btn-shimmer btn-press mb-4' onClick={goToCreate}>

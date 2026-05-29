@@ -70,7 +70,7 @@ export default function Index() {
   return (
     <View className='min-h-full bg-background'>
       {/* 1. 用户概览区 - 渐变背景 */}
-      <View className='px-4 pt-3'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px' }}>
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           {/* 渐变顶部装饰条 */}
           <View className='h-2' style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F, #D4A574)' }} />
@@ -119,7 +119,7 @@ export default function Index() {
       </View>
 
       {/* 2. 求职漏斗看板 */}
-      <View className='px-4 mt-5'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '20px' }}>
         <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
           <CardContent className='p-4'>
             <Text className='block text-base font-semibold text-foreground mb-4'>求职漏斗</Text>
@@ -149,7 +149,7 @@ export default function Index() {
       </View>
 
       {/* 3. 快捷入口 2x2 */}
-      <View className='px-4 mt-5'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '20px' }}>
         <View className='grid grid-cols-2 gap-3'>
           {quickActions.map((action, idx) => (
             <Card
@@ -170,7 +170,7 @@ export default function Index() {
       </View>
 
       {/* 4. HR反向模拟入口 */}
-      <View className='px-4 mt-5 pb-4'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '20px', paddingBottom: '16px' }}>
         <Card
           className={`shadow-card card-hover ${loaded ? 'anim-fade-in-up anim-delay-5' : 'opacity-0'}`}
           onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/index' })}

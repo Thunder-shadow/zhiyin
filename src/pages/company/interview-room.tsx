@@ -453,18 +453,18 @@ export default function DungeonInterviewRoom() {
                 </Card>
               </View>
             ) : (
-              <View className='flex flex-row items-start gap-2 ml-auto' style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
+              <View className='flex flex-row items-start gap-2 justify-end'>
+                <Card className='shadow-card' style={{ backgroundColor: '#E26A5C', maxWidth: '75%' }}>
+                  <CardContent className='p-3'>
+                    <Text className='block text-sm text-white leading-relaxed'>{msg.content}</Text>
+                  </CardContent>
+                </Card>
                 <View
                   className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0'
                   style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
                 >
                   <User size={14} color='#fff' />
                 </View>
-                <Card className='shadow-card' style={{ backgroundColor: '#E26A5C' }}>
-                  <CardContent className='p-3'>
-                    <Text className='block text-sm text-white leading-relaxed'>{msg.content}</Text>
-                  </CardContent>
-                </Card>
               </View>
             )}
           </View>

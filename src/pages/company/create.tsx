@@ -83,7 +83,7 @@ export default function CreateJob() {
   return (
     <View className='min-h-full bg-background'>
       {/* 顶部 */}
-      <View className='px-4 pt-3'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px' }}>
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <View className='h-2' style={{ background: 'linear-gradient(90deg, #E26A5C, #FF6B35, #D4A574)' }} />
           <CardContent className='p-4'>
@@ -101,7 +101,7 @@ export default function CreateJob() {
       </View>
 
       {/* 表单区 */}
-      <ScrollView className='flex-1 px-4 pt-4 pb-6' scrollY>
+      <ScrollView className='flex-1' style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '24px' }} scrollY>
         {/* 创建按钮 */}
         <View className='mb-4'>
           <Button

@@ -33,7 +33,7 @@ export default function ResumeList() {
   return (
     <View className='min-h-full bg-background'>
       {/* 顶部 */}
-      <View className='px-4 pt-3'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px' }}>
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <View className='h-2' style={{ background: 'linear-gradient(90deg, #2D6A4F, #40916C, #52B788)' }} />
           <CardContent className='p-4'>
@@ -54,7 +54,7 @@ export default function ResumeList() {
       </View>
 
       {/* 新建按钮 */}
-      <View className='px-4 mt-4'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '16px' }}>
         <Button
           className='w-full btn-shimmer btn-press'
           onClick={() => Taro.navigateTo({ url: '/pages/resume/editor?mode=add' })}
@@ -64,7 +64,7 @@ export default function ResumeList() {
         </Button>
       </View>
 
-      <View className='px-4 mt-4'>
+      <View style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '16px' }}>
         {resumes.length === 0 ? (
           <Card className={`shadow-card ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
             <CardContent className='p-8 flex flex-col items-center'>

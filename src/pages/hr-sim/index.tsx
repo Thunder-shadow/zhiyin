@@ -227,7 +227,7 @@ export default function HrSim() {
       <View className='min-h-full bg-background pb-safe'>
         {/* 顶部 */}
         <View
-          className='px-4 pb-6 pt-4 rounded-b-2xl relative overflow-hidden'
+          className='rounded-b-2xl relative overflow-hidden' style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '24px', paddingTop: '16px' }}
           style={{
             background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
           }}
@@ -241,7 +241,7 @@ export default function HrSim() {
           </View>
         </View>
 
-        <View className='px-4 pt-6 pb-6'>
+        <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '24px', paddingBottom: '24px' }}>
           {/* 主入口卡片 */}
           <View className={`${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
             <Card className='shadow-card overflow-hidden' onClick={goToCandidates}>
@@ -315,7 +315,7 @@ export default function HrSim() {
     <View className='min-h-full bg-background flex flex-col'>
       {/* 顶部 */}
       <View
-        className='px-4 py-3 flex flex-row items-center gap-3'
+        className='flex flex-row items-center gap-3' style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}
         style={{
           background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
         }}
