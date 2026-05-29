@@ -76,7 +76,7 @@ export default function Profile() {
               {/* 头像带光环 */}
               <View className="relative flex-shrink-0">
                 <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #5B9A6F, #D4A574)', padding: '2px', margin: '-2px' }} />
-                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative">
+                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative" style={{ overflow: 'hidden' }}>
                   <Text className="text-lg font-bold text-primary-foreground">{userInfo.nick_name[0]}</Text>
                 </View>
               </View>

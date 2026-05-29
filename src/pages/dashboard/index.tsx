@@ -81,7 +81,7 @@ export default function Dashboard() {
             {/* 头像带 3D 光圈 */}
             <View className="relative">
               <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #FF6B35, #FFB347)', padding: '2px', margin: '-2px' }} />
-              <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative">
+              <View className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative" style={{ overflow: 'hidden' }}>
                 <Text className="text-white text-lg font-bold">{userInfo.nick_name[0]}</Text>
               </View>
             </View>

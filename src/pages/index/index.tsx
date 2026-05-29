@@ -79,7 +79,7 @@ export default function Index() {
               {/* 头像带光环 */}
               <View className="relative flex-shrink-0">
                 <View className="absolute inset-0 rounded-full" style={{ background: 'linear-gradient(135deg, #5B9A6F, #D4A574)', padding: '2px', margin: '-2px' }} />
-                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative">
+                <View className="w-12 h-12 rounded-full bg-primary flex items-center justify-center relative" style={{ overflow: 'hidden' }}>
                   <Text className="text-lg font-bold text-primary-foreground">{gameState.title[0]}</Text>
                 </View>
               </View>
@@ -155,7 +155,7 @@ export default function Index() {
             <Card
               key={action.label}
               className={`shadow-card card-hover ${action.bg} ${loaded ? `anim-fade-in-scale anim-delay-${idx + 2}` : 'opacity-0'}`}
-              onClick={() => Taro.switchTab({ url: action.path })}
+              onClick={() => Taro.navigateTo({ url: action.path })}
             >
               <CardContent className="p-4">
                 <View className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.iconBg} icon-entrance`}>

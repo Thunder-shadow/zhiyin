@@ -12,6 +12,8 @@ export default defineAppConfig({
     'pages/interview/room',
     'pages/interview/report',
     'pages/hr-sim/index',
+    'pages/hr-sim/candidates',
+    'pages/hr-sim/candidate-edit',
     'pages/hr-sim/report',
     'pages/hr-sim/history',
     'pages/hr-sim/report-detail',

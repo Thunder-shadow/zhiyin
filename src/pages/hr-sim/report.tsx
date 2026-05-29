@@ -14,6 +14,7 @@ export default function HrReport() {
 
   const candidateName = useRef('')
   const resumeIndex = useRef(0)
+  const candidateId = useRef('')
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 80)
@@ -23,6 +24,7 @@ export default function HrReport() {
     const params = currentPage.options || {}
     candidateName.current = decodeURIComponent(params.candidateName || '候选人')
     resumeIndex.current = parseInt(params.resumeIndex || '0')
+    candidateId.current = params.candidateId || ''
   }, [])
 
   useEffect(() => {
@@ -33,16 +35,30 @@ export default function HrReport() {
 
   const generateReport = async () => {
     const conversation = Taro.getStorageSync('hr_sim_conversation') || []
+    // Try to get cached candidate data
+    const cachedCandidate = Taro.getStorageSync('hr_selected_candidate')
+    const requestData: any = {
+      action: 'hr_sim_response',
+      end: true,
+      conversation: conversation.map((m: any) => ({ role: m.role, content: m.content })),
+    }
+    if (cachedCandidate) {
+      requestData.candidate = {
+        name: cachedCandidate.name,
+        school: cachedCandidate.school,
+        major: cachedCandidate.major,
+        background: cachedCandidate.background,
+        personality: cachedCandidate.personality,
+        real_level: cachedCandidate.real_level,
+      }
+    } else {
+      requestData.resume_index = resumeIndex.current
+    }
     try {
       const res = await Network.request({
         url: '/api/ai/chat',
         method: 'POST',
-        data: {
-          action: 'hr_sim_response',
-          resume_index: resumeIndex.current,
-          end: true,
-          conversation: conversation.map((m: any) => ({ role: m.role, content: m.content }))
-        }
+        data: requestData,
       })
       const data = res.data?.data || res.data
       const notes = data?.hr_notes || data?.message || '报告生成失败'

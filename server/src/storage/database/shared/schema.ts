@@ -109,6 +109,29 @@ export const interviews = pgTable(
   ]
 );
 
+// HR候选人表
+export const hrCandidates = pgTable(
+  "hr_candidates",
+  {
+    id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+    user_id: varchar("user_id", { length: 36 }).notNull().references(() => users.id),
+    name: varchar("name", { length: 100 }).notNull(),
+    school: varchar("school", { length: 200 }).notNull(),
+    major: varchar("major", { length: 100 }).notNull(),
+    background: text("background").default(''),
+    personality: text("personality").default(''),
+    real_level: varchar("real_level", { length: 10 }).default('B'),
+    summary: varchar("summary", { length: 500 }).default(''),
+    tag: varchar("tag", { length: 50 }).default(''),
+    color: varchar("color", { length: 20 }).default('#8B5CF6'),
+    created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updated_at: timestamp("updated_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("hr_candidates_user_id_idx").on(table.user_id),
+  ]
+);
+
 // HR反向模拟表
 export const hrSimulations = pgTable(
   "hr_simulations",
