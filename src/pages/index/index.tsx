@@ -60,12 +60,21 @@ export default function Index() {
     { label: 'Offer', count: gameState.wins, color: 'bg-funnel-offer', textColor: 'text-funnel-offer' },
   ]
 
+  // tabBar页面需要用switchTab，普通页面用navigateTo
   const quickActions = [
-    { label: '职业沙盘', path: '/pages/plan/sandbox', Icon: Sparkles, bg: 'bg-entry-sandbox-bg', iconBg: 'bg-entry-sandbox-icon-bg', iconColor: '#7C5CFC', desc: 'AI帮你规划' },
-    { label: '副本大厅', path: '/pages/company/hall', Icon: Building, bg: 'bg-entry-dungeon-bg', iconBg: 'bg-entry-dungeon-icon-bg', iconColor: '#3A4A44', desc: '浏览岗位' },
-    { label: '训练场', path: '/pages/interview/lobby', Icon: Swords, bg: 'bg-entry-training-bg', iconBg: 'bg-entry-training-icon-bg', iconColor: '#E8864A', desc: '模拟面试' },
-    { label: '简历库', path: '/pages/resume/list', Icon: FileText, bg: 'bg-entry-resume-bg', iconBg: 'bg-entry-resume-icon-bg', iconColor: '#A89060', desc: '管理简历' },
+    { label: '职业沙盘', path: '/pages/plan/sandbox', useSwitchTab: false, Icon: Sparkles, bg: 'bg-entry-sandbox-bg', iconBg: 'bg-entry-sandbox-icon-bg', iconColor: '#7C5CFC', desc: 'AI帮你规划' },
+    { label: '副本大厅', path: '/pages/company/hall', useSwitchTab: true, Icon: Building, bg: 'bg-entry-dungeon-bg', iconBg: 'bg-entry-dungeon-icon-bg', iconColor: '#3A4A44', desc: '浏览岗位' },
+    { label: '训练场', path: '/pages/interview/lobby', useSwitchTab: true, Icon: Swords, bg: 'bg-entry-training-bg', iconBg: 'bg-entry-training-icon-bg', iconColor: '#E8864A', desc: '模拟面试' },
+    { label: '简历库', path: '/pages/resume/list', useSwitchTab: false, Icon: FileText, bg: 'bg-entry-resume-bg', iconBg: 'bg-entry-resume-icon-bg', iconColor: '#A89060', desc: '管理简历' },
   ]
+
+  const handleNavigate = (action: typeof quickActions[0]) => {
+    if (action.useSwitchTab) {
+      Taro.switchTab({ url: action.path })
+    } else {
+      Taro.navigateTo({ url: action.path })
+    }
+  }
 
   return (
     <View className='min-h-full bg-background'>
@@ -155,7 +164,7 @@ export default function Index() {
             <Card
               key={action.label}
               className={`shadow-card card-hover ${action.bg} ${loaded ? `anim-fade-in-scale anim-delay-${idx + 2}` : 'opacity-0'}`}
-              onClick={() => Taro.navigateTo({ url: action.path })}
+              onClick={() => handleNavigate(action)}
             >
               <CardContent className='p-4'>
                 <View className={`w-11 h-11 rounded-xl flex items-center justify-center ${action.iconBg} icon-entrance`}>
