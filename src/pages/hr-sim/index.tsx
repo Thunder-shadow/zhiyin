@@ -48,12 +48,17 @@ export default function HrSim() {
 
   const scrollToBottom = () => {
     scrollRef.current = 'msg-bottom-hr-' + Date.now()
+    // Backup: use Taro.pageScrollTo in case scrollIntoView doesn't work
+    setTimeout(() => {
+      Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
+    }, 50)
   }
 
   /** 键盘弹起时自动滚动到底部 */
   useEffect(() => {
     if (keyboardOffset > 0) {
-      setTimeout(() => scrollToBottom(), 150)
+      // Longer delay to ensure keyboard is fully shown
+      setTimeout(() => scrollToBottom(), 300)
     }
   }, [keyboardOffset])
 
@@ -142,6 +147,8 @@ export default function HrSim() {
     const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
     const newMessages = [...currentConversation, aiMsg]
     setMessages([...newMessages])
+    // Scroll to bottom after adding user message
+    setTimeout(() => scrollToBottom(), 100)
 
     await fetchStream(
       '/api/ai/chat/stream',
@@ -372,7 +379,7 @@ export default function HrSim() {
       {/* 聊天区 - scrollable middle area */}
       <ScrollView
         className="flex-1 px-4"
-        style={{ paddingTop: '90px', paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 80}px` : '160px' }}
+        style={{ paddingTop: '90px', paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 100}px` : '160px' }}
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation

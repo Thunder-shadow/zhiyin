@@ -293,7 +293,7 @@ export default function CompanyDetail() {
               {strategy.resume_tips && (
                 <View className="mb-4">
                   <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center">
+                    <View className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
                       <Shield size={12} color="#3A4A44" />
                     </View>
                     <Text className="block text-sm font-medium text-foreground">简历修饰建议</Text>
@@ -305,7 +305,7 @@ export default function CompanyDetail() {
               {strategy.hidden_requirements && (
                 <View className="mb-4">
                   <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-warning-container flex items-center justify-center">
+                    <View className="w-6 h-6 rounded-full bg-warning-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
                       <Lightbulb size={12} color="#D4A017" />
                     </View>
                     <Text className="block text-sm font-medium text-foreground">隐性需求</Text>
@@ -317,7 +317,7 @@ export default function CompanyDetail() {
               {strategy.hr_questions_prediction?.length > 0 && (
                 <View className="mb-4">
                   <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-error-container flex items-center justify-center">
+                    <View className="w-6 h-6 rounded-full bg-error-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
                       <MessageCircle size={12} color="#E26A5C" />
                     </View>
                     <Text className="block text-sm font-medium text-foreground">HR可能的问题</Text>
@@ -325,7 +325,7 @@ export default function CompanyDetail() {
                   <View className="pl-8">
                     {strategy.hr_questions_prediction.map((q: string, i: number) => (
                       <View key={i} className="flex flex-row items-start gap-2 mb-2">
-                        <View className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-1">
+                        <View className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-1" style={{ overflow: 'hidden' }}>
                           <Text className="text-xs text-primary font-semibold">{i + 1}</Text>
                         </View>
                         <Text className="text-sm text-muted-foreground">{q}</Text>
@@ -338,7 +338,7 @@ export default function CompanyDetail() {
               {strategy.actions?.length > 0 && (
                 <View>
                   <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-success-container flex items-center justify-center">
+                    <View className="w-6 h-6 rounded-full bg-success-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
                       <Target size={12} color="#5B9A6F" />
                     </View>
                     <Text className="block text-sm font-medium text-foreground">行动建议</Text>

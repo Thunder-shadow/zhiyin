@@ -9,7 +9,8 @@ const isNotWeb = Taro.getEnv() !== Taro.ENV_TYPE.WEB
 
 if (isNotWeb && typeof Taro.onKeyboardHeightChange === 'function') {
     Taro.onKeyboardHeightChange(res => {
-        globalKeyboardHeight = res.height
+        console.log('[Keyboard] height changed:', res.height)
+        globalKeyboardHeight = Math.max(0, res.height)
         listeners.forEach(listener => listener(globalKeyboardHeight))
     })
 }

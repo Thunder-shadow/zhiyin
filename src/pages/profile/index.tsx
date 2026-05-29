@@ -126,6 +126,7 @@ export default function Profile() {
             >
               <View
                 className={`w-16 h-16 rounded-full flex items-center justify-center ${ach.unlocked ? `${ach.bg} badge-glow` : 'border-2 border-dashed border-outline-variant border-opacity-40 bg-muted'}`}
+                style={{ overflow: 'hidden' }}
               >
                 <ach.Icon size={28} color={ach.iconColor} />
               </View>

@@ -128,7 +128,7 @@ export default function Dashboard() {
             <View className="flex flex-row items-center justify-around">
               {funnelItems.map((item, idx) => (
                 <View key={item.label} className="flex flex-col items-center">
-                  <View className={`w-14 h-14 rounded-full ${item.bg} flex items-center justify-center mb-1 card-hover`}>
+                  <View className={`w-14 h-14 rounded-full ${item.bg} flex items-center justify-center mb-1 card-hover`} style={{ overflow: 'hidden' }}>
                     <Text className={`block ${item.textColor} font-bold text-xl font-mono`}>{item.count}</Text>
                   </View>
                   <Text className="block text-muted-foreground text-xs">{item.label}</Text>
@@ -175,7 +175,7 @@ export default function Dashboard() {
         </View>
         <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
           <CardContent className="p-6 flex flex-col items-center justify-center">
-            <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
+            <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3" style={{ overflow: 'hidden' }}>
               <Target size={28} color="#B8C2BB" />
             </View>
             <Text className="block text-muted-foreground text-sm font-medium mt-1">还没有行动记录</Text>

@@ -41,8 +41,10 @@ export default function InterviewRoom() {
   const statusBarHeight = getStatusBarHeight()
 
   const scrollToBottom = useCallback(() => {
+    scrollRef.current = Date.now().toString()
+    // Backup: use Taro.pageScrollTo
     setTimeout(() => {
-      scrollRef.current = Date.now().toString()
+      Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
     }, 50)
   }, [])
 
@@ -153,7 +155,7 @@ export default function InterviewRoom() {
           <View className="flex items-center justify-center pt-20">
             <Card className="shadow-card w-full">
               <CardContent className="p-6 text-center">
-                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#3A4A4415' }}>
+                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#3A4A4415', overflow: 'hidden' }}>
                   <Bot size={32} color="#3A4A44" />
                 </View>
                 <Text className="block text-lg font-bold text-foreground mb-2">{modeInfo.title}</Text>
@@ -172,7 +174,7 @@ export default function InterviewRoom() {
               <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
                 <View
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#3A4A44' }}
+                  style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
                 >
                   <Bot size={14} color="#fff" />
                 </View>
@@ -189,7 +191,7 @@ export default function InterviewRoom() {
               <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
                 <View
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#E26A5C' }}
+                  style={{ backgroundColor: '#E26A5C', overflow: 'hidden' }}
                 >
                   <User size={14} color="#fff" />
                 </View>
@@ -206,7 +208,7 @@ export default function InterviewRoom() {
         {showThinking && (
           <View className="mb-3" id="msg-thinking">
             <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
-              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44' }}>
+              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}>
                 <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">

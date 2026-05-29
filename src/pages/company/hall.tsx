@@ -94,7 +94,7 @@ export default function CompanyHall() {
         <View className="px-4">
           <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
             <CardContent className="p-8 flex flex-col items-center">
-              <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3">
+              <View className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3" style={{ overflow: 'hidden' }}>
                 <Building size={28} color="#B8C2BB" />
               </View>
               <Text className="block text-muted-foreground text-sm font-medium mt-1">这里还没有你的副本</Text>

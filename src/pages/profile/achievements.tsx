@@ -61,7 +61,7 @@ export default function Achievements() {
                   className={`flex flex-row items-center gap-3 ${loaded ? `anim-fade-in-up anim-delay-${idx + 1}` : 'opacity-0'}`}
                 >
                   <View
-                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${t.bg}`}
+                    className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${t.bg}`} style={{ overflow: 'hidden' }}
                   >
                     <Text className="text-xs font-bold" style={{ color: t.color }}>Lv.{t.level}</Text>
                   </View>
@@ -85,7 +85,7 @@ export default function Achievements() {
             >
               <CardContent className="p-3 flex flex-col items-center">
                 <View
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${badge.unlocked ? 'badge-glow' : ''}`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${badge.unlocked ? 'badge-glow' : ''}`} style={{ overflow: 'hidden' }}
                   style={{ backgroundColor: badge.unlocked ? badge.color : '#E5E7EB' }}
                 >
                   <badge.icon size={24} color={badge.unlocked ? '#fff' : '#9CA3AF'} />

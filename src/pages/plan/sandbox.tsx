@@ -31,8 +31,10 @@ export default function PlanSandbox() {
   const statusBarHeight = getStatusBarHeight()
 
   const scrollToBottom = useCallback(() => {
+    scrollRef.current = Date.now().toString()
+    // Backup: use Taro.pageScrollTo
     setTimeout(() => {
-      scrollRef.current = Date.now().toString()
+      Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
     }, 50)
   }, [])
 
@@ -93,7 +95,7 @@ export default function PlanSandbox() {
             <Text className="block text-white font-bold text-base">职业沙盘</Text>
             <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>AI帮你规划职业路径</Text>
           </View>
-          <View className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+          <View className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
             <Sparkles size={14} color="#fff" />
           </View>
         </View>
@@ -110,7 +112,7 @@ export default function PlanSandbox() {
           <View className="flex items-center justify-center pt-16">
             <Card className="shadow-card w-full">
               <CardContent className="p-6 text-center">
-                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#8B5CF615' }}>
+                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#8B5CF615', overflow: 'hidden' }}>
                   <Sparkles size={32} color="#8B5CF6" />
                 </View>
                 <Text className="block text-lg font-bold text-foreground mb-2">职业沙盘</Text>
@@ -127,7 +129,7 @@ export default function PlanSandbox() {
               <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
                 <View
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#3A4A44' }}
+                  style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
                 >
                   <Bot size={14} color="#fff" />
                 </View>
@@ -144,7 +146,7 @@ export default function PlanSandbox() {
               <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
                 <View
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: '#6B7B74' }}
+                  style={{ backgroundColor: '#6B7B74', overflow: 'hidden' }}
                 >
                   <Text className="text-white text-xs font-bold">我</Text>
                 </View>
@@ -161,7 +163,7 @@ export default function PlanSandbox() {
         {showThinking && (
           <View className="mb-3" id="msg-thinking">
             <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
-              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44' }}>
+              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}>
                 <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">
