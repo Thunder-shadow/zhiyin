@@ -365,8 +365,8 @@ export default function DungeonInterviewRoom() {
     <View className='flex flex-col' style={{ height: '100vh' }}>
       {/* 顶部 */}
       <View
-        className='flex-shrink-0 px-4 pb-3'
-        style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #E26A5C 0%, #FF6B35 50%, #D4A574 100%)' }}
+        className='flex-shrink-0'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '12px', paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #E26A5C 0%, #FF6B35 50%, #D4A574 100%)' }}
       >
         <View className='flex flex-row items-center gap-3'>
           <View className='flex-1 min-w-0'>
@@ -399,7 +399,8 @@ export default function DungeonInterviewRoom() {
 
       {/* 聊天区 */}
       <ScrollView
-        className='flex-1 px-4 pt-4'
+        className='flex-1'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px' }}
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
@@ -453,7 +454,7 @@ export default function DungeonInterviewRoom() {
                 </Card>
               </View>
             ) : (
-              <View className='flex flex-row items-start gap-2 justify-end'>
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
                 <Card className='shadow-card' style={{ backgroundColor: '#E26A5C', maxWidth: '75%' }}>
                   <CardContent className='p-3'>
                     <Text className='block text-sm text-white leading-relaxed'>{msg.content}</Text>
