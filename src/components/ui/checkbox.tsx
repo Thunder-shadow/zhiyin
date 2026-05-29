@@ -49,7 +49,7 @@ const Checkbox = React.forwardRef<
       onClick={handleClick}
       {...props}
     >
-      {checked && <Check color="#fff" size={12} strokeWidth={3} className="text-current" />}
+      {checked && <Check color='#fff' size={12} strokeWidth={3} className='text-current' />}
     </View>
   )
 })

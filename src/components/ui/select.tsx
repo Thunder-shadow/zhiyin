@@ -147,7 +147,7 @@ const SelectTrigger = React.forwardRef<
       }}
     >
       {children}
-      <ChevronDown className="text-muted-foreground" size={16} color="inherit" />
+      <ChevronDown className='text-muted-foreground' size={16} color='inherit' />
     </View>
   )
 })
@@ -155,14 +155,14 @@ SelectTrigger.displayName = "SelectTrigger"
 
 const SelectScrollUpButton = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) => (
     <View className={cn("flex cursor-default items-center justify-center py-1", className)} {...props}>
-        <ChevronUp size={16} color="inherit" />
+        <ChevronUp size={16} color='inherit' />
     </View>
 )
 SelectScrollUpButton.displayName = "SelectScrollUpButton"
 
 const SelectScrollDownButton = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) => (
     <View className={cn("flex cursor-default items-center justify-center py-1", className)} {...props}>
-        <ChevronDown size={16} color="inherit" />
+        <ChevronDown size={16} color='inherit' />
     </View>
 )
 SelectScrollDownButton.displayName = "SelectScrollDownButton"
@@ -321,7 +321,7 @@ const SelectContent = React.forwardRef<
     return (
       <Portal>
         <View
-          className="fixed inset-0 z-50 bg-transparent"
+          className='fixed inset-0 z-50 bg-transparent'
           onClick={() => context.onOpenChange?.(false)}
         />
         <View
@@ -338,11 +338,11 @@ const SelectContent = React.forwardRef<
           }}
           {...props}
         >
-          <SelectScrollUpButton className="hidden" />
-          <ScrollView scrollY className="max-h-[50vh]">
+          <SelectScrollUpButton className='hidden' />
+          <ScrollView scrollY className='max-h-[50vh]'>
             {children}
           </ScrollView>
-          <SelectScrollDownButton className="hidden" />
+          <SelectScrollDownButton className='hidden' />
         </View>
       </Portal>
     )
@@ -399,12 +399,12 @@ const SelectItem = React.forwardRef<
       }}
       {...props}
     >
-      <View className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
+      <View className='flex flex-1 shrink-0 gap-2 whitespace-nowrap'>
         {children}
       </View>
       {isSelected ? (
-        <View className="pointer-events-none absolute right-2 flex h-4 w-4 items-center justify-center">
-          <Check size={16} color="inherit" />
+        <View className='pointer-events-none absolute right-2 flex h-4 w-4 items-center justify-center'>
+          <Check size={16} color='inherit' />
         </View>
       ) : null}
     </View>

@@ -48,7 +48,7 @@ const InputOTP = React.forwardRef<
         )}
       >
         <Input
-          className="z-10 taro-otp-hidden-input"
+          className='z-10 taro-otp-hidden-input'
           style={{
             position: "absolute",
             left: 0,
@@ -70,7 +70,7 @@ const InputOTP = React.forwardRef<
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           maxlength={maxLength}
-          type="number"
+          type='number'
           disabled={disabled}
           focus={autoFocus}
           ref={ref}
@@ -115,8 +115,8 @@ const InputOTPSlot = React.forwardRef<
     >
       <View>{char}</View>
       {hasFakeCaret && (
-        <View className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <View className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+        <View className='pointer-events-none absolute inset-0 flex items-center justify-center'>
+          <View className='h-4 w-px animate-caret-blink bg-foreground duration-1000' />
         </View>
       )}
     </View>
@@ -129,7 +129,7 @@ const InputOTPSeparator = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof View>
 >(({ ...props }, ref) => (
   <View ref={ref} {...props}>
-    <Dot size={24} color="inherit" />
+    <Dot size={24} color='inherit' />
   </View>
 ))
 InputOTPSeparator.displayName = "InputOTPSeparator"

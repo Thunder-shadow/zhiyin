@@ -455,12 +455,12 @@ const ToastItem = ({
 
   return (
     <View className={baseClasses} style={finalStyle} id={elementId}>
-      <View className="flex gap-3 items-center flex-1" style={{ opacity: isCollapsedStack ? 0 : 1, transition: "opacity 400ms ease" }}>
+      <View className='flex gap-3 items-center flex-1' style={{ opacity: isCollapsedStack ? 0 : 1, transition: "opacity 400ms ease" }}>
         {TypeIcon && (
           <TypeIcon className={cn("shrink-0", item.type === "loading" && "animate-spin")} color={iconColor} size={20} />
         )}
-        <View className="flex flex-col gap-1 flex-1">
-          {item.title && <Text className="text-sm font-semibold leading-none" style={palette ? { color: palette.color } : undefined}>{item.title}</Text>}
+        <View className='flex flex-col gap-1 flex-1'>
+          {item.title && <Text className='text-sm font-semibold leading-none' style={palette ? { color: palette.color } : undefined}>{item.title}</Text>}
           {item.description && (
             <Text className={cn("text-xs opacity-90 leading-normal", item.descriptionClassName)} style={palette ? { color: palette.color } : undefined}>
               {item.description}
@@ -470,10 +470,10 @@ const ToastItem = ({
       </View>
 
       {(item.action || item.cancel) && (
-        <View className="flex flex-nowrap items-center gap-2 shrink-0" style={{ opacity: isCollapsedStack ? 0 : 1, transition: "opacity 400ms ease" }}>
+        <View className='flex flex-nowrap items-center gap-2 shrink-0' style={{ opacity: isCollapsedStack ? 0 : 1, transition: "opacity 400ms ease" }}>
           {item.cancel && (
             <View
-              className="text-xs font-medium opacity-70 active:opacity-100 whitespace-nowrap"
+              className='text-xs font-medium opacity-70 active:opacity-100 whitespace-nowrap'
               onClick={(e) => {
                 e.stopPropagation()
                 item.cancel?.onClick()
@@ -485,7 +485,7 @@ const ToastItem = ({
           )}
           {item.action && (
             <View
-              className="text-xs font-medium active:opacity-80 px-3 py-2 rounded-md bg-primary text-primary-foreground shadow hover:bg-primary hover:bg-opacity-90 whitespace-nowrap"
+              className='text-xs font-medium active:opacity-80 px-3 py-2 rounded-md bg-primary text-primary-foreground shadow hover:bg-primary hover:bg-opacity-90 whitespace-nowrap'
               onClick={(e) => {
                 e.stopPropagation()
                 item.action?.onClick()
@@ -500,7 +500,7 @@ const ToastItem = ({
 
       {closeButton && (
         <View
-          className="absolute right-2 top-2 rounded-md p-1 opacity-50 transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2"
+          className='absolute right-2 top-2 rounded-md p-1 opacity-50 transition-opacity hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2'
           style={{ opacity: isCollapsedStack ? 0 : undefined, transition: "opacity 400ms ease" }}
           onClick={(e) => {
             e.stopPropagation()

@@ -23,7 +23,7 @@ function InputGroup({ className, disabled, ...props }: React.ComponentPropsWitho
   return (
     <InputGroupContext.Provider value={{ isFocused, setIsFocused, disabled }}>
       <View
-        data-slot="input-group"
+        data-slot='input-group'
         className={cn(
           "border-input dark:bg-input dark:bg-opacity-30 shadow-xs relative flex w-full min-h-9 flex-wrap items-center rounded-md border outline-none transition-[color,box-shadow]",
           isFocused && "ring-2 ring-ring ring-offset-2 ring-offset-background",
@@ -64,7 +64,7 @@ function InputGroupAddon({
   const { disabled } = React.useContext(InputGroupContext)
   return (
     <View
-      data-slot="input-group-addon"
+      data-slot='input-group-addon'
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), disabled && "opacity-50", className)}
       {...props}
@@ -130,14 +130,14 @@ function InputGroupInput({
   const { setIsFocused } = React.useContext(InputGroupContext)
 
   return (
-    <View className="flex h-full flex-1 items-center px-2 py-2">
+    <View className='flex h-full flex-1 items-center px-2 py-2'>
       <Input
-        data-slot="input-group-control"
+        data-slot='input-group-control'
         className={cn(
           "flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           className
         )}
-        placeholderClass="text-muted-foreground"
+        placeholderClass='text-muted-foreground'
         onFocus={(e) => {
           setIsFocused(true)
           onFocus?.(e)
@@ -164,14 +164,14 @@ function InputGroupTextarea({
   const { setIsFocused } = React.useContext(InputGroupContext)
 
   return (
-    <View className="flex h-full flex-1 min-w-20 m-2">
+    <View className='flex h-full flex-1 min-w-20 m-2'>
       <Textarea
-        data-slot="input-group-control"
+        data-slot='input-group-control'
         className={cn(
           "flex-1 w-full h-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           className
         )}
-        placeholderClass="text-muted-foreground"
+        placeholderClass='text-muted-foreground'
         onFocus={(e) => {
           setIsFocused(true)
           onFocus?.(e)

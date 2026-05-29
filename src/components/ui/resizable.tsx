@@ -333,8 +333,8 @@ const ResizableHandle = ({
       style={__direction === "vertical" ? { height: "1PX" } : { width: "1PX" }}
     />
     {withHandle && (
-      <View className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
-        <GripVertical className="h-3 w-3" size={12} color="inherit" />
+      <View className='z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border'>
+        <GripVertical className='h-3 w-3' size={12} color='inherit' />
       </View>
     )}
   </View>

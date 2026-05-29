@@ -9,7 +9,7 @@ const Breadcrumb = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof View> & {
     separator?: React.ReactNode
   }
->(({ ...props }, ref) => <View ref={ref} aria-label="breadcrumb" {...props} />)
+>(({ ...props }, ref) => <View ref={ref} aria-label='breadcrumb' {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
 
 const BreadcrumbList = React.forwardRef<
@@ -65,9 +65,9 @@ const BreadcrumbPage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    role="link"
-    aria-disabled="true"
-    aria-current="page"
+    role='link'
+    aria-disabled='true'
+    aria-current='page'
     className={cn("font-normal text-foreground", className)}
     {...props}
   />
@@ -80,12 +80,12 @@ const BreadcrumbSeparator = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof View>) => (
   <View
-    role="presentation"
-    aria-hidden="true"
+    role='presentation'
+    aria-hidden='true'
     className={cn("[&>svg]:w-4 [&>svg]:h-4 flex items-center", className)}
     {...props}
   >
-    {children ?? <ChevronRight size={16} color="inherit" />}
+    {children ?? <ChevronRight size={16} color='inherit' />}
   </View>
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
@@ -95,13 +95,13 @@ const BreadcrumbEllipsis = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof View>) => (
   <View
-    role="presentation"
-    aria-hidden="true"
+    role='presentation'
+    aria-hidden='true'
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
   >
-    <Ellipsis color="#737373" size={16} />
-    <View className="sr-only">More</View>
+    <Ellipsis color='#737373' size={16} />
+    <View className='sr-only'>More</View>
   </View>
 )
 BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"

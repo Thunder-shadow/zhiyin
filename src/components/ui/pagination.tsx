@@ -7,8 +7,8 @@ import { ButtonProps, buttonVariants } from "@/components/ui/button"
 
 const Pagination = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) => (
   <View
-    role="navigation"
-    aria-label="pagination"
+    role='navigation'
+    aria-label='pagination'
     className={cn("mx-auto flex w-full justify-center", className)}
     {...props}
   />
@@ -65,12 +65,12 @@ const PaginationPrevious = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to previous page"
-    size="default"
+    aria-label='Go to previous page'
+    size='default'
     className={cn("gap-1 pl-3", className)}
     {...props}
   >
-    <ChevronLeft size={16} color="inherit" />
+    <ChevronLeft size={16} color='inherit' />
     <Text>上一页</Text>
   </PaginationLink>
 )
@@ -81,13 +81,13 @@ const PaginationNext = ({
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
-    aria-label="Go to next page"
-    size="default"
+    aria-label='Go to next page'
+    size='default'
     className={cn("gap-1 pr-3", className)}
     {...props}
   >
     <Text>下一页</Text>
-    <ChevronRight size={16} color="inherit" />
+    <ChevronRight size={16} color='inherit' />
   </PaginationLink>
 )
 PaginationNext.displayName = "PaginationNext"
@@ -101,8 +101,8 @@ const PaginationEllipsis = ({
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
   >
-    <Ellipsis size={16} color="inherit" />
-    <View className="sr-only">More pages</View>
+    <Ellipsis size={16} color='inherit' />
+    <View className='sr-only'>More pages</View>
   </View>
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"

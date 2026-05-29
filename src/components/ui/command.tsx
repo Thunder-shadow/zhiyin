@@ -148,8 +148,8 @@ const CommandDialog = ({ children, ...props }) => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange} {...rest}>
       <DialogContent 
-        className="overflow-hidden p-0 shadow-lg"
-        closeClassName="top-3"
+        className='overflow-hidden p-0 shadow-lg'
+        closeClassName='top-3'
       >
         <Command>{enhancedChildren}</Command>
       </DialogContent>
@@ -207,10 +207,10 @@ const CommandInput = React.forwardRef<
 
   return (
     <View
-      className="flex h-11 items-center border-b px-3"
-      data-slot="command-input-wrapper"
+      className='flex h-11 items-center border-b px-3'
+      data-slot='command-input-wrapper'
     >
-      <Search className="mr-2 shrink-0 opacity-50" size={16} color="inherit" />
+      <Search className='mr-2 shrink-0 opacity-50' size={16} color='inherit' />
       <Input
         ref={ref}
         className={cn(
@@ -279,15 +279,15 @@ const CommandGroup = React.forwardRef<
     <GroupContext.Provider value={{ groupId }}>
       <View
         ref={ref}
-        data-slot="command-group"
+        data-slot='command-group'
         className={cn("overflow-hidden p-1 text-foreground", className)}
         style={!show ? ({ display: "none" } as any) : undefined}
         {...props}
       >
         {heading && (
           <View
-            data-slot="command-group-heading"
-            className="px-2 py-2 text-xs font-medium text-muted-foreground"
+            data-slot='command-group-heading'
+            className='px-2 py-2 text-xs font-medium text-muted-foreground'
           >
             {heading}
           </View>
@@ -340,7 +340,7 @@ const CommandItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="command-item"
+      data-slot='command-item'
       className={cn(
         "relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-2 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
         disabled && "opacity-50 pointer-events-none",

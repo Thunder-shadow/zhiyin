@@ -31,6 +31,7 @@ export default function HrReport() {
     if (generatedRef.current) return
     generatedRef.current = true
     generateReport()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const generateReport = async () => {
@@ -111,62 +112,62 @@ export default function HrReport() {
   }
 
   return (
-    <View className="min-h-full bg-background">
+    <View className='min-h-full bg-background'>
       {/* 顶部 */}
       <View
-        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
         style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
       >
-        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className="flex flex-row items-center gap-3 relative">
-          <View onClick={handleBack} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#fff" />
+        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
+        <View className='flex flex-row items-center gap-3 relative'>
+          <View onClick={handleBack} className='p-1 btn-press'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <View className="flex-1">
-            <Text className="block text-white font-bold text-base">
+          <View className='flex-1'>
+            <Text className='block text-white font-bold text-base'>
               {step === 'loading' ? '生成招聘笔记' : '招聘笔记'}
             </Text>
-            <Text className="block text-gray-300 text-xs">候选人: {candidateName.current}</Text>
+            <Text className='block text-gray-300 text-xs'>候选人: {candidateName.current}</Text>
           </View>
         </View>
       </View>
 
-      <View className="px-4 pt-5">
+      <View className='px-4 pt-5'>
         {step === 'loading' ? (
           <View className={`${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-            <Card className="shadow-card">
-              <CardContent className="p-6 flex flex-col items-center">
+            <Card className='shadow-card'>
+              <CardContent className='p-6 flex flex-col items-center'>
                 {/* 加载动画 */}
                 <View
-                  className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
+                  className='w-20 h-20 rounded-full flex items-center justify-center mb-5'
                   style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
                 >
-                  <Loader size={36} color="#7C3AED" className="animate-spin" />
+                  <Loader size={36} color='#7C3AED' className='animate-spin' />
                 </View>
-                <Text className="block text-base font-semibold text-foreground mb-2">
+                <Text className='block text-base font-semibold text-foreground mb-2'>
                   正在生成招聘笔记...
                 </Text>
-                <Text className="block text-sm text-muted-foreground text-center leading-relaxed">
+                <Text className='block text-sm text-muted-foreground text-center leading-relaxed'>
                   AI正在分析面试对话，评估候选人表现
                 </Text>
 
                 {/* 进度提示 */}
-                <View className="w-full mt-6">
-                  <View className="flex flex-row items-center gap-2 mb-3">
-                    <View className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
-                    <Text className="text-xs text-muted-foreground">分析对话内容</Text>
+                <View className='w-full mt-6'>
+                  <View className='flex flex-row items-center gap-2 mb-3'>
+                    <View className='w-2 h-2 rounded-full bg-violet-500 animate-pulse' />
+                    <Text className='text-xs text-muted-foreground'>分析对话内容</Text>
                   </View>
-                  <View className="flex flex-row items-center gap-2 mb-3">
-                    <View className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
-                    <Text className="text-xs text-muted-foreground">评估候选人表现</Text>
+                  <View className='flex flex-row items-center gap-2 mb-3'>
+                    <View className='w-2 h-2 rounded-full bg-violet-400 animate-pulse' style={{ animationDelay: '0.3s' }} />
+                    <Text className='text-xs text-muted-foreground'>评估候选人表现</Text>
                   </View>
-                  <View className="flex flex-row items-center gap-2">
-                    <View className="w-2 h-2 rounded-full bg-violet-300 animate-pulse" style={{ animationDelay: '0.6s' }} />
-                    <Text className="text-xs text-muted-foreground">生成评估报告</Text>
+                  <View className='flex flex-row items-center gap-2'>
+                    <View className='w-2 h-2 rounded-full bg-violet-300 animate-pulse' style={{ animationDelay: '0.6s' }} />
+                    <Text className='text-xs text-muted-foreground'>生成评估报告</Text>
                   </View>
                 </View>
 
-                <Text className="block text-xs text-muted-foreground mt-6" style={{ opacity: 0.6 }}>
+                <Text className='block text-xs text-muted-foreground mt-6' style={{ opacity: 0.6 }}>
                   你可以随时退出，报告会自动保存到「招聘笔记」
                 </Text>
               </CardContent>
@@ -174,25 +175,25 @@ export default function HrReport() {
           </View>
         ) : (
           <View className={`${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-            <Card className="shadow-card mb-4">
-              <CardContent className="p-4">
-                <View className="flex flex-row items-center gap-2 mb-3">
-                  <View className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #D1FAE5, #ECFDF5)' }}>
-                    <FileCheck size={18} color="#10B981" />
+            <Card className='shadow-card mb-4'>
+              <CardContent className='p-4'>
+                <View className='flex flex-row items-center gap-2 mb-3'>
+                  <View className='w-9 h-9 rounded-lg flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #D1FAE5, #ECFDF5)' }}>
+                    <FileCheck size={18} color='#10B981' />
                   </View>
                   <View>
-                    <Text className="block font-semibold text-foreground">评估报告</Text>
-                    <Text className="block text-xs text-muted-foreground">{candidateName.current}</Text>
+                    <Text className='block font-semibold text-foreground'>评估报告</Text>
+                    <Text className='block text-xs text-muted-foreground'>{candidateName.current}</Text>
                   </View>
                 </View>
-                <View className="h-px bg-outline-variant bg-opacity-15 my-3" />
-                <Text className="block text-sm text-foreground leading-relaxed whitespace-pre-wrap">{hrNotes}</Text>
+                <View className='h-px bg-outline-variant bg-opacity-15 my-3' />
+                <Text className='block text-sm text-foreground leading-relaxed whitespace-pre-wrap'>{hrNotes}</Text>
               </CardContent>
             </Card>
 
-            <View className="flex flex-col gap-3 pb-8">
+            <View className='flex flex-col gap-3 pb-8'>
               <Button
-                className="w-full btn-shimmer btn-press"
+                className='w-full btn-shimmer btn-press'
                 onClick={() => {
                   Taro.removeStorageSync('hr_sim_conversation')
                   // 返回到选择页（delta 2: report -> interview -> select）
@@ -201,20 +202,20 @@ export default function HrReport() {
                   Taro.navigateBack({ delta: backDelta })
                 }}
               >
-                <BookOpen size={16} color="#fff" />
-                <Text className="ml-1">完成</Text>
+                <BookOpen size={16} color='#fff' />
+                <Text className='ml-1'>完成</Text>
               </Button>
 
               <Button
-                variant="outline"
-                className="w-full btn-press"
+                variant='outline'
+                className='w-full btn-press'
                 onClick={() => {
                   Taro.removeStorageSync('hr_sim_conversation')
                   Taro.navigateTo({ url: '/pages/hr-sim/history' })
                 }}
               >
-                <ExternalLink size={14} color="#7C3AED" />
-                <Text className="ml-1">查看历史笔记</Text>
+                <ExternalLink size={14} color='#7C3AED' />
+                <Text className='ml-1'>查看历史笔记</Text>
               </Button>
             </View>
           </View>

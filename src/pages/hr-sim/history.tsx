@@ -77,37 +77,37 @@ export default function HrHistory() {
   }
 
   return (
-    <View className="min-h-full bg-background">
+    <View className='min-h-full bg-background'>
       {/* 顶部 */}
       <View
-        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
         style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
       >
-        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className="flex flex-row items-center gap-3 relative">
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#fff" />
+        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
+        <View className='flex flex-row items-center gap-3 relative'>
+          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <View className="flex-1">
-            <Text className="block text-white font-bold text-base">招聘笔记</Text>
-            <Text className="block text-gray-300 text-xs">
+          <View className='flex-1'>
+            <Text className='block text-white font-bold text-base'>招聘笔记</Text>
+            <Text className='block text-gray-300 text-xs'>
               {reports.length > 0 ? `共 ${reports.length} 份笔记` : '历史面试评估报告'}
             </Text>
           </View>
         </View>
       </View>
 
-      <View className="px-4 pt-4 pb-6">
+      <View className='px-4 pt-4 pb-6'>
         {loading ? (
           <View className={`${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
             {[1, 2, 3].map(i => (
-              <Card key={i} className="shadow-card mb-3">
-                <CardContent className="p-4">
-                  <View className="flex flex-row items-center gap-3">
-                    <View className="w-10 h-10 rounded-xl bg-muted" />
-                    <View className="flex-1">
-                      <View className="w-24 h-4 rounded bg-muted mb-2" />
-                      <View className="w-40 h-3 rounded bg-muted" style={{ opacity: 0.5 }} />
+              <Card key={i} className='shadow-card mb-3'>
+                <CardContent className='p-4'>
+                  <View className='flex flex-row items-center gap-3'>
+                    <View className='w-10 h-10 rounded-xl bg-muted' />
+                    <View className='flex-1'>
+                      <View className='w-24 h-4 rounded bg-muted mb-2' />
+                      <View className='w-40 h-3 rounded bg-muted' style={{ opacity: 0.5 }} />
                     </View>
                   </View>
                 </CardContent>
@@ -116,21 +116,21 @@ export default function HrHistory() {
           </View>
         ) : reports.length === 0 ? (
           <View className={`${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-            <Card className="shadow-card">
-              <CardContent className="p-8 flex flex-col items-center">
+            <Card className='shadow-card'>
+              <CardContent className='p-8 flex flex-col items-center'>
                 <View
-                  className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+                  className='w-20 h-20 rounded-full flex items-center justify-center mb-4'
                   style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
                 >
-                  <FileCheck size={36} color="#C4B5FD" />
+                  <FileCheck size={36} color='#C4B5FD' />
                 </View>
-                <Text className="block text-base font-semibold text-foreground mb-2">暂无笔记</Text>
-                <Text className="block text-sm text-muted-foreground text-center leading-relaxed mb-5">
+                <Text className='block text-base font-semibold text-foreground mb-2'>暂无笔记</Text>
+                <Text className='block text-sm text-muted-foreground text-center leading-relaxed mb-5'>
                   完成HR模拟面试后{'\n'}招聘笔记会自动保存到这里
                 </Text>
                 <Button
-                  variant="outline"
-                  className="btn-press"
+                  variant='outline'
+                  className='btn-press'
                   onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/index' })}
                 >
                   <Text>去体验HR模拟</Text>
@@ -146,28 +146,28 @@ export default function HrHistory() {
                 className={`shadow-card card-hover mb-3 ${loaded ? `anim-fade-in-up anim-delay-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}
                 onClick={() => viewReport(report)}
               >
-                <CardContent className="p-4">
-                  <View className="flex flex-row items-start gap-3">
+                <CardContent className='p-4'>
+                  <View className='flex flex-row items-start gap-3'>
                     {/* 候选人头像 */}
                     <View
-                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                      className='w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0'
                       style={{ backgroundColor: `${RESUME_COLORS[report.resume_index % 3]}15` }}
                     >
                       <User size={22} color={RESUME_COLORS[report.resume_index % 3]} />
                     </View>
                     {/* 内容 */}
-                    <View className="flex-1 min-w-0">
-                      <View className="flex flex-row items-center justify-between mb-1">
-                        <Text className="block font-semibold text-foreground">{report.candidate_name}</Text>
+                    <View className='flex-1 min-w-0'>
+                      <View className='flex flex-row items-center justify-between mb-1'>
+                        <Text className='block font-semibold text-foreground'>{report.candidate_name}</Text>
                         <View
-                          className="p-2 rounded-full btn-press"
+                          className='p-2 rounded-full btn-press'
                           onClick={(e) => deleteReport(report.id, e)}
                         >
-                          <Trash2 size={14} color="#9CA3AF" />
+                          <Trash2 size={14} color='#9CA3AF' />
                         </View>
                       </View>
                       <Text
-                        className="block text-sm text-muted-foreground leading-relaxed"
+                        className='block text-sm text-muted-foreground leading-relaxed'
                         style={{
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -177,13 +177,13 @@ export default function HrHistory() {
                       >
                         {report.report_content}
                       </Text>
-                      <View className="flex flex-row items-center gap-1 mt-2">
-                        <Clock size={11} color="#9CA3AF" />
-                        <Text className="text-xs text-muted-foreground">{formatDate(report.created_at)}</Text>
+                      <View className='flex flex-row items-center gap-1 mt-2'>
+                        <Clock size={11} color='#9CA3AF' />
+                        <Text className='text-xs text-muted-foreground'>{formatDate(report.created_at)}</Text>
                       </View>
                     </View>
                     {/* 箭头 */}
-                    <ChevronRight size={16} color="#6B7B7480" className="flex-shrink-0 mt-1" />
+                    <ChevronRight size={16} color='#6B7B7480' className='flex-shrink-0 mt-1' />
                   </View>
                 </CardContent>
               </Card>

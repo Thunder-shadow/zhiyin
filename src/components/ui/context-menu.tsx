@@ -177,7 +177,7 @@ const ContextMenuContent = React.forwardRef<
   return (
     <Portal>
       <View
-        className="fixed inset-0 z-50 bg-transparent"
+        className='fixed inset-0 z-50 bg-transparent'
         onClick={() => context.onOpenChange?.(false)}
         // @ts-ignore
         onContextMenu={(e) => {
@@ -188,8 +188,8 @@ const ContextMenuContent = React.forwardRef<
       <View
         ref={ref}
         id={contentId.current}
-        data-slot="context-menu-content"
-        data-state="open"
+        data-slot='context-menu-content'
+        data-state='open'
         className={cn(
           "fixed z-50 min-w-32 overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground ring-opacity-10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
           className
@@ -198,7 +198,7 @@ const ContextMenuContent = React.forwardRef<
         onClick={(e) => e.stopPropagation()}
         {...props}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>
@@ -219,7 +219,7 @@ const ContextMenuItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="context-menu-item"
+      data-slot='context-menu-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       className={cn(
@@ -288,7 +288,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="context-menu-checkbox-item"
+      data-slot='context-menu-checkbox-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -306,8 +306,8 @@ const ContextMenuCheckboxItem = React.forwardRef<
       }}
       {...props}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Check size={16} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Check size={16} color='inherit' />}
       </View>
       {children}
     </View>
@@ -331,7 +331,7 @@ const ContextMenuRadioItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="context-menu-radio-item"
+      data-slot='context-menu-radio-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -350,8 +350,8 @@ const ContextMenuRadioItem = React.forwardRef<
       }}
       {...props}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Circle className="fill-current" size={8} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Circle className='fill-current' size={8} color='inherit' />}
       </View>
       {children}
     </View>
@@ -476,7 +476,7 @@ const ContextMenuSubTrigger = React.forwardRef<
       {...props}
       ref={ref}
       id={subContext?.triggerId}
-      data-slot="context-menu-sub-trigger"
+      data-slot='context-menu-sub-trigger'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={subContext?.open ? "open" : "closed"}
@@ -494,7 +494,7 @@ const ContextMenuSubTrigger = React.forwardRef<
       }}
     >
       {children}
-      <ChevronRight className="ml-auto opacity-50" size={16} color="inherit" />
+      <ChevronRight className='ml-auto opacity-50' size={16} color='inherit' />
     </View>
   )
 })
@@ -580,14 +580,14 @@ const ContextMenuSubContent = React.forwardRef<
         {...props}
         ref={ref}
         id={contentId.current}
-        data-slot="context-menu-sub-content"
-        data-state="open"
+        data-slot='context-menu-sub-content'
+        data-state='open'
         data-side={side}
         className={cn(baseClassName, className)}
         style={contentStyle}
         onClick={(e) => e.stopPropagation()}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>

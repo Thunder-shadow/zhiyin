@@ -50,7 +50,7 @@ const DropdownMenuTrigger = React.forwardRef<
       {...props}
       ref={ref}
       id={context?.triggerId}
-      data-slot="dropdown-menu-trigger"
+      data-slot='dropdown-menu-trigger'
       className={className}
       onClick={(e) => {
         e.stopPropagation()
@@ -68,7 +68,7 @@ const DropdownMenuGroup = React.forwardRef<
   React.ElementRef<typeof View>,
   React.ComponentPropsWithoutRef<typeof View>
 >(({ className, ...props }, ref) => (
-  <View ref={ref} data-slot="dropdown-menu-group" className={className} {...props} />
+  <View ref={ref} data-slot='dropdown-menu-group' className={className} {...props} />
 ))
 DropdownMenuGroup.displayName = "DropdownMenuGroup"
 
@@ -238,19 +238,19 @@ const DropdownMenuContent = React.forwardRef<
 
   return (
     <Portal>
-      <View className="fixed inset-0 z-50 bg-transparent" onClick={() => context.onOpenChange?.(false)} />
+      <View className='fixed inset-0 z-50 bg-transparent' onClick={() => context.onOpenChange?.(false)} />
       <View
         {...props}
         ref={ref}
         id={contentId.current}
-        data-slot="dropdown-menu-content"
-        data-state="open"
+        data-slot='dropdown-menu-content'
+        data-state='open'
         data-side={side}
         className={cn(baseClassName, className)}
         style={contentStyle}
         onClick={(e) => e.stopPropagation()}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>
@@ -273,7 +273,7 @@ const DropdownMenuItem = React.forwardRef<
     <View
       {...props}
       ref={ref}
-      data-slot="dropdown-menu-item"
+      data-slot='dropdown-menu-item'
       data-inset={inset ? "" : undefined}
       data-variant={variant}
       data-disabled={disabled ? "" : undefined}
@@ -308,7 +308,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     <View
       {...props}
       ref={ref}
-      data-slot="dropdown-menu-checkbox-item"
+      data-slot='dropdown-menu-checkbox-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -323,8 +323,8 @@ const DropdownMenuCheckboxItem = React.forwardRef<
         if (closeOnSelect) context?.onOpenChange?.(false)
       }}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Check size={16} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Check size={16} color='inherit' />}
       </View>
       {children}
     </View>
@@ -349,7 +349,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     <View
       {...props}
       ref={ref}
-      data-slot="dropdown-menu-radio-item"
+      data-slot='dropdown-menu-radio-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -365,8 +365,8 @@ const DropdownMenuRadioItem = React.forwardRef<
         if (closeOnSelect) context?.onOpenChange?.(false)
       }}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Check size={16} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Check size={16} color='inherit' />}
       </View>
       {children}
     </View>
@@ -382,7 +382,7 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <View
     ref={ref}
-    data-slot="dropdown-menu-label"
+    data-slot='dropdown-menu-label'
     data-inset={inset ? "" : undefined}
     className={cn("px-2 py-1 text-xs font-medium text-muted-foreground", inset && "pl-7", className)}
     {...props}
@@ -396,7 +396,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    data-slot="dropdown-menu-separator"
+    data-slot='dropdown-menu-separator'
     className={cn("-mx-1 my-1 h-px bg-border", className)}
     {...props}
   />
@@ -406,7 +406,7 @@ DropdownMenuSeparator.displayName = "DropdownMenuSeparator"
 const DropdownMenuShortcut = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) => {
   return (
     <View
-      data-slot="dropdown-menu-shortcut"
+      data-slot='dropdown-menu-shortcut'
       className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
@@ -427,7 +427,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
       {...props}
       ref={ref}
       id={subContext?.triggerId}
-      data-slot="dropdown-menu-sub-trigger"
+      data-slot='dropdown-menu-sub-trigger'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={subContext?.open ? "open" : "closed"}
@@ -445,7 +445,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
       }}
     >
       {children}
-      <ChevronRight className="ml-auto opacity-50" size={16} color="inherit" />
+      <ChevronRight className='ml-auto opacity-50' size={16} color='inherit' />
     </View>
   )
 })
@@ -526,14 +526,14 @@ const DropdownMenuSubContent = React.forwardRef<
         {...props}
         ref={ref}
         id={contentId.current}
-        data-slot="dropdown-menu-sub-content"
-        data-state="open"
+        data-slot='dropdown-menu-sub-content'
+        data-state='open'
         data-side={side}
         className={cn(baseClassName, className)}
         style={contentStyle}
         onClick={(e) => e.stopPropagation()}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>

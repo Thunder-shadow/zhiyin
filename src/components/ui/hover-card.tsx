@@ -246,7 +246,7 @@ const HoverCardContent = React.forwardRef<
   const overlay =
     !isH5() ? (
       <View
-        className="fixed inset-0 z-50 bg-transparent"
+        className='fixed inset-0 z-50 bg-transparent'
         onClick={() => context.onOpenChange?.(false)}
       />
     ) : null

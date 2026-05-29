@@ -165,7 +165,7 @@ const SheetContent = React.forwardRef<
   return (
     <SheetPortal>
       <View
-        className="fixed inset-0 z-50"
+        className='fixed inset-0 z-50'
         onClick={() => context?.onOpenChange?.(false)}
       >
         <SheetOverlay />
@@ -179,15 +179,15 @@ const SheetContent = React.forwardRef<
         >
           {children}
           <View 
-            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
+            className='absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary'
             data-state={state}
             onClick={(e) => {
                   e.stopPropagation()
                   context?.onOpenChange?.(false)
               }}
           >
-            <X size={16} color="inherit" />
-            <View className="sr-only">Close</View>
+            <X size={16} color='inherit' />
+            <View className='sr-only'>Close</View>
           </View>
         </View>
       </View>

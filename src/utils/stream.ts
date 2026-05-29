@@ -6,9 +6,9 @@ import Taro from '@tarojs/taro'
  */
 
 export interface StreamCallbacks {
-  onChunk: (content: string) => void
-  onDone: (data?: any) => void
-  onError: (message: string) => void
+  onChunk: (_content: string) => void
+  onDone: (_data?: any) => void
+  onError: (_message: string) => void
 }
 
 /** 构建完整 URL */

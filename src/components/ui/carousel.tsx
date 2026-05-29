@@ -129,7 +129,7 @@ const CarouselContent = React.forwardRef<
     <View className={cn("overflow-hidden", className)}>
       <Swiper
         ref={ref}
-        className="h-full w-full"
+        className='h-full w-full'
         vertical={orientation === "vertical"}
         current={current}
         onChange={(e) => setCurrent(e.detail.current)}
@@ -142,7 +142,7 @@ const CarouselContent = React.forwardRef<
       >
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child)) {
-            return <SwiperItem className="h-full w-full">{child}</SwiperItem>
+            return <SwiperItem className='h-full w-full'>{child}</SwiperItem>
           }
           return null
         })}
@@ -183,8 +183,8 @@ const CarouselPrevious = React.forwardRef<
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft size={16} color="inherit" />
-      <View className="sr-only">Previous slide</View>
+      <ArrowLeft size={16} color='inherit' />
+      <View className='sr-only'>Previous slide</View>
     </Button>
   )
 })
@@ -212,8 +212,8 @@ const CarouselNext = React.forwardRef<
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight size={16} color="inherit" />
-      <View className="sr-only">Next slide</View>
+      <ArrowRight size={16} color='inherit' />
+      <View className='sr-only'>Next slide</View>
     </Button>
   )
 })

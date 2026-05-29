@@ -191,11 +191,11 @@ const H5ErrorOverlayHost = () => {
 
   return (
     <Portal>
-      <View className="pointer-events-none fixed inset-0 z-[2147483646]">
-        <View className="pointer-events-auto fixed bottom-5 left-5">
+      <View className='pointer-events-none fixed inset-0 z-[2147483646]'>
+        <View className='pointer-events-auto fixed bottom-5 left-5'>
           <Button
-            variant="outline"
-            size="icon"
+            variant='outline'
+            size='icon'
             className={cn(
               'h-11 w-11 rounded-full shadow-md transition-transform',
             )}
@@ -211,10 +211,10 @@ const H5ErrorOverlayHost = () => {
         </View>
 
         {store.open && (
-          <View className="pointer-events-none fixed inset-0 bg-white bg-opacity-15 supports-[backdrop-filter]:backdrop-blur-md">
-            <View className="absolute inset-0 flex items-center justify-center px-4 py-4">
+          <View className='pointer-events-none fixed inset-0 bg-white bg-opacity-15 supports-[backdrop-filter]:backdrop-blur-md'>
+            <View className='absolute inset-0 flex items-center justify-center px-4 py-4'>
               <View
-                className="w-full max-w-md"
+                className='w-full max-w-md'
                 style={{
                   width:
                     'min(calc(100vw - 32px), var(--h5-phone-width, 390px))',
@@ -226,53 +226,53 @@ const H5ErrorOverlayHost = () => {
                     'pointer-events-auto h-full rounded-2xl border border-border bg-background text-foreground shadow-2xl',
                   )}
                 >
-                  <View className="relative flex h-full flex-col">
-                    <CardHeader className="gap-2 p-4 pb-2">
-                      <View className="flex items-start justify-between gap-3">
-                        <View className="flex flex-wrap items-center gap-2">
+                  <View className='relative flex h-full flex-col'>
+                    <CardHeader className='gap-2 p-4 pb-2'>
+                      <View className='flex items-start justify-between gap-3'>
+                        <View className='flex flex-wrap items-center gap-2'>
                           <Badge
-                            variant="destructive"
-                            className="border-none bg-red-500 px-3 py-1 text-xs font-medium text-white"
+                            variant='destructive'
+                            className='border-none bg-red-500 px-3 py-1 text-xs font-medium text-white'
                           >
                             Runtime Error
                           </Badge>
                           <Badge
-                            variant="outline"
-                            className="px-3 py-1 text-xs"
+                            variant='outline'
+                            className='px-3 py-1 text-xs'
                           >
                             {store.source}
                           </Badge>
                         </View>
 
-                        <View className="flex shrink-0 items-center gap-1">
+                        <View className='flex shrink-0 items-center gap-1'>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full"
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 rounded-full'
                             onClick={() => window.location.reload()}
                           >
-                            <RefreshCw size={15} color="inherit" />
+                            <RefreshCw size={15} color='inherit' />
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full"
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 rounded-full'
                             onClick={() => setPanelOpen(false)}
                           >
-                            <X size={17} color="inherit" />
+                            <X size={17} color='inherit' />
                           </Button>
                         </View>
                       </View>
 
-                      <View className="flex items-center justify-between gap-3">
-                        <CardTitle className="text-left text-lg">
+                      <View className='flex items-center justify-between gap-3'>
+                        <CardTitle className='text-left text-lg'>
                           {errorName}
                         </CardTitle>
 
                         <Button
-                          variant="outline"
-                          size="sm"
-                          className="shrink-0 rounded-lg"
+                          variant='outline'
+                          size='sm'
+                          className='shrink-0 rounded-lg'
                           onClick={async () => {
                             const copied = await copyText(store.report);
                             if (copied) {
@@ -289,50 +289,50 @@ const H5ErrorOverlayHost = () => {
                             });
                           }}
                         >
-                          <Copy size={15} color="inherit" />
+                          <Copy size={15} color='inherit' />
                           <View>复制错误</View>
                         </Button>
                       </View>
                     </CardHeader>
 
-                    <CardContent className="min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-2">
-                      <View className="flex h-full min-h-0 flex-col gap-2">
-                        <View className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border px-3 py-2 text-sm">
-                          <View className="flex items-center gap-2">
-                            <View className="text-muted-foreground">Error</View>
-                            <View className="font-medium text-foreground">
+                    <CardContent className='min-h-0 flex-1 overflow-hidden px-4 pb-4 pt-2'>
+                      <View className='flex h-full min-h-0 flex-col gap-2'>
+                        <View className='flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border px-3 py-2 text-sm'>
+                          <View className='flex items-center gap-2'>
+                            <View className='text-muted-foreground'>Error</View>
+                            <View className='font-medium text-foreground'>
                               {store.error?.name || 'Error'}
                             </View>
                           </View>
-                          <View className="h-4 w-px bg-border" />
-                          <View className="flex items-center gap-2">
-                            <View className="text-muted-foreground">
+                          <View className='h-4 w-px bg-border' />
+                          <View className='flex items-center gap-2'>
+                            <View className='text-muted-foreground'>
                               Source
                             </View>
-                            <View className="font-medium text-foreground">
+                            <View className='font-medium text-foreground'>
                               {store.source}
                             </View>
                           </View>
                         </View>
 
-                        <View className="min-h-0 flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-black text-white">
-                          <View className="flex items-center justify-between border-b border-white border-opacity-10 px-3 py-3">
-                            <View className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                        <View className='min-h-0 flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-black text-white'>
+                          <View className='flex items-center justify-between border-b border-white border-opacity-10 px-3 py-3'>
+                            <View className='text-xs font-medium uppercase tracking-wide text-zinc-400'>
                               Full Report
                             </View>
                             <Badge
-                              variant="outline"
-                              className="border-zinc-700 bg-transparent px-2 py-1 text-xs text-zinc-400"
+                              variant='outline'
+                              className='border-zinc-700 bg-transparent px-2 py-1 text-xs text-zinc-400'
                             >
                               {store.timestamp}
                             </Badge>
                           </View>
 
                           <ScrollArea
-                            className="min-h-0 flex-1 w-full"
-                            orientation="both"
+                            className='min-h-0 flex-1 w-full'
+                            orientation='both'
                           >
-                            <View className="inline-block min-w-full whitespace-pre px-3 py-3 pb-8 font-mono text-xs leading-6 text-zinc-200">
+                            <View className='inline-block min-w-full whitespace-pre px-3 py-3 pb-8 font-mono text-xs leading-6 text-zinc-200'>
                               {store.report}
                             </View>
                           </ScrollArea>

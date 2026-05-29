@@ -127,40 +127,40 @@ export default function InterviewRoom() {
   const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
 
   return (
-    <View className="flex flex-col" style={{ height: '100vh' }}>
+    <View className='flex flex-col' style={{ height: '100vh' }}>
       {/* 自定义顶部导航栏 */}
       <View
-        className="flex-shrink-0 px-4 pb-3"
+        className='flex-shrink-0 px-4 pb-3'
         style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
-        <View className="flex flex-row items-center gap-3">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
-            <ArrowLeft size={20} color="#fff" />
+        <View className='flex flex-row items-center gap-3'>
+          <View onClick={() => Taro.navigateBack()} className='p-1'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <View className="flex-1 min-w-0">
-            <Text className="block text-white font-bold text-base">{modeInfo.title}</Text>
-            <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{modeInfo.label}</Text>
+          <View className='flex-1 min-w-0'>
+            <Text className='block text-white font-bold text-base'>{modeInfo.title}</Text>
+            <Text className='block text-sm' style={{ color: 'rgba(255,255,255,0.7)' }}>{modeInfo.label}</Text>
           </View>
         </View>
       </View>
 
       {/* 聊天区 */}
       <ScrollView
-        className="flex-1 px-4 pt-4"
+        className='flex-1 px-4 pt-4'
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
       >
         {!hasStarted && messages.length === 0 && (
-          <View className="flex items-center justify-center pt-20">
-            <Card className="shadow-card w-full">
-              <CardContent className="p-6 text-center">
-                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#3A4A4415', overflow: 'hidden' }}>
-                  <Bot size={32} color="#3A4A44" />
+          <View className='flex items-center justify-center pt-20'>
+            <Card className='shadow-card w-full'>
+              <CardContent className='p-6 text-center'>
+                <View className='w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center' style={{ backgroundColor: '#3A4A4415', overflow: 'hidden' }}>
+                  <Bot size={32} color='#3A4A44' />
                 </View>
-                <Text className="block text-lg font-bold text-foreground mb-2">{modeInfo.title}</Text>
-                <Text className="block text-sm text-muted-foreground mb-4">AI将扮演{modeInfo.label}与你对话</Text>
-                <Button className="w-full" style={{ backgroundColor: '#3A4A44' }} onClick={startInterview}>
+                <Text className='block text-lg font-bold text-foreground mb-2'>{modeInfo.title}</Text>
+                <Text className='block text-sm text-muted-foreground mb-4'>AI将扮演{modeInfo.label}与你对话</Text>
+                <Button className='w-full' style={{ backgroundColor: '#3A4A44' }} onClick={startInterview}>
                   <Text>开始面试</Text>
                 </Button>
               </CardContent>
@@ -169,35 +169,35 @@ export default function InterviewRoom() {
         )}
 
         {messages.map((msg, idx) => (
-          <View key={idx} id={`msg-${idx}`} className="mb-3">
+          <View key={idx} id={`msg-${idx}`} className='mb-3'>
             {msg.role === 'assistant' ? (
-              <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
+              <View className='flex flex-row items-start gap-2' style={{ maxWidth: '85%' }}>
                 <View
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0'
                   style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
                 >
-                  <Bot size={14} color="#fff" />
+                  <Bot size={14} color='#fff' />
                 </View>
-                <Card className="shadow-card">
-                  <CardContent className="p-3">
-                    <Text className="block text-sm text-foreground leading-relaxed">
+                <Card className='shadow-card'>
+                  <CardContent className='p-3'>
+                    <Text className='block text-sm text-foreground leading-relaxed'>
                       {msg.content}
-                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
+                      {msg.streaming && <Text className='inline-block w-2 h-4 ml-1' style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>
               </View>
             ) : (
-              <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
+              <View className='flex flex-row items-start gap-2 ml-auto' style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
                 <View
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0'
                   style={{ backgroundColor: '#E26A5C', overflow: 'hidden' }}
                 >
-                  <User size={14} color="#fff" />
+                  <User size={14} color='#fff' />
                 </View>
-                <Card className="shadow-card" style={{ backgroundColor: '#3A4A44' }}>
-                  <CardContent className="p-3">
-                    <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
+                <Card className='shadow-card' style={{ backgroundColor: '#3A4A44' }}>
+                  <CardContent className='p-3'>
+                    <Text className='block text-sm text-white leading-relaxed'>{msg.content}</Text>
                   </CardContent>
                 </Card>
               </View>
@@ -206,38 +206,38 @@ export default function InterviewRoom() {
         ))}
 
         {showThinking && (
-          <View className="mb-3" id="msg-thinking">
-            <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
-              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}>
-                <Bot size={14} color="#fff" />
+          <View className='mb-3' id='msg-thinking'>
+            <View className='flex flex-row items-start gap-2' style={{ maxWidth: '85%' }}>
+              <View className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0' style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}>
+                <Bot size={14} color='#fff' />
               </View>
-              <Card className="shadow-card">
-                <CardContent className="p-3">
-                  <Text className="block text-xs text-muted-foreground">面试官思考中...</Text>
+              <Card className='shadow-card'>
+                <CardContent className='p-3'>
+                  <Text className='block text-xs text-muted-foreground'>面试官思考中...</Text>
                 </CardContent>
               </Card>
             </View>
           </View>
         )}
-        <View id="msg-bottom-interview" style={{ height: '1px' }} />
+        <View id='msg-bottom-interview' style={{ height: '1px' }} />
         <View style={{ height: '80px' }} />
       </ScrollView>
 
       {/* 输入区 */}
       <View
-        className="flex-shrink-0 px-3 pt-3 bg-card"
+        className='flex-shrink-0 px-3 pt-3 bg-card'
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)', borderTop: '1px solid var(--color-outline-variant)' }}
       >
         <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
           <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
             <TaroInput
               style={{ width: '100%', fontSize: '14px', color: 'var(--color-foreground)', backgroundColor: 'transparent' }}
-              placeholder="输入你的回答..."
-              placeholderStyle="color: var(--color-muted-foreground)"
+              placeholder='输入你的回答...'
+              placeholderStyle='color: var(--color-muted-foreground)'
               value={input}
               onInput={(e) => setInput(e.detail.value)}
               onConfirm={sendMessage}
-              confirmType="send"
+              confirmType='send'
               disabled={isLoading || !hasStarted}
               adjustPosition
               onFocus={scrollToBottom}
@@ -245,13 +245,13 @@ export default function InterviewRoom() {
           </View>
           <View style={{ flexShrink: 0 }}>
             <Button
-              size="sm"
-              className="rounded-full"
+              size='sm'
+              className='rounded-full'
               style={{ backgroundColor: '#3A4A44' }}
               onClick={sendMessage}
               disabled={!input.trim() || isLoading || !hasStarted}
             >
-              <Send size={16} color="#fff" />
+              <Send size={16} color='#fff' />
             </Button>
           </View>
         </View>

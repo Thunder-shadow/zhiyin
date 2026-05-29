@@ -107,10 +107,10 @@ export default function CandidateEdit() {
   }
 
   return (
-    <View className="min-h-full bg-background">
+    <View className='min-h-full bg-background'>
       {/* 顶部 - fixed */}
       <View
-        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
         style={{
           background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
           position: 'fixed',
@@ -120,75 +120,75 @@ export default function CandidateEdit() {
           zIndex: 100,
         }}
       >
-        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className="flex flex-row items-center gap-3 relative">
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#fff" />
+        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
+        <View className='flex flex-row items-center gap-3 relative'>
+          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <View className="flex-1">
-            <Text className="block text-white font-bold text-base">
+          <View className='flex-1'>
+            <Text className='block text-white font-bold text-base'>
               {candidateId ? '编辑候选人' : '新建候选人'}
             </Text>
-            <Text className="block text-gray-300 text-xs">填写候选人详细信息</Text>
+            <Text className='block text-gray-300 text-xs'>填写候选人详细信息</Text>
           </View>
           <Button
-            size="sm"
-            className="bg-accent text-white border-none rounded-lg btn-shimmer btn-press"
+            size='sm'
+            className='bg-accent text-white border-none rounded-lg btn-shimmer btn-press'
             onClick={handleSave}
             disabled={loading}
           >
-            <Save size={14} color="#fff" />
-            <Text className="text-white ml-1">{loading ? '保存中...' : '保存'}</Text>
+            <Save size={14} color='#fff' />
+            <Text className='text-white ml-1'>{loading ? '保存中...' : '保存'}</Text>
           </Button>
         </View>
       </View>
 
       {/* 表单区 */}
       <ScrollView
-        className="flex-1 px-4"
+        className='flex-1 px-4'
         style={{ paddingTop: '90px', paddingBottom: '20px' }}
         scrollY
       >
         {/* 基本信息 */}
         <Card className={`shadow-card mb-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <Text className="block text-base font-semibold text-foreground mb-4">基本信息</Text>
+          <CardContent className='p-4'>
+            <Text className='block text-base font-semibold text-foreground mb-4'>基本信息</Text>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">姓名 *</Text>
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>姓名 *</Text>
               <Input
-                className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                placeholder="请输入候选人姓名"
+                className='w-full bg-muted rounded-lg px-3 py-2 text-sm'
+                placeholder='请输入候选人姓名'
                 value={formData.name}
                 onInput={(e) => update('name', e.detail.value)}
               />
             </View>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">学校 *</Text>
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>学校 *</Text>
               <Input
-                className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                placeholder="请输入毕业院校"
+                className='w-full bg-muted rounded-lg px-3 py-2 text-sm'
+                placeholder='请输入毕业院校'
                 value={formData.school}
                 onInput={(e) => update('school', e.detail.value)}
               />
             </View>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">专业 *</Text>
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>专业 *</Text>
               <Input
-                className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                placeholder="请输入专业"
+                className='w-full bg-muted rounded-lg px-3 py-2 text-sm'
+                placeholder='请输入专业'
                 value={formData.major}
                 onInput={(e) => update('major', e.detail.value)}
               />
             </View>
 
-            <View className="mb-0">
-              <Text className="block text-sm font-medium text-foreground mb-2">简短描述</Text>
+            <View className='mb-0'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>简短描述</Text>
               <Input
-                className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                placeholder="如：3段大厂实习，GPA 3.8"
+                className='w-full bg-muted rounded-lg px-3 py-2 text-sm'
+                placeholder='如：3段大厂实习，GPA 3.8'
                 value={formData.summary}
                 onInput={(e) => update('summary', e.detail.value)}
               />
@@ -198,15 +198,15 @@ export default function CandidateEdit() {
 
         {/* 详细信息 */}
         <Card className={`shadow-card mb-4 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <Text className="block text-base font-semibold text-foreground mb-4">详细信息</Text>
+          <CardContent className='p-4'>
+            <Text className='block text-base font-semibold text-foreground mb-4'>详细信息</Text>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">背景经历</Text>
-              <View className="bg-muted rounded-lg px-3 py-2">
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>背景经历</Text>
+              <View className='bg-muted rounded-lg px-3 py-2'>
                 <Textarea
-                  className="w-full text-sm bg-transparent"
-                  placeholder="教育背景、实习经历、项目经验等"
+                  className='w-full text-sm bg-transparent'
+                  placeholder='教育背景、实习经历、项目经验等'
                   value={formData.background}
                   onInput={(e) => update('background', e.detail.value)}
                   style={{ minHeight: '60px' }}
@@ -214,12 +214,12 @@ export default function CandidateEdit() {
               </View>
             </View>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">性格特点</Text>
-              <View className="bg-muted rounded-lg px-3 py-2">
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>性格特点</Text>
+              <View className='bg-muted rounded-lg px-3 py-2'>
                 <Textarea
-                  className="w-full text-sm bg-transparent"
-                  placeholder="如：外向能说、技术宅、沉稳干练等"
+                  className='w-full text-sm bg-transparent'
+                  placeholder='如：外向能说、技术宅、沉稳干练等'
                   value={formData.personality}
                   onInput={(e) => update('personality', e.detail.value)}
                   style={{ minHeight: '60px' }}
@@ -227,9 +227,9 @@ export default function CandidateEdit() {
               </View>
             </View>
 
-            <View className="mb-4">
-              <Text className="block text-sm font-medium text-foreground mb-2">真实水平</Text>
-              <View className="flex flex-row gap-2">
+            <View className='mb-4'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>真实水平</Text>
+              <View className='flex flex-row gap-2'>
                 {LEVEL_OPTIONS.map(opt => (
                   <View
                     key={opt.value}
@@ -241,7 +241,7 @@ export default function CandidateEdit() {
                     onClick={() => update('real_level', opt.value)}
                   >
                     <Text
-                      className="block text-sm font-semibold text-center"
+                      className='block text-sm font-semibold text-center'
                       style={{ color: formData.real_level === opt.value ? opt.color : '#6B7B74' }}
                     >
                       {opt.label}
@@ -251,9 +251,9 @@ export default function CandidateEdit() {
               </View>
             </View>
 
-            <View className="mb-0">
-              <Text className="block text-sm font-medium text-foreground mb-2">标签</Text>
-              <View className="flex flex-row flex-wrap gap-2">
+            <View className='mb-0'>
+              <Text className='block text-sm font-medium text-foreground mb-2'>标签</Text>
+              <View className='flex flex-row flex-wrap gap-2'>
                 {TAG_OPTIONS.map(opt => (
                   <View
                     key={opt.value}
@@ -270,7 +270,7 @@ export default function CandidateEdit() {
                     }}
                   >
                     <Text
-                      className="text-sm font-medium"
+                      className='text-sm font-medium'
                       style={{ color: formData.tag === opt.value ? '#fff' : '#6B7B74' }}
                     >
                       {opt.value}
@@ -284,36 +284,36 @@ export default function CandidateEdit() {
 
         {/* 预览 */}
         <Card className={`shadow-card mb-4 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <Text className="block text-base font-semibold text-foreground mb-3">预览效果</Text>
-            <Card className="shadow-card" style={{ background: `${formData.color}08` }}>
-              <CardContent className="p-4">
-                <View className="flex flex-row items-center gap-3">
+          <CardContent className='p-4'>
+            <Text className='block text-base font-semibold text-foreground mb-3'>预览效果</Text>
+            <Card className='shadow-card' style={{ background: `${formData.color}08` }}>
+              <CardContent className='p-4'>
+                <View className='flex flex-row items-center gap-3'>
                   <View
-                    className="w-14 h-14 rounded-xl flex items-center justify-center"
+                    className='w-14 h-14 rounded-xl flex items-center justify-center'
                     style={{ backgroundColor: `${formData.color}15` }}
                   >
                     <User size={28} color={formData.color} />
                   </View>
-                  <View className="flex-1">
-                    <View className="flex flex-row items-center gap-2 mb-1">
-                      <Text className="block font-bold text-foreground text-lg">
+                  <View className='flex-1'>
+                    <View className='flex flex-row items-center gap-2 mb-1'>
+                      <Text className='block font-bold text-foreground text-lg'>
                         {formData.name || '候选人姓名'}
                       </Text>
                       {formData.tag && (
                         <Badge
-                          className="text-xs border-none"
+                          className='text-xs border-none'
                           style={{ backgroundColor: `${formData.color}15`, color: formData.color }}
                         >
                           {formData.tag}
                         </Badge>
                       )}
                     </View>
-                    <Text className="block text-sm text-muted-foreground">
+                    <Text className='block text-sm text-muted-foreground'>
                       {formData.school || '学校'} · {formData.major || '专业'}
                     </Text>
                     {formData.summary && (
-                      <Text className="block text-xs text-muted-foreground mt-1">{formData.summary}</Text>
+                      <Text className='block text-xs text-muted-foreground mt-1'>{formData.summary}</Text>
                     )}
                   </View>
                 </View>

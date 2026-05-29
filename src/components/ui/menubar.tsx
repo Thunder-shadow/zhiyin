@@ -71,7 +71,7 @@ const MenubarTrigger = React.forwardRef<
     <View
       ref={ref}
       id={context?.triggerId}
-      data-slot="menubar-trigger"
+      data-slot='menubar-trigger'
       className={cn(
         "flex cursor-default select-none items-center rounded-sm px-3 py-2 text-sm font-medium outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
         className
@@ -174,14 +174,14 @@ const MenubarContent = React.forwardRef<
   return (
     <Portal>
       <View
-        className="fixed inset-0 z-50 bg-transparent"
+        className='fixed inset-0 z-50 bg-transparent'
         onClick={() => context.onOpenChange(false)}
       />
       <View
         ref={ref}
         id={contentId.current}
-        data-slot="menubar-content"
-        data-state="open"
+        data-slot='menubar-content'
+        data-state='open'
         data-side={side}
         className={cn(
           baseClassName,
@@ -191,7 +191,7 @@ const MenubarContent = React.forwardRef<
         onClick={(e) => e.stopPropagation()}
         {...props}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>
@@ -213,7 +213,7 @@ const MenubarItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="menubar-item"
+      data-slot='menubar-item'
       data-inset={inset ? "" : undefined}
       data-variant={variant}
       data-disabled={disabled ? "" : undefined}
@@ -250,7 +250,7 @@ const MenubarCheckboxItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="menubar-checkbox-item"
+      data-slot='menubar-checkbox-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -267,8 +267,8 @@ const MenubarCheckboxItem = React.forwardRef<
       }}
       {...props}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Check size={16} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Check size={16} color='inherit' />}
       </View>
       {children}
     </View>
@@ -325,7 +325,7 @@ const MenubarRadioItem = React.forwardRef<
   return (
     <View
       ref={ref}
-      data-slot="menubar-radio-item"
+      data-slot='menubar-radio-item'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={checked ? "checked" : "unchecked"}
@@ -343,8 +343,8 @@ const MenubarRadioItem = React.forwardRef<
       }}
       {...props}
     >
-      <View className="pointer-events-none absolute right-2 flex items-center justify-center">
-        {checked && <Check size={16} color="inherit" />}
+      <View className='pointer-events-none absolute right-2 flex items-center justify-center'>
+        {checked && <Check size={16} color='inherit' />}
       </View>
       {children}
     </View>
@@ -360,7 +360,7 @@ const MenubarLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <View
     ref={ref}
-    data-slot="menubar-label"
+    data-slot='menubar-label'
     data-inset={inset ? "" : undefined}
     className={cn(
       "px-2 py-1 text-xs font-medium text-muted-foreground",
@@ -378,7 +378,7 @@ const MenubarSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <View
     ref={ref}
-    data-slot="menubar-separator"
+    data-slot='menubar-separator'
     className={cn("-mx-1 my-1 h-px bg-border", className)}
     {...props}
   />
@@ -391,7 +391,7 @@ const MenubarShortcut = ({
 }: React.ComponentPropsWithoutRef<typeof View>) => {
   return (
     <View
-      data-slot="menubar-shortcut"
+      data-slot='menubar-shortcut'
       className={cn("ml-auto text-xs tracking-widest text-muted-foreground", className)}
       {...props}
     />
@@ -403,7 +403,7 @@ const MenubarGroup = React.forwardRef<
   React.ElementRef<typeof View>,
   React.ComponentPropsWithoutRef<typeof View>
 >(({ className, ...props }, ref) => (
-  <View ref={ref} data-slot="menubar-group" className={className} {...props} />
+  <View ref={ref} data-slot='menubar-group' className={className} {...props} />
 ))
 MenubarGroup.displayName = "MenubarGroup"
 
@@ -456,7 +456,7 @@ const MenubarSubTrigger = React.forwardRef<
       {...props}
       ref={ref}
       id={subContext?.triggerId}
-      data-slot="menubar-sub-trigger"
+      data-slot='menubar-sub-trigger'
       data-inset={inset ? "" : undefined}
       data-disabled={disabled ? "" : undefined}
       data-state={subContext?.open ? "open" : "closed"}
@@ -474,7 +474,7 @@ const MenubarSubTrigger = React.forwardRef<
       }}
     >
       {children}
-      <ChevronRight className="ml-auto opacity-50" size={16} color="inherit" />
+      <ChevronRight className='ml-auto opacity-50' size={16} color='inherit' />
     </View>
   )
 })
@@ -559,14 +559,14 @@ const MenubarSubContent = React.forwardRef<
         {...props}
         ref={ref}
         id={contentId.current}
-        data-slot="menubar-sub-content"
-        data-state="open"
+        data-slot='menubar-sub-content'
+        data-state='open'
         data-side={side}
         className={cn(baseClassName, className)}
         style={contentStyle}
         onClick={(e) => e.stopPropagation()}
       >
-        <ScrollView scrollY className="max-h-[50vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[50vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>

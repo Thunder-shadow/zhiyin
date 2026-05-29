@@ -96,7 +96,7 @@ const NavigationMenuTrigger = React.forwardRef<
     <View
       ref={ref}
       id={item?.triggerId}
-      data-slot="navigation-menu-trigger"
+      data-slot='navigation-menu-trigger'
       data-state={isOpen ? "open" : "closed"}
       className={cn(navigationMenuTriggerStyle(), "group", className)}
       onClick={() => context?.onValueChange?.(isOpen ? undefined : item?.value)}
@@ -109,8 +109,8 @@ const NavigationMenuTrigger = React.forwardRef<
           isOpen && "rotate-180"
         )}
         size={12}
-        color="inherit"
-        aria-hidden="true"
+        color='inherit'
+        aria-hidden='true'
       />
     </View>
   )
@@ -217,14 +217,14 @@ const NavigationMenuContent = React.forwardRef<
   return (
     <Portal>
       <View
-        className="fixed inset-0 z-50 bg-transparent"
+        className='fixed inset-0 z-50 bg-transparent'
         onClick={() => context?.onValueChange?.(undefined)}
       />
       <View
         ref={ref}
         id={contentId.current}
-        data-slot="navigation-menu-content"
-        data-state="open"
+        data-slot='navigation-menu-content'
+        data-state='open'
         data-side={side}
         className={cn(
           baseClassName,
@@ -234,7 +234,7 @@ const NavigationMenuContent = React.forwardRef<
         onClick={(e) => e.stopPropagation()}
         {...props}
       >
-        <ScrollView scrollY className="max-h-[70vh] overflow-x-hidden overflow-y-auto">
+        <ScrollView scrollY className='max-h-[70vh] overflow-x-hidden overflow-y-auto'>
           {children}
         </ScrollView>
       </View>

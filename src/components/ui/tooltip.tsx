@@ -354,7 +354,7 @@ const TooltipContent = React.forwardRef<
     const arrow =
       showArrow && layout ? (
         <View
-          className="absolute rotate-45 bg-black"
+          className='absolute rotate-45 bg-black'
           style={
             layout.side === "top"
               ? (isH5()
@@ -417,7 +417,7 @@ const TooltipContent = React.forwardRef<
 
     const overlay = !isH5() ? (
       <View
-        className="fixed inset-0 z-50 bg-transparent"
+        className='fixed inset-0 z-50 bg-transparent'
         onClick={() => context.onOpenChange(false)}
       />
     ) : null

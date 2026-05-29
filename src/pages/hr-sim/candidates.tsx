@@ -1,11 +1,14 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/exhaustive-deps */
+import { View, Text } from '@tarojs/components'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { ArrowLeft, Plus, User, Pencil, Trash2, Swords, Search } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
-import { ArrowLeft, Plus, Pencil, Trash2, ChevronRight, User } from 'lucide-react-taro'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 
 interface HrCandidate {
   id: string
@@ -20,19 +23,19 @@ interface HrCandidate {
   color?: string
 }
 
-export default function HrCandidates() {
+export default function Candidates() {
   const [candidates, setCandidates] = useState<HrCandidate[]>([])
   const [loading, setLoading] = useState(true)
-  const [loaded, setLoaded] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState('')
 
+  // 每次页面显示时刷新数据
   useDidShow(() => {
-    setLoaded(false)
-    setTimeout(() => setLoaded(true), 80)
     loadCandidates()
   })
 
   const loadCandidates = async () => {
     try {
+      setLoading(true)
       const res = await Network.request({ url: '/api/hr-candidates' })
       if (res.data?.code === 0) {
         setCandidates(res.data.data || [])
@@ -44,182 +47,201 @@ export default function HrCandidates() {
     }
   }
 
-  const deleteCandidate = async (id: string, e: any) => {
-    e.stopPropagation()
-    const { confirm } = await Taro.showModal({
-      title: '确认删除',
-      content: '删除后不可恢复，确认删除该候选人？',
-      confirmText: '删除',
-      confirmColor: '#EF4444',
-    })
-    if (!confirm) return
-
-    try {
-      await Network.request({ url: `/api/hr-candidates/${id}`, method: 'DELETE' })
-      setCandidates(prev => prev.filter(c => c.id !== id))
-      Taro.showToast({ title: '删除成功', icon: 'success' })
-    } catch (err) {
-      Taro.showToast({ title: '删除失败', icon: 'error' })
-    }
-  }
-
+  /** 开始面试 */
   const startInterview = (candidate: HrCandidate) => {
-    Taro.setStorageSync('hr_selected_candidate', candidate)
     Taro.navigateTo({
-      url: `/pages/hr-sim/index?candidateId=${candidate.id}`
+      url: `/pages/hr-sim/index?candidateId=${candidate.id}&candidateName=${encodeURIComponent(candidate.name)}&candidateSchool=${encodeURIComponent(candidate.school)}&candidateMajor=${encodeURIComponent(candidate.major)}&candidateBackground=${encodeURIComponent(candidate.background)}&candidatePersonality=${encodeURIComponent(candidate.personality)}&candidateRealLevel=${encodeURIComponent(candidate.real_level)}&candidateColor=${encodeURIComponent(candidate.color || '#8B5CF6')}`
     })
   }
+
+  /** 跳转创建候选人 */
+  const goToCreate = () => {
+    Taro.navigateTo({ url: '/pages/hr-sim/candidate-edit' })
+  }
+
+  /** 跳转编辑候选人 */
+  const goToEdit = (id: string) => {
+    Taro.navigateTo({ url: `/pages/hr-sim/candidate-edit?id=${id}` })
+  }
+
+  /** 删除候选人 */
+  const deleteCandidate = (candidate: HrCandidate) => {
+    Taro.showModal({
+      title: '确认删除',
+      content: `确定要删除候选人「${candidate.name}」吗？此操作不可恢复。`,
+      confirmText: '删除',
+      confirmColor: '#E26A5C',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await Network.request({
+              url: `/api/hr-candidates/${candidate.id}`,
+              method: 'DELETE'
+            })
+            Taro.showToast({ title: '删除成功', icon: 'success' })
+            loadCandidates()
+          } catch (err) {
+            console.error('Delete error:', err)
+            Taro.showToast({ title: '删除失败', icon: 'none' })
+          }
+        }
+      }
+    })
+  }
+
+  // 过滤候选人
+  const filteredCandidates = candidates.filter(c => {
+    if (!searchKeyword) return true
+    const keyword = searchKeyword.toLowerCase()
+    return (
+      c.name.toLowerCase().includes(keyword) ||
+      c.school.toLowerCase().includes(keyword) ||
+      c.major.toLowerCase().includes(keyword)
+    )
+  })
 
   return (
-    <View className="min-h-full bg-background">
-      {/* 顶部 - fixed */}
+    <View className='min-h-full bg-background pb-safe'>
+      {/* 顶部 */}
       <View
-        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
+        className='px-4 pb-4 pt-4 rounded-b-2xl relative overflow-hidden'
         style={{
           background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
         }}
       >
-        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className="flex flex-row items-center gap-3 relative">
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#fff" />
+        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
+        <View className='flex flex-row items-center gap-3 relative'>
+          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <View className="flex-1">
-            <Text className="block text-white font-bold text-base">候选人管理</Text>
-            <Text className="block text-gray-300 text-xs">
-              {candidates.length > 0 ? `共 ${candidates.length} 位候选人` : '创建和管理面试候选人'}
-            </Text>
+          <View className='flex-1'>
+            <Text className='block text-white font-bold text-base'>选择候选人</Text>
+            <Text className='block text-gray-300 text-xs'>选择一个候选人开始面试</Text>
           </View>
           <Button
-            size="sm"
-            className="bg-accent text-white border-none rounded-lg btn-shimmer btn-press"
-            onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/candidate-edit' })}
+            size='sm'
+            className='bg-white bg-opacity-20 border-none rounded-lg btn-press'
+            onClick={goToCreate}
           >
-            <Plus size={14} color="#fff" />
+            <Plus size={16} color='#fff' />
           </Button>
         </View>
       </View>
 
-      {/* 内容区 */}
-      <ScrollView
-        className="flex-1 px-4"
-        style={{ paddingTop: '90px', paddingBottom: '20px' }}
-        scrollY
-      >
-        {loading ? (
-          <View className="flex flex-col items-center justify-center py-20">
-            <Text className="block text-sm text-muted-foreground">加载中...</Text>
+      <View className='px-4 pt-4'>
+        {/* 搜索框 */}
+        <View className='bg-surface-container rounded-xl px-3 py-2 mb-4'>
+          <View className='flex flex-row items-center gap-2'>
+            <Search size={16} color='#6B7B7480' />
+            <Input
+              className='flex-1 bg-transparent text-sm'
+              placeholder='搜索候选人...'
+              value={searchKeyword}
+              onInput={(e: any) => setSearchKeyword(e.detail.value)}
+            />
           </View>
-        ) : candidates.length === 0 ? (
-          <View className={`${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-            <Card className="shadow-card">
-              <CardContent className="p-8 flex flex-col items-center">
-                <View
-                  className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-                  style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
-                >
-                  <User size={36} color="#C4B5FD" />
-                </View>
-                <Text className="block text-base font-semibold text-foreground mb-2">
-                  还没有候选人
-                </Text>
-                <Text className="block text-sm text-muted-foreground text-center leading-relaxed mb-5">
-                  创建候选人后{'\n'}可以进行HR模拟面试
-                </Text>
-                <Button
-                  className="btn-shimmer btn-press"
-                  onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/candidate-edit' })}
-                >
-                  <Plus size={16} color="#fff" />
-                  <Text className="ml-1">创建第一个候选人</Text>
-                </Button>
-              </CardContent>
-            </Card>
+        </View>
+
+        {loading ? (
+          <View className='flex flex-col items-center py-16'>
+            <Text className='block text-sm text-muted-foreground'>加载中...</Text>
+          </View>
+        ) : filteredCandidates.length === 0 ? (
+          <View>
+            {searchKeyword ? (
+              <Card className='shadow-card'>
+                <CardContent className='p-8 flex flex-col items-center'>
+                  <View
+                    className='w-16 h-16 rounded-full flex items-center justify-center mb-4'
+                    style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
+                  >
+                    <Search size={28} color='#C4B5FD' />
+                  </View>
+                  <Text className='block text-base font-semibold text-foreground mb-2'>未找到候选人</Text>
+                  <Text className='block text-sm text-muted-foreground text-center'>
+                    换个关键词试试
+                  </Text>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className='shadow-card'>
+                <CardContent className='p-8 flex flex-col items-center'>
+                  <View
+                    className='w-20 h-20 rounded-full flex items-center justify-center mb-4'
+                    style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
+                  >
+                    <User size={36} color='#C4B5FD' />
+                  </View>
+                  <Text className='block text-base font-semibold text-foreground mb-2'>还没有候选人</Text>
+                  <Text className='block text-sm text-muted-foreground text-center leading-relaxed mb-5'>
+                    先创建候选人，再开始面试
+                  </Text>
+                  <Button className='btn-shimmer btn-press' onClick={goToCreate}>
+                    <Plus size={16} color='#fff' />
+                    <Text className='ml-1'>创建候选人</Text>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </View>
         ) : (
-          <View className="flex flex-col gap-3">
-            {candidates.map((candidate, idx) => (
-              <Card
-                key={candidate.id}
-                className={`shadow-card card-hover ${loaded ? `anim-fade-in-up anim-delay-${Math.min(idx + 1, 5)}` : 'opacity-0'}`}
-              >
-                <CardContent className="p-4">
-                  <View className="flex flex-row items-start gap-3">
+          <View>
+            {filteredCandidates.map((candidate) => (
+              <Card key={candidate.id} className='mb-3 shadow-card'>
+                <CardContent className='p-4'>
+                  <View className='flex flex-row items-center gap-3'>
                     <View
-                      className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                      className='w-12 h-12 rounded-xl flex items-center justify-center'
                       style={{ backgroundColor: `${candidate.color || '#8B5CF6'}15` }}
                     >
-                      <User size={28} color={candidate.color || '#8B5CF6'} />
+                      <User size={24} color={candidate.color || '#8B5CF6'} />
                     </View>
-                    <View className="flex-1 min-w-0">
-                      <View className="flex flex-row items-center gap-2 mb-1">
-                        <Text className="block font-bold text-foreground text-base">
-                          {candidate.name}
-                        </Text>
+                    <View className='flex-1'>
+                      <View className='flex flex-row items-center gap-2'>
+                        <Text className='block font-semibold text-foreground'>{candidate.name}</Text>
                         {candidate.tag && (
                           <Badge
-                            className="text-xs border-none"
+                            className='text-xs border-none'
                             style={{
                               backgroundColor: `${candidate.color || '#8B5CF6'}15`,
-                              color: candidate.color || '#8B5CF6'
+                              color: candidate.color || '#8B5CF6',
                             }}
                           >
                             {candidate.tag}
                           </Badge>
                         )}
                       </View>
-                      <Text className="block text-sm text-muted-foreground">
+                      <Text className='block text-xs text-muted-foreground mt-1'>
                         {candidate.school} · {candidate.major}
                       </Text>
-                      {candidate.summary && (
-                        <Text className="block text-xs text-muted-foreground mt-1" style={{ opacity: 0.7 }}>
-                          {candidate.summary}
-                        </Text>
-                      )}
-                      <View className="flex flex-row items-center gap-2 mt-2">
-                        <View className="px-2 py-1 rounded bg-muted">
-                          <Text className="text-xs text-muted-foreground">
-                            水平：{candidate.real_level}级
-                          </Text>
-                        </View>
-                      </View>
                     </View>
                   </View>
 
                   {/* 操作按钮 */}
-                  <View className="flex flex-row items-center justify-end gap-2 mt-3 pt-3 border-t border-outline-variant border-opacity-15">
+                  <View className='flex flex-row items-center gap-2 mt-3 pt-3' style={{ borderTop: '1px solid #F0F2EF' }}>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="btn-press"
-                      onClick={(e: any) => {
-                        e.stopPropagation()
-                        Taro.navigateTo({ url: `/pages/hr-sim/candidate-edit?id=${candidate.id}` })
-                      }}
-                    >
-                      <Pencil size={14} color="#6B7B74" />
-                      <Text className="ml-1">编辑</Text>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="btn-press"
-                      onClick={(e: any) => deleteCandidate(candidate.id, e)}
-                    >
-                      <Trash2 size={14} color="#EF4444" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="btn-shimmer btn-press"
+                      size='sm'
+                      className='flex-1 bg-primary text-on-primary border-none rounded-lg'
                       onClick={() => startInterview(candidate)}
                     >
-                      <Text>开始面试</Text>
-                      <ChevronRight size={14} color="#fff" />
+                      <Swords size={14} color='#fff' />
+                      <Text className='ml-1'>开始面试</Text>
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      className='px-3 rounded-lg'
+                      onClick={() => goToEdit(candidate.id)}
+                    >
+                      <Pencil size={14} color='#6B7B74' />
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      className='px-3 rounded-lg'
+                      onClick={() => deleteCandidate(candidate)}
+                    >
+                      <Trash2 size={14} color='#E26A5C' />
                     </Button>
                   </View>
                 </CardContent>
@@ -227,7 +249,7 @@ export default function HrCandidates() {
             ))}
           </View>
         )}
-      </ScrollView>
+      </View>
     </View>
   )
 }

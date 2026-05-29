@@ -6,7 +6,7 @@ import { Preset } from './presets';
 
 const App = ({ children }: PropsWithChildren) => {
   return (
-    <LucideTaroProvider defaultColor="#000" defaultSize={24}>
+    <LucideTaroProvider defaultColor='#000' defaultSize={24}>
       <Preset>{children}</Preset>
       <Toaster />
     </LucideTaroProvider>

@@ -208,85 +208,85 @@ function Calendar({
         className
       )}
     >
-      <View className="flex items-center justify-between">
+      <View className='flex items-center justify-between'>
         {captionHasButtons ? (
           <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8'
             onClick={() => setMonth(subMonths(visibleMonth, 1))}
           >
-            <ChevronLeft size={16} color="inherit" />
+            <ChevronLeft size={16} color='inherit' />
           </Button>
         ) : (
-          <View className="h-8 w-8" />
+          <View className='h-8 w-8' />
         )}
 
         {captionHasDropdown ? (
-          <View className="flex items-center gap-2">
+          <View className='flex items-center gap-2'>
             <Picker
-              mode="selector"
+              mode='selector'
               range={yearOptions}
               value={yearIndex}
               onChange={(e) => setYear(yearOptions[Number(e.detail.value)]!)}
             >
-              <Button variant="ghost" className="h-8 px-2">
-                <Text className="text-sm font-medium">
+              <Button variant='ghost' className='h-8 px-2'>
+                <Text className='text-sm font-medium'>
                   {visibleMonth.getFullYear()}
                 </Text>
-                <ChevronDown size={16} className="opacity-50" color="inherit" />
+                <ChevronDown size={16} className='opacity-50' color='inherit' />
               </Button>
             </Picker>
             <Picker
-              mode="selector"
+              mode='selector'
               range={monthOptions}
               value={monthIndex}
               onChange={(e) =>
                 setMonthOfYear(monthOptions[Number(e.detail.value)]!)
               }
             >
-              <Button variant="ghost" className="h-8 px-2">
-                <Text className="text-sm font-medium">
+              <Button variant='ghost' className='h-8 px-2'>
+                <Text className='text-sm font-medium'>
                   {String(visibleMonth.getMonth() + 1).padStart(2, "0")}
                   月
                 </Text>
-                <ChevronDown size={16} className="opacity-50" color="inherit" />
+                <ChevronDown size={16} className='opacity-50' color='inherit' />
               </Button>
             </Picker>
           </View>
         ) : (
-          <Text className="text-sm font-medium">
+          <Text className='text-sm font-medium'>
             {format(visibleMonth, "yyyy年MM月")}
           </Text>
         )}
 
         {captionHasButtons ? (
           <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8'
             onClick={() => setMonth(addMonths(visibleMonth, 1))}
           >
-            <ChevronRight size={16} color="inherit" />
+            <ChevronRight size={16} color='inherit' />
           </Button>
         ) : (
-          <View className="h-8 w-8" />
+          <View className='h-8 w-8' />
         )}
       </View>
 
-      <View className="flex">
+      <View className='flex'>
         {weekdays.map((label) => (
-          <View key={label} className="flex flex-1 items-center justify-center">
-            <Text className="text-muted-foreground text-xs font-normal">
+          <View key={label} className='flex flex-1 items-center justify-center'>
+            <Text className='text-muted-foreground text-xs font-normal'>
               {label}
             </Text>
           </View>
         ))}
       </View>
 
-      <View className="flex flex-col gap-2">
+      <View className='flex flex-col gap-2'>
         {weeks.map((week, rowIndex) => (
-          <View key={rowIndex} className="flex">
+          <View key={rowIndex} className='flex'>
             {week.map((date) => {
               const outside = !isSameMonth(date, visibleMonth)
               const hidden = outside && !showOutsideDays
@@ -371,8 +371,8 @@ function CalendarDayButton({
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant='ghost'
+      size='icon'
       className={cn(
         base,
         outsideClass,
@@ -386,7 +386,7 @@ function CalendarDayButton({
       )}
       onClick={disabled ? undefined : () => onPress(date)}
     >
-      <Text className="text-sm">{format(date, "d")}</Text>
+      <Text className='text-sm'>{format(date, "d")}</Text>
     </Button>
   )
 }

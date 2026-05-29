@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 function FieldSet({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) {
   return (
     <View
-      data-slot="field-set"
+      data-slot='field-set'
       className={cn(
         "flex flex-col gap-3",
         className
@@ -26,7 +26,7 @@ function FieldLegend({
 }: React.ComponentPropsWithoutRef<typeof View> & { variant?: "legend" | "label" }) {
   return (
     <View
-      data-slot="field-legend"
+      data-slot='field-legend'
       data-variant={variant}
       className={cn(
         "mb-1 font-medium",
@@ -42,7 +42,7 @@ function FieldLegend({
 function FieldGroup({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) {
   return (
     <View
-      data-slot="field-group"
+      data-slot='field-group'
       className={cn(
         "flex w-full flex-col gap-3 data-[slot=checkbox-group]:gap-3",
         className
@@ -77,8 +77,8 @@ function Field({
 }: React.ComponentPropsWithoutRef<typeof View> & VariantProps<typeof fieldVariants>) {
   return (
     <View
-      role="group"
-      data-slot="field"
+      role='group'
+      data-slot='field'
       data-orientation={orientation}
       className={cn(fieldVariants({ orientation }), className)}
       {...props}
@@ -89,7 +89,7 @@ function Field({
 function FieldContent({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) {
   return (
     <View
-      data-slot="field-content"
+      data-slot='field-content'
       className={cn(
         "flex flex-1 flex-col gap-2 leading-snug",
         className
@@ -105,7 +105,7 @@ function FieldLabel({
 }: React.ComponentPropsWithoutRef<typeof Label>) {
   return (
     <Label
-      data-slot="field-label"
+      data-slot='field-label'
       className={cn(
         "flex w-fit gap-2 leading-snug",
         "[&>view]:p-1",
@@ -119,7 +119,7 @@ function FieldLabel({
 function FieldTitle({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) {
   return (
     <View
-      data-slot="field-label"
+      data-slot='field-label'
       className={cn(
         "flex w-fit items-center gap-2 text-sm font-medium leading-snug",
         className
@@ -132,7 +132,7 @@ function FieldTitle({ className, ...props }: React.ComponentPropsWithoutRef<type
 function FieldDescription({ className, ...props }: React.ComponentPropsWithoutRef<typeof View>) {
   return (
     <View
-      data-slot="field-description"
+      data-slot='field-description'
       className={cn(
         "text-muted-foreground text-sm font-normal leading-normal",
         // "group-has-[[data-orientation=horizontal]]/field:text-balance", // text-balance not supported in Taro
@@ -152,7 +152,7 @@ function FieldSeparator({
 }) {
   return (
     <View
-      data-slot="field-separator"
+      data-slot='field-separator'
       data-content={!!children}
       className={cn(
         "relative -my-2 h-5 text-sm",
@@ -160,11 +160,11 @@ function FieldSeparator({
       )}
       {...props}
     >
-      <Separator className="absolute inset-0 top-1/2" />
+      <Separator className='absolute inset-0 top-1/2' />
       {children && (
         <View
-          className="bg-background text-muted-foreground relative mx-auto block w-fit px-2"
-          data-slot="field-separator-content"
+          className='bg-background text-muted-foreground relative mx-auto block w-fit px-2'
+          data-slot='field-separator-content'
         >
           {children}
         </View>
@@ -189,9 +189,9 @@ function FieldError({
             content = <Text>{errors[0].message}</Text>
         } else if (errors.length > 0) {
             content = (
-                <View className="ml-4 flex flex-col gap-1">
+                <View className='ml-4 flex flex-col gap-1'>
                     {errors.map((error, index) => 
-                        error?.message && <Text key={index} className="text-xs">{`\u2022 ${error.message}`}</Text>
+                        error?.message && <Text key={index} className='text-xs'>{`\u2022 ${error.message}`}</Text>
                     )}
                 </View>
             )
@@ -204,8 +204,8 @@ function FieldError({
 
   return (
     <View
-      role="alert"
-      data-slot="field-error"
+      role='alert'
+      data-slot='field-error'
       className={cn("text-destructive text-sm font-normal", className)}
       {...props}
     >

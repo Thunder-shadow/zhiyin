@@ -127,7 +127,7 @@ const AlertDialogContent = React.forwardRef<
   const state = context?.open ? "open" : "closed"
   return (
     <AlertDialogPortal>
-      <View className="fixed inset-0 z-50">
+      <View className='fixed inset-0 z-50'>
         <AlertDialogOverlay />
         <View
           ref={ref}

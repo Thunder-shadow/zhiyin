@@ -127,7 +127,7 @@ const DialogContent = React.forwardRef<
     return (
         <DialogPortal>
             <View
-              className="fixed inset-0 z-50"
+              className='fixed inset-0 z-50'
               onClick={() => context?.onOpenChange?.(false)}
             >
               <DialogOverlay />
@@ -147,7 +147,7 @@ const DialogContent = React.forwardRef<
               >
                   {children}
                   <View 
-                    data-slot="dialog-close"
+                    data-slot='dialog-close'
                     className={cn(
                         "absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
                         closeClassName
@@ -158,8 +158,8 @@ const DialogContent = React.forwardRef<
                           context?.onOpenChange?.(false)
                       }}
                   >
-                      <X size={16} color="inherit" />
-                      <View className="sr-only">Close</View>
+                      <X size={16} color='inherit' />
+                      <View className='sr-only'>Close</View>
                   </View>
               </View>
             </View>

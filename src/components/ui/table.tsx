@@ -7,7 +7,7 @@ const Table = React.forwardRef<
   React.ElementRef<typeof View>,
   React.ComponentPropsWithoutRef<typeof View>
 >(({ className, ...props }, ref) => (
-  <View className="relative w-full overflow-auto">
+  <View className='relative w-full overflow-auto'>
     <View
       ref={ref}
       className={cn("w-full caption-bottom text-sm", className)}

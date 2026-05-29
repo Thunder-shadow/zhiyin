@@ -131,16 +131,16 @@ const CodeBlock: FC<CodeBlockProps> = ({
   return (
     <View className={cn("relative w-full overflow-hidden", className)} style={style}>
       <ScrollArea 
-        orientation="both" 
+        orientation='both' 
         className={cn("bg-code rounded-lg w-full", scrollAreaClassName)}
       >
-        <View className="p-4 inline-block box-border min-w-full">
+        <View className='p-4 inline-block box-border min-w-full'>
           {language && (
-            <Text className="absolute top-2 left-2 text-xs text-muted-foreground uppercase font-mono pointer-events-none">
+            <Text className='absolute top-2 left-2 text-xs text-muted-foreground uppercase font-mono pointer-events-none'>
               {language}
             </Text>
           )}
-          <Text className="text-xs font-mono whitespace-pre">
+          <Text className='text-xs font-mono whitespace-pre'>
             {tokens.map((token, i) => (
               <Text 
                 key={i} 
@@ -154,12 +154,12 @@ const CodeBlock: FC<CodeBlockProps> = ({
       </ScrollArea>
       {showCopyButton && (
         <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute top-1 right-1 h-6 w-6"
+          variant='ghost' 
+          size='icon' 
+          className='absolute top-1 right-1 h-6 w-6'
           onClick={copyCode}
         >
-          <Copy size={12} color="#a3a3a3" />
+          <Copy size={12} color='#a3a3a3' />
         </Button>
       )}
     </View>

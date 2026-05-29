@@ -208,12 +208,12 @@ export const H5NavBar = () => {
   return (
     <>
       <View
-        className="fixed top-0 left-0 right-0 h-11 flex items-center justify-center z-1000"
+        className='fixed top-0 left-0 right-0 h-11 flex items-center justify-center z-1000'
         style={getBgStyle()}
       >
         {navState.leftIcon === LeftIcon.Back && (
           <View
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 flex items-center justify-center"
+            className='absolute left-2 top-1/2 -translate-y-1/2 p-1 flex items-center justify-center'
             onClick={handleBack}
           >
             <ChevronLeft size={24} color={iconColor} />
@@ -221,7 +221,7 @@ export const H5NavBar = () => {
         )}
         {navState.leftIcon === LeftIcon.Home && (
           <View
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 flex items-center justify-center"
+            className='absolute left-2 top-1/2 -translate-y-1/2 p-1 flex items-center justify-center'
             onClick={handleGoHome}
           >
             <House size={22} color={iconColor} />
@@ -233,7 +233,7 @@ export const H5NavBar = () => {
           {navState.title}
         </Text>
       </View>
-      <View className="h-11 shrink-0" />
+      <View className='h-11 shrink-0' />
     </>
   );
 };

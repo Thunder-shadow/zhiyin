@@ -90,26 +90,26 @@ export default function ResumeEditor() {
   }
 
   return (
-    <View className="min-h-full bg-background">
+    <View className='min-h-full bg-background'>
       {/* 顶部 */}
-      <View className="bg-gradient-to-br from-emerald-500 to-teal-600 px-4 pt-4 pb-6 rounded-b-3xl">
-        <View className="flex flex-row items-center gap-2">
-          <View onClick={() => Taro.navigateBack()} className="p-1">
-            <ArrowLeft size={20} color="#fff" />
+      <View className='bg-gradient-to-br from-emerald-500 to-teal-600 px-4 pt-4 pb-6 rounded-b-3xl'>
+        <View className='flex flex-row items-center gap-2'>
+          <View onClick={() => Taro.navigateBack()} className='p-1'>
+            <ArrowLeft size={20} color='#fff' />
           </View>
-          <Text className="block text-white font-bold text-lg">编辑简历</Text>
+          <Text className='block text-white font-bold text-lg'>编辑简历</Text>
         </View>
       </View>
 
-      <View className="px-4 -mt-3">
+      <View className='px-4 -mt-3'>
         {/* 版本名称 */}
         <Card className={`shadow-sm mb-3 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <Text className="block text-sm text-gray-500 mb-1">版本名称</Text>
-            <View className="bg-gray-50 rounded-xl px-3 py-2">
+          <CardContent className='p-4'>
+            <Text className='block text-sm text-gray-500 mb-1'>版本名称</Text>
+            <View className='bg-gray-50 rounded-xl px-3 py-2'>
               <Input
                 style={{ width: '100%', fontSize: '14px', backgroundColor: 'transparent' }}
-                placeholder="如：投递字节产品岗 v1"
+                placeholder='如：投递字节产品岗 v1'
                 value={versionName}
                 onInput={(e) => setVersionName(e.detail.value)}
               />
@@ -119,12 +119,12 @@ export default function ResumeEditor() {
 
         {/* 简历内容 */}
         <Card className={`shadow-sm mb-3 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <Text className="block text-sm text-gray-500 mb-1">简历内容</Text>
-            <View className="bg-gray-50 rounded-xl p-3">
+          <CardContent className='p-4'>
+            <Text className='block text-sm text-gray-500 mb-1'>简历内容</Text>
+            <View className='bg-gray-50 rounded-xl p-3'>
               <Textarea
                 style={{ width: '100%', minHeight: '120px', backgroundColor: 'transparent', fontSize: '13px' }}
-                placeholder="粘贴或输入你的简历内容..."
+                placeholder='粘贴或输入你的简历内容...'
                 value={contentText}
                 onInput={(e) => setContentText(e.detail.value)}
                 maxlength={5000}
@@ -139,48 +139,48 @@ export default function ResumeEditor() {
           onClick={saveResume}
           disabled={isSaving}
         >
-          <Save size={16} color="#fff" />
-          <Text className="text-white ml-1">{isSaving ? '保存中...' : '保存简历'}</Text>
+          <Save size={16} color='#fff' />
+          <Text className='text-white ml-1'>{isSaving ? '保存中...' : '保存简历'}</Text>
         </Button>
 
         {/* JD 匹配分析 */}
         <Card className={`shadow-sm ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <View className="flex flex-row items-center gap-2 mb-3">
-              <Sparkles size={16} color="#FF6B35" />
-              <Text className="block font-semibold text-foreground">JD匹配分析</Text>
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-2 mb-3'>
+              <Sparkles size={16} color='#FF6B35' />
+              <Text className='block font-semibold text-foreground'>JD匹配分析</Text>
             </View>
-            <View className="mb-3">
-              <View className="bg-gray-50 rounded-xl p-3">
+            <View className='mb-3'>
+              <View className='bg-gray-50 rounded-xl p-3'>
                 <Textarea
                   style={{ width: '100%', minHeight: '80px', backgroundColor: 'transparent', fontSize: '13px' }}
-                  placeholder="粘贴目标岗位的JD..."
+                  placeholder='粘贴目标岗位的JD...'
                   value={jdText}
                   onInput={(e) => setJdText(e.detail.value)}
                   maxlength={3000}
                 />
               </View>
             </View>
-            <Button className="w-full btn-shimmer" onClick={matchResume} disabled={isMatching || !jdText.trim()}>
-              <Sparkles size={16} color="#fff" />
-              <Text className="text-white ml-1">{isMatching ? 'AI分析中...' : 'AI匹配分析'}</Text>
+            <Button className='w-full btn-shimmer' onClick={matchResume} disabled={isMatching || !jdText.trim()}>
+              <Sparkles size={16} color='#fff' />
+              <Text className='text-white ml-1'>{isMatching ? 'AI分析中...' : 'AI匹配分析'}</Text>
             </Button>
           </CardContent>
         </Card>
 
         {/* 匹配结果 */}
         {matchResult && (
-          <Card className="mt-4 shadow-sm anim-fade-in-up">
-            <CardContent className="p-4">
-              <View className="flex flex-row items-center justify-between mb-2">
-                <Text className="block font-semibold text-foreground">匹配结果</Text>
+          <Card className='mt-4 shadow-sm anim-fade-in-up'>
+            <CardContent className='p-4'>
+              <View className='flex flex-row items-center justify-between mb-2'>
+                <Text className='block font-semibold text-foreground'>匹配结果</Text>
                 <Badge className={`border-none text-sm font-bold ${matchResult.match_score >= 70 ? 'bg-emerald-50 text-emerald-600' : matchResult.match_score >= 50 ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'}`}>
                   {matchResult.match_score}%
                 </Badge>
               </View>
-              <View className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+              <View className='w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3'>
                 <View
-                  className="h-full rounded-full progress-animated"
+                  className='h-full rounded-full progress-animated'
                   style={{
                     width: `${matchResult.match_score}%`,
                     backgroundColor: matchResult.match_score >= 70 ? '#10B981' : matchResult.match_score >= 50 ? '#F59E0B' : '#EF4444',
@@ -188,7 +188,7 @@ export default function ResumeEditor() {
                 />
               </View>
               {matchResult.suggestions && (
-                <Text className="block text-sm text-foreground leading-relaxed">{matchResult.suggestions}</Text>
+                <Text className='block text-sm text-foreground leading-relaxed'>{matchResult.suggestions}</Text>
               )}
             </CardContent>
           </Card>

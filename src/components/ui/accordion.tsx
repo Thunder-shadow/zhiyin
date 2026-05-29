@@ -107,7 +107,7 @@ const AccordionTriggerInternal = React.forwardRef<
         : context?.value === itemValue
 
     return (
-        <View className="flex">
+        <View className='flex'>
             <View
               ref={ref}
               className={cn(
@@ -118,7 +118,7 @@ const AccordionTriggerInternal = React.forwardRef<
               {...props}
             >
                 {children}
-                <ChevronsUpDown className={cn("shrink-0 transition-transform duration-200", isOpen && "rotate-180")} size={16} color="inherit" />
+                <ChevronsUpDown className={cn("shrink-0 transition-transform duration-200", isOpen && "rotate-180")} size={16} color='inherit' />
             </View>
         </View>
     )
@@ -148,7 +148,7 @@ const AccordionContentInternal = React.forwardRef<
     return (
         <View
           ref={ref}
-          className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+          className='overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down'
           {...props}
         >
             <View className={cn("pb-4 pt-0", className)}>{children}</View>

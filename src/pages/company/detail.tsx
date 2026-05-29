@@ -158,64 +158,64 @@ export default function CompanyDetail() {
   }
 
   return (
-    <View className="min-h-full bg-background">
+    <View className='min-h-full bg-background'>
       {/* 顶部标题栏 */}
-      <View className="bg-background px-4 pt-2 pb-3 flex flex-row items-center gap-3">
-        <View onClick={() => Taro.navigateBack()} className="p-1">
-          <ArrowLeft size={20} color="#3A4A44" />
+      <View className='bg-background px-4 pt-2 pb-3 flex flex-row items-center gap-3'>
+        <View onClick={() => Taro.navigateBack()} className='p-1'>
+          <ArrowLeft size={20} color='#3A4A44' />
         </View>
-        <Text className="block text-lg font-bold text-foreground">领取新任务</Text>
+        <Text className='block text-lg font-bold text-foreground'>领取新任务</Text>
       </View>
 
-      <View className="px-4">
+      <View className='px-4'>
         {/* 基本信息 */}
-        <Card className="mb-4 shadow-card">
-          <CardContent className="p-4">
-            <View className="flex flex-row items-center gap-2 mb-4">
-              <Target size={16} color="#3A4A44" />
-              <Text className="block font-semibold text-foreground">目标岗位</Text>
+        <Card className='mb-4 shadow-card'>
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-2 mb-4'>
+              <Target size={16} color='#3A4A44' />
+              <Text className='block font-semibold text-foreground'>目标岗位</Text>
             </View>
-            <View className="mb-3">
-              <Text className="block text-xs text-muted-foreground mb-2">公司名称</Text>
-              <View className="bg-muted rounded-lg px-4 py-3">
+            <View className='mb-3'>
+              <Text className='block text-xs text-muted-foreground mb-2'>公司名称</Text>
+              <View className='bg-muted rounded-lg px-4 py-3'>
                 <Input
-                  className="w-full bg-transparent text-sm text-foreground"
-                  placeholder="输入公司名称"
+                  className='w-full bg-transparent text-sm text-foreground'
+                  placeholder='输入公司名称'
                   value={company}
                   onInput={(e) => setCompany(e.detail.value)}
                 />
               </View>
             </View>
             <View>
-              <Text className="block text-xs text-muted-foreground mb-2">岗位名称</Text>
-              <View className="bg-muted rounded-lg px-4 py-3">
+              <Text className='block text-xs text-muted-foreground mb-2'>岗位名称</Text>
+              <View className='bg-muted rounded-lg px-4 py-3'>
                 <Input
-                  className="w-full bg-transparent text-sm text-foreground"
-                  placeholder="输入岗位名称"
+                  className='w-full bg-transparent text-sm text-foreground'
+                  placeholder='输入岗位名称'
                   value={position}
                   onInput={(e) => setPosition(e.detail.value)}
                 />
               </View>
             </View>
             {/* 行业/薪资 行 */}
-            <View className="flex flex-row gap-3 mt-3">
-              <View className="flex-1">
-                <Text className="block text-xs text-muted-foreground mb-2">行业</Text>
-                <View className="bg-muted rounded-lg px-4 py-3">
+            <View className='flex flex-row gap-3 mt-3'>
+              <View className='flex-1'>
+                <Text className='block text-xs text-muted-foreground mb-2'>行业</Text>
+                <View className='bg-muted rounded-lg px-4 py-3'>
                   <Input
-                    className="w-full bg-transparent text-sm text-foreground"
-                    placeholder="如：互联网"
+                    className='w-full bg-transparent text-sm text-foreground'
+                    placeholder='如：互联网'
                     value={industry}
                     onInput={(e) => setIndustry(e.detail.value)}
                   />
                 </View>
               </View>
-              <View className="flex-1">
-                <Text className="block text-xs text-muted-foreground mb-2">薪资范围</Text>
-                <View className="bg-muted rounded-lg px-4 py-3">
+              <View className='flex-1'>
+                <Text className='block text-xs text-muted-foreground mb-2'>薪资范围</Text>
+                <View className='bg-muted rounded-lg px-4 py-3'>
                   <Input
-                    className="w-full bg-transparent text-sm text-foreground"
-                    placeholder="如：20-40K"
+                    className='w-full bg-transparent text-sm text-foreground'
+                    placeholder='如：20-40K'
                     value={salary}
                     onInput={(e) => setSalary(e.detail.value)}
                   />
@@ -223,24 +223,24 @@ export default function CompanyDetail() {
               </View>
             </View>
             {/* 地点/学历 行 */}
-            <View className="flex flex-row gap-3 mt-3">
-              <View className="flex-1">
-                <Text className="block text-xs text-muted-foreground mb-2">地点</Text>
-                <View className="bg-muted rounded-lg px-4 py-3">
+            <View className='flex flex-row gap-3 mt-3'>
+              <View className='flex-1'>
+                <Text className='block text-xs text-muted-foreground mb-2'>地点</Text>
+                <View className='bg-muted rounded-lg px-4 py-3'>
                   <Input
-                    className="w-full bg-transparent text-sm text-foreground"
-                    placeholder="如：北京"
+                    className='w-full bg-transparent text-sm text-foreground'
+                    placeholder='如：北京'
                     value={location}
                     onInput={(e) => setLocation(e.detail.value)}
                   />
                 </View>
               </View>
-              <View className="flex-1">
-                <Text className="block text-xs text-muted-foreground mb-2">学历要求</Text>
-                <View className="bg-muted rounded-lg px-4 py-3">
+              <View className='flex-1'>
+                <Text className='block text-xs text-muted-foreground mb-2'>学历要求</Text>
+                <View className='bg-muted rounded-lg px-4 py-3'>
                   <Input
-                    className="w-full bg-transparent text-sm text-foreground"
-                    placeholder="如：本科"
+                    className='w-full bg-transparent text-sm text-foreground'
+                    placeholder='如：本科'
                     value={education}
                     onInput={(e) => setEducation(e.detail.value)}
                   />
@@ -251,28 +251,28 @@ export default function CompanyDetail() {
         </Card>
 
         {/* JD 输入区 */}
-        <Card className="mb-4 shadow-card">
-          <CardContent className="p-4">
-            <View className="flex flex-row items-center gap-2 mb-3">
-              <FileText size={16} color="#3A4A44" />
-              <Text className="block font-semibold text-foreground">职位描述 (JD)</Text>
+        <Card className='mb-4 shadow-card'>
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-2 mb-3'>
+              <FileText size={16} color='#3A4A44' />
+              <Text className='block font-semibold text-foreground'>职位描述 (JD)</Text>
             </View>
-            <View className="bg-muted rounded-lg p-3">
+            <View className='bg-muted rounded-lg p-3'>
               <Textarea
                 style={{ width: '100%', minHeight: '120px', backgroundColor: 'transparent', fontSize: '13px' }}
-                placeholder="粘贴岗位JD，AI将逆向解析隐性需求..."
+                placeholder='粘贴岗位JD，AI将逆向解析隐性需求...'
                 value={jdText}
                 onInput={(e) => setJdText(e.detail.value)}
               />
             </View>
             {cardId && strategy ? (
               <Button
-                className="w-full mt-3"
+                className='w-full mt-3'
                 disabled={strategyLoading || !jdText}
                 onClick={handleReParse}
               >
-                <Sparkles size={16} color="#fff" />
-                <Text className="text-primary-foreground ml-1">{strategyLoading ? 'AI解析中...' : '重新解析'}</Text>
+                <Sparkles size={16} color='#fff' />
+                <Text className='text-primary-foreground ml-1'>{strategyLoading ? 'AI解析中...' : '重新解析'}</Text>
               </Button>
             ) : null}
           </CardContent>
@@ -280,55 +280,55 @@ export default function CompanyDetail() {
 
         {/* AI 策略结果 */}
         {strategy && (
-          <Card className="mb-4 shadow-card">
-            <CardContent className="p-4">
-              <View className="flex flex-row items-center gap-2 mb-4">
-                <Sparkles size={16} color="#E26A5C" />
-                <Text className="block font-semibold text-foreground">AI攻略策略</Text>
-                <Badge className="bg-primary bg-opacity-15 text-primary border-none ml-auto">
-                  <Text className="text-xs">已解锁</Text>
+          <Card className='mb-4 shadow-card'>
+            <CardContent className='p-4'>
+              <View className='flex flex-row items-center gap-2 mb-4'>
+                <Sparkles size={16} color='#E26A5C' />
+                <Text className='block font-semibold text-foreground'>AI攻略策略</Text>
+                <Badge className='bg-primary bg-opacity-15 text-primary border-none ml-auto'>
+                  <Text className='text-xs'>已解锁</Text>
                 </Badge>
               </View>
 
               {strategy.resume_tips && (
-                <View className="mb-4">
-                  <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
-                      <Shield size={12} color="#3A4A44" />
+                <View className='mb-4'>
+                  <View className='flex flex-row items-center gap-2 mb-2'>
+                    <View className='w-6 h-6 rounded-full bg-primary-container flex items-center justify-center' style={{ overflow: 'hidden' }}>
+                      <Shield size={12} color='#3A4A44' />
                     </View>
-                    <Text className="block text-sm font-medium text-foreground">简历修饰建议</Text>
+                    <Text className='block text-sm font-medium text-foreground'>简历修饰建议</Text>
                   </View>
-                  <Text className="block text-sm text-muted-foreground leading-relaxed pl-8">{strategy.resume_tips}</Text>
+                  <Text className='block text-sm text-muted-foreground leading-relaxed pl-8'>{strategy.resume_tips}</Text>
                 </View>
               )}
 
               {strategy.hidden_requirements && (
-                <View className="mb-4">
-                  <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-warning-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
-                      <Lightbulb size={12} color="#D4A017" />
+                <View className='mb-4'>
+                  <View className='flex flex-row items-center gap-2 mb-2'>
+                    <View className='w-6 h-6 rounded-full bg-warning-container flex items-center justify-center' style={{ overflow: 'hidden' }}>
+                      <Lightbulb size={12} color='#D4A017' />
                     </View>
-                    <Text className="block text-sm font-medium text-foreground">隐性需求</Text>
+                    <Text className='block text-sm font-medium text-foreground'>隐性需求</Text>
                   </View>
-                  <Text className="block text-sm text-muted-foreground leading-relaxed pl-8">{strategy.hidden_requirements}</Text>
+                  <Text className='block text-sm text-muted-foreground leading-relaxed pl-8'>{strategy.hidden_requirements}</Text>
                 </View>
               )}
 
               {strategy.hr_questions_prediction?.length > 0 && (
-                <View className="mb-4">
-                  <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-error-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
-                      <MessageCircle size={12} color="#E26A5C" />
+                <View className='mb-4'>
+                  <View className='flex flex-row items-center gap-2 mb-2'>
+                    <View className='w-6 h-6 rounded-full bg-error-container flex items-center justify-center' style={{ overflow: 'hidden' }}>
+                      <MessageCircle size={12} color='#E26A5C' />
                     </View>
-                    <Text className="block text-sm font-medium text-foreground">HR可能的问题</Text>
+                    <Text className='block text-sm font-medium text-foreground'>HR可能的问题</Text>
                   </View>
-                  <View className="pl-8">
+                  <View className='pl-8'>
                     {strategy.hr_questions_prediction.map((q: string, i: number) => (
-                      <View key={i} className="flex flex-row items-start gap-2 mb-2">
-                        <View className="w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-1" style={{ overflow: 'hidden' }}>
-                          <Text className="text-xs text-primary font-semibold">{i + 1}</Text>
+                      <View key={i} className='flex flex-row items-start gap-2 mb-2'>
+                        <View className='w-5 h-5 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-1' style={{ overflow: 'hidden' }}>
+                          <Text className='text-xs text-primary font-semibold'>{i + 1}</Text>
                         </View>
-                        <Text className="text-sm text-muted-foreground">{q}</Text>
+                        <Text className='text-sm text-muted-foreground'>{q}</Text>
                       </View>
                     ))}
                   </View>
@@ -337,17 +337,17 @@ export default function CompanyDetail() {
 
               {strategy.actions?.length > 0 && (
                 <View>
-                  <View className="flex flex-row items-center gap-2 mb-2">
-                    <View className="w-6 h-6 rounded-full bg-success-container flex items-center justify-center" style={{ overflow: 'hidden' }}>
-                      <Target size={12} color="#5B9A6F" />
+                  <View className='flex flex-row items-center gap-2 mb-2'>
+                    <View className='w-6 h-6 rounded-full bg-success-container flex items-center justify-center' style={{ overflow: 'hidden' }}>
+                      <Target size={12} color='#5B9A6F' />
                     </View>
-                    <Text className="block text-sm font-medium text-foreground">行动建议</Text>
+                    <Text className='block text-sm font-medium text-foreground'>行动建议</Text>
                   </View>
-                  <View className="pl-8">
+                  <View className='pl-8'>
                     {strategy.actions.map((a: string, i: number) => (
-                      <View key={i} className="flex flex-row items-start gap-2 mb-2">
-                        <View className="w-2 h-2 rounded-full bg-success mt-2 flex-shrink-0" />
-                        <Text className="text-sm text-muted-foreground">{a}</Text>
+                      <View key={i} className='flex flex-row items-start gap-2 mb-2'>
+                        <View className='w-2 h-2 rounded-full bg-success mt-2 flex-shrink-0' />
+                        <Text className='text-sm text-muted-foreground'>{a}</Text>
                       </View>
                     ))}
                   </View>
@@ -359,24 +359,24 @@ export default function CompanyDetail() {
 
         {/* 解析中提示 */}
         {strategyLoading && (
-          <Card className="mb-4 shadow-card">
-            <CardContent className="p-6 flex flex-col items-center">
-              <Sparkles size={32} color="#3A4A44" />
-              <Text className="block text-foreground font-semibold mt-3">AI正在解析JD</Text>
-              <Text className="block text-muted-foreground text-sm mt-1">分析隐性需求和面试策略...</Text>
+          <Card className='mb-4 shadow-card'>
+            <CardContent className='p-6 flex flex-col items-center'>
+              <Sparkles size={32} color='#3A4A44' />
+              <Text className='block text-foreground font-semibold mt-3'>AI正在解析JD</Text>
+              <Text className='block text-muted-foreground text-sm mt-1'>分析隐性需求和面试策略...</Text>
             </CardContent>
           </Card>
         )}
 
         {/* 底部提交按钮 */}
-        <View className="pb-8">
+        <View className='pb-8'>
           <Button
-            className="w-full"
+            className='w-full'
             disabled={saving || strategyLoading || !company || !position}
             onClick={handleSaveAndParse}
           >
-            <Sparkles size={16} color="#fff" />
-            <Text className="text-primary-foreground ml-1">
+            <Sparkles size={16} color='#fff' />
+            <Text className='text-primary-foreground ml-1'>
               {saving ? '保存中...' : strategyLoading ? '解析中...' : '领取任务并解析JD'}
             </Text>
           </Button>
