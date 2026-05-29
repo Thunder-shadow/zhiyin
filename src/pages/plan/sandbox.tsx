@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Send, Bot, User, GraduationCap } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Network } from '@/network'
+import { fetchStream } from '@/utils/stream'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   isThinking?: boolean
+  streaming?: boolean
 }
 
 function getStatusBarHeight(): number {
@@ -26,21 +27,9 @@ export default function CareerSandbox() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const scrollRef = useRef('')
   const messagesRef = useRef<Message[]>([])
   const statusBarHeight = getStatusBarHeight()
-
-  // 监听键盘高度变化
-  useEffect(() => {
-    const listener = (res: { height: number }) => {
-      setKeyboardHeight(res.height > 0 ? res.height : 0)
-    }
-    Taro.onKeyboardHeightChange(listener)
-    return () => {
-      Taro.offKeyboardHeightChange(listener)
-    }
-  }, [])
 
   const scrollToBottom = useCallback(() => {
     scrollRef.current = 'scroll-' + Date.now()
@@ -60,61 +49,62 @@ export default function CareerSandbox() {
     setInput('')
     setIsLoading(true)
 
-    const aiMsg: Message = { id: 'ai-' + Date.now(), role: 'assistant', content: '', isThinking: true }
+    const aiMsgId = 'ai-' + Date.now()
+    const aiMsg: Message = { id: aiMsgId, role: 'assistant', content: '', isThinking: true, streaming: true }
     messagesRef.current = [...messagesRef.current, aiMsg]
     setMessages([...messagesRef.current])
     scrollToBottom()
 
-    try {
-      const res = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: {
-          action: 'career_plan',
-          prompt: trimmed,
-          conversation: messagesRef.current.filter(m => m.role === 'user').map(m => ({
-            role: m.role,
-            content: m.content
-          }))
-        }
-      })
-
-      if (res.data.code === 200 && res.data.data) {
-        const reply = res.data.data.reply || res.data.data.content || ''
-        const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
-        if (msgIndex !== -1) {
-          messagesRef.current[msgIndex] = {
-            ...aiMsg,
-            content: reply,
-            isThinking: false,
+    await fetchStream(
+      '/api/ai/chat/stream',
+      {
+        action: 'career_plan',
+        conversation: messagesRef.current.filter(m => m.role === 'user').map(m => ({
+          role: m.role,
+          content: m.content
+        }))
+      },
+      {
+        onChunk: (content) => {
+          const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsgId)
+          if (msgIndex !== -1) {
+            messagesRef.current[msgIndex] = {
+              ...messagesRef.current[msgIndex],
+              content: messagesRef.current[msgIndex].content + content,
+              isThinking: false,
+              streaming: true,
+            }
+            setMessages([...messagesRef.current])
           }
-        }
-        setMessages([...messagesRef.current])
-      } else {
-        const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
-        if (msgIndex !== -1) {
-          messagesRef.current[msgIndex] = {
-            ...aiMsg,
-            content: 'AI暂时无法回复，请稍后再试...',
-            isThinking: false,
+          scrollToBottom()
+        },
+        onDone: () => {
+          const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsgId)
+          if (msgIndex !== -1) {
+            messagesRef.current[msgIndex] = {
+              ...messagesRef.current[msgIndex],
+              isThinking: false,
+              streaming: false,
+            }
+            setMessages([...messagesRef.current])
           }
-        }
-        setMessages([...messagesRef.current])
+          setIsLoading(false)
+        },
+        onError: () => {
+          const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsgId)
+          if (msgIndex !== -1) {
+            messagesRef.current[msgIndex] = {
+              ...messagesRef.current[msgIndex],
+              content: 'AI暂时无法回复，请稍后再试...',
+              isThinking: false,
+              streaming: false,
+            }
+            setMessages([...messagesRef.current])
+          }
+          setIsLoading(false)
+        },
       }
-    } catch (err) {
-      const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
-      if (msgIndex !== -1) {
-        messagesRef.current[msgIndex] = {
-          ...aiMsg,
-          content: 'AI暂时无法回复，请稍后再试...',
-          isThinking: false,
-        }
-      }
-      setMessages([...messagesRef.current])
-    } finally {
-      setIsLoading(false)
-      scrollToBottom()
-    }
+    )
   }, [input, isLoading, scrollToBottom])
 
   // 初始化消息
@@ -191,6 +181,7 @@ export default function CareerSandbox() {
             >
               <Text className='block text-sm' style={{ color: msg.role === 'user' ? '#fff' : '#333', lineHeight: '22px' }}>
                 {msg.content}
+                {msg.streaming && <Text className='inline-block w-2 h-4 ml-1' style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
               </Text>
               {msg.isThinking && (
                 <Text className='block text-xs mt-1 animate-pulse' style={{ color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : '#999' }}>
@@ -220,39 +211,34 @@ export default function CareerSandbox() {
         <View id={scrollRef.current} className='h-4' />
       </ScrollView>
 
-      {/* 输入区 - 固定在键盘上方 */}
+      {/* 输入区 */}
       <View
-        className='flex-shrink-0 px-4 py-3'
-        style={{
-          background: '#fff',
-          borderTop: '1px solid #eee',
-          paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : '12px',
-        }}
+        className='flex-shrink-0 px-3 pt-3 bg-card'
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)', borderTop: '1px solid var(--color-outline-variant)' }}
       >
-        <View
-          className='flex flex-row items-center px-4 py-2 rounded-full'
-          style={{ background: '#F5F5F5' }}
-        >
-          <TaroInput
-            className='flex-1 text-sm'
-            style={{ minHeight: '36px', lineHeight: '36px' }}
-            placeholder='输入你的职业问题...'
-            value={input}
-            onInput={(e) => setInput(e.detail.value)}
-            disabled={isLoading}
-            adjustPosition
-            onConfirm={sendMessage}
-          />
-          <View className='ml-2 flex-shrink-0'>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
+          <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
+            <TaroInput
+              style={{ width: '100%', fontSize: '14px', color: 'var(--color-foreground)', backgroundColor: 'transparent' }}
+              placeholder='输入你的职业问题...'
+              placeholderStyle='color: var(--color-muted-foreground)'
+              value={input}
+              onInput={(e) => setInput(e.detail.value)}
+              disabled={isLoading}
+              adjustPosition
+              onConfirm={sendMessage}
+              onFocus={scrollToBottom}
+            />
+          </View>
+          <View style={{ flexShrink: 0 }}>
             <Button
               size='sm'
-              variant='ghost'
+              className='rounded-full'
+              style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className='rounded-full p-2'
-              style={{ background: input.trim() && !isLoading ? 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' : '#ddd' }}
             >
-              <Send size={18} color={input.trim() && !isLoading ? '#fff' : '#999'} />
+              <Send size={16} color='#fff' />
             </Button>
           </View>
         </View>

@@ -62,7 +62,7 @@ export default function HrReport() {
         data: requestData,
       })
       const data = res.data?.data || res.data
-      const notes = data?.hr_notes || data?.message || '报告生成失败'
+      const notes = data?.hr_notes || data?.reply || data?.message || '报告生成失败'
       setHrNotes(notes)
       setStep('result')
 
