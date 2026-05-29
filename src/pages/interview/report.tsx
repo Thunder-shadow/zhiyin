@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trophy, Star, Lightbulb, ArrowLeft } from 'lucide-react-taro'
+import { Trophy, Star, Lightbulb } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 
@@ -34,8 +34,7 @@ export default function InterviewReport() {
     <View className='min-h-full bg-background'>
       {/* 顶部 */}
       <View className='bg-gradient-to-br from-primary to-indigo-700 px-4 pt-4 pb-6 rounded-b-3xl'>
-        <View className='flex flex-row items-center gap-2' onClick={() => Taro.navigateBack()}>
-          <ArrowLeft size={20} color='#fff' />
+        <View className='flex flex-row items-center gap-2'>
           <Text className='block font-bold text-lg text-white'>面试报告</Text>
         </View>
       </View>

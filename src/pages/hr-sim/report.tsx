@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, FileCheck, Loader, BookOpen, ExternalLink } from 'lucide-react-taro'
+import { FileCheck, Loader, BookOpen, ExternalLink } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect, useRef } from 'react'
 import { Network } from '@/network'
@@ -92,44 +92,26 @@ export default function HrReport() {
     }
   }
 
-  const handleBack = () => {
-    if (step === 'loading') {
-      Taro.showModal({
-        title: '提示',
-        content: '报告正在生成中，生成完成后可在「我的 - 招聘笔记」中查看',
-        showCancel: true,
-        cancelText: '继续等待',
-        confirmText: '我知道了',
-        success: (res) => {
-          if (res.confirm) {
-            Taro.navigateBack()
-          }
-        }
-      })
-    } else {
-      Taro.navigateBack()
-    }
-  }
-
   return (
     <View className='min-h-full bg-background'>
       {/* 顶部 */}
-      <View
-        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
-        style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
-      >
-        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className='flex flex-row items-center gap-3 relative'>
-          <View onClick={handleBack} className='p-1 btn-press'>
-            <ArrowLeft size={20} color='#fff' />
-          </View>
-          <View className='flex-1'>
-            <Text className='block text-white font-bold text-base'>
-              {step === 'loading' ? '生成招聘笔记' : '招聘笔记'}
-            </Text>
-            <Text className='block text-gray-300 text-xs'>候选人: {candidateName.current}</Text>
-          </View>
-        </View>
+      <View className='px-4 pt-3'>
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View className='h-2' style={{ background: 'linear-gradient(90deg, #10B981, #059669, #047857)' }} />
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-3'>
+              <View className='w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0' style={{ overflow: 'hidden' }}>
+                <FileCheck size={22} color='#10B981' />
+              </View>
+              <View className='flex-1 min-w-0'>
+                <Text className='text-base font-semibold text-foreground'>
+                  {step === 'loading' ? '生成招聘笔记' : '招聘笔记'}
+                </Text>
+                <Text className='text-xs text-muted-foreground mt-1'>候选人: {candidateName.current}</Text>
+              </View>
+            </View>
+          </CardContent>
+        </Card>
       </View>
 
       <View className='px-4 pt-5'>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Plus, User, Pencil, Trash2, Swords, Search } from 'lucide-react-taro'
+import { Plus, User, Pencil, Trash2, Swords, Search } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
@@ -111,24 +111,20 @@ export default function Candidates() {
       >
         <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
         <View className='flex flex-row items-center gap-3 relative'>
-          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
-            <ArrowLeft size={20} color='#fff' />
-          </View>
           <View className='flex-1'>
             <Text className='block text-white font-bold text-base'>选择候选人</Text>
             <Text className='block text-gray-300 text-xs'>选择一个候选人开始面试</Text>
           </View>
-          <Button
-            size='sm'
-            className='bg-white bg-opacity-20 border-none rounded-lg btn-press'
-            onClick={goToCreate}
-          >
-            <Plus size={16} color='#fff' />
-          </Button>
         </View>
       </View>
 
       <View className='px-4 pt-4'>
+        {/* 新建候选人按钮 */}
+        <Button className='w-full btn-shimmer btn-press mb-4' onClick={goToCreate}>
+          <Plus size={16} />
+          <Text className='ml-2'>新建候选人</Text>
+        </Button>
+
         {/* 搜索框 */}
         <View className='bg-surface-container rounded-xl px-3 py-2 mb-4'>
           <View className='flex flex-row items-center gap-2'>

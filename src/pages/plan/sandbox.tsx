@@ -2,7 +2,7 @@
 import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Send, Bot, Sparkles } from 'lucide-react-taro'
+import { Send, Bot, Sparkles } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback } from 'react'
 import { fetchStream } from '@/utils/stream'
@@ -88,9 +88,6 @@ export default function PlanSandbox() {
         style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className='flex flex-row items-center gap-3'>
-          <View onClick={() => Taro.navigateBack()} className='p-1'>
-            <ArrowLeft size={20} color='#fff' />
-          </View>
           <View className='flex-1 min-w-0'>
             <Text className='block text-white font-bold text-base'>职业沙盘</Text>
             <Text className='block text-sm' style={{ color: 'rgba(255,255,255,0.7)' }}>AI帮你规划职业路径</Text>

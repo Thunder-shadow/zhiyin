@@ -3,7 +3,7 @@ import { View, Text } from '@tarojs/components'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, User, Clock, ChevronRight, Swords, Bot, Send } from 'lucide-react-taro'
+import { User, Clock, ChevronRight, Swords, Bot, Send } from 'lucide-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
 import { useState, useEffect, useRef, useCallback } from 'react'
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -234,9 +234,6 @@ export default function HrSim() {
         >
           <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
           <View className='flex flex-row items-center gap-3 relative'>
-            <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
-              <ArrowLeft size={20} color='#fff' />
-            </View>
             <View className='flex-1'>
               <Text className='block text-white font-bold text-base'>HR反向模拟</Text>
               <Text className='block text-gray-300 text-xs'>扮演面试官，训练选人眼光</Text>
@@ -323,9 +320,6 @@ export default function HrSim() {
           background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
         }}
       >
-        <View onClick={endInterview} className='p-1 btn-press'>
-          <ArrowLeft size={20} color='#fff' />
-        </View>
         <View className='flex-1'>
           <Text className='block text-white font-bold text-sm'>{candidate?.name || '面试中'}</Text>
           <Text className='block text-gray-300 text-xs'>{candidate?.school || ''}</Text>

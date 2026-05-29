@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Save, User } from 'lucide-react-taro'
+import { Save, User } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Network } from '@/network'
@@ -108,47 +108,44 @@ export default function CandidateEdit() {
 
   return (
     <View className='min-h-full bg-background'>
-      {/* 顶部 - fixed */}
-      <View
-        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
-        style={{
-          background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-        }}
-      >
-        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className='flex flex-row items-center gap-3 relative'>
-          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
-            <ArrowLeft size={20} color='#fff' />
-          </View>
-          <View className='flex-1'>
-            <Text className='block text-white font-bold text-base'>
-              {candidateId ? '编辑候选人' : '新建候选人'}
-            </Text>
-            <Text className='block text-gray-300 text-xs'>填写候选人详细信息</Text>
-          </View>
-          <Button
-            size='sm'
-            className='bg-accent text-white border-none rounded-lg btn-shimmer btn-press'
-            onClick={handleSave}
-            disabled={loading}
-          >
-            <Save size={14} color='#fff' />
-            <Text className='text-white ml-1'>{loading ? '保存中...' : '保存'}</Text>
-          </Button>
-        </View>
+      {/* 顶部 */}
+      <View className='px-4 pt-3'>
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View className='h-2' style={{ background: 'linear-gradient(90deg, #F59E0B, #D97706, #B45309)' }} />
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-3'>
+              <View className='w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0' style={{ overflow: 'hidden' }}>
+                <User size={22} color='#F59E0B' />
+              </View>
+              <View className='flex-1 min-w-0'>
+                <Text className='text-base font-semibold text-foreground'>
+                  {candidateId ? '编辑候选人' : '新建候选人'}
+                </Text>
+                <Text className='text-xs text-muted-foreground mt-1'>填写候选人详细信息</Text>
+              </View>
+            </View>
+          </CardContent>
+        </Card>
       </View>
 
       {/* 表单区 */}
       <ScrollView
         className='flex-1 px-4'
-        style={{ paddingTop: '90px', paddingBottom: '20px' }}
+        style={{ paddingTop: '8px', paddingBottom: '20px' }}
         scrollY
       >
+        {/* 保存按钮 */}
+        <View className='mb-4'>
+          <Button
+            className='w-full btn-shimmer btn-press'
+            onClick={handleSave}
+            disabled={loading}
+          >
+            <Save size={16} />
+            <Text className='ml-2'>{loading ? '保存中...' : '保存'}</Text>
+          </Button>
+        </View>
+
         {/* 基本信息 */}
         <Card className={`shadow-card mb-4 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           <CardContent className='p-4'>

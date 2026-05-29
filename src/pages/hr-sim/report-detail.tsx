@@ -1,6 +1,6 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, FileCheck, User, Clock, MessageSquare } from 'lucide-react-taro'
+import { FileCheck, User, Clock, MessageSquare } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 
@@ -40,20 +40,21 @@ export default function HrReportDetail() {
   return (
     <View className='min-h-full bg-background'>
       {/* 顶部 */}
-      <View
-        className='px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden'
-        style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
-      >
-        <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className='flex flex-row items-center gap-3 relative'>
-          <View onClick={() => Taro.navigateBack()} className='p-1 btn-press'>
-            <ArrowLeft size={20} color='#fff' />
-          </View>
-          <View className='flex-1'>
-            <Text className='block text-white font-bold text-base'>招聘笔记详情</Text>
-            <Text className='block text-gray-300 text-xs'>候选人: {report.candidate_name}</Text>
-          </View>
-        </View>
+      <View className='px-4 pt-3'>
+        <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
+          <View className='h-2' style={{ background: 'linear-gradient(90deg, #6366F1, #4F46E5, #4338CA)' }} />
+          <CardContent className='p-4'>
+            <View className='flex flex-row items-center gap-3'>
+              <View className='w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0' style={{ overflow: 'hidden' }}>
+                <FileCheck size={22} color='#6366F1' />
+              </View>
+              <View className='flex-1 min-w-0'>
+                <Text className='text-base font-semibold text-foreground'>招聘笔记详情</Text>
+                <Text className='text-xs text-muted-foreground mt-1'>候选人: {report.candidate_name}</Text>
+              </View>
+            </View>
+          </CardContent>
+        </Card>
       </View>
 
       <View className='px-4 pt-5 pb-6'>
