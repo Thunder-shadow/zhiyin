@@ -31,14 +31,22 @@ export default function PlanSandbox() {
   const statusBarHeight = getStatusBarHeight()
   const messagesRef = useRef<Message[]>([])
 
-  // 监听键盘高度变化
+  // 监听键盘高度变化 - H5端不支持该API，需try/catch
   useEffect(() => {
-    const listener = (res: { height: number }) => {
-      setKeyboardHeight(res.height > 0 ? res.height : 0)
-    }
-    Taro.onKeyboardHeightChange(listener)
-    return () => {
-      Taro.offKeyboardHeightChange(listener)
+    try {
+      const listener = (res: { height: number }) => {
+        setKeyboardHeight(res.height > 0 ? res.height : 0)
+      }
+      Taro.onKeyboardHeightChange(listener)
+      return () => {
+        try {
+          Taro.offKeyboardHeightChange(listener)
+        } catch {
+          // ignore
+        }
+      }
+    } catch {
+      // ignore - H5端不支持
     }
   }, [])
 
