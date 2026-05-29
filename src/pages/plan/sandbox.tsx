@@ -81,7 +81,7 @@ export default function PlanSandbox() {
   const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
 
   return (
-    <View className='flex flex-col' style={{ height: '100vh' }}>
+    <View style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
       {/* 自定义顶部导航栏 */}
       <View
         className='flex-shrink-0'
@@ -101,7 +101,7 @@ export default function PlanSandbox() {
       {/* 聊天区 */}
       <ScrollView
         className='flex-1'
-        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px' }}
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
