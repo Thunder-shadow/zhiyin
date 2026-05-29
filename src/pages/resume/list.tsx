@@ -59,7 +59,7 @@ export default function ResumeList() {
           className='w-full btn-shimmer btn-press'
           onClick={() => Taro.navigateTo({ url: '/pages/resume/editor?mode=add' })}
         >
-          <Plus size={16} />
+          <Plus size={16} color='#fff' />
           <Text className='ml-2'>新建简历</Text>
         </Button>
       </View>

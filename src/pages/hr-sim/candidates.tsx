@@ -108,10 +108,8 @@ export default function Candidates() {
     <View className='min-h-full bg-background pb-safe'>
       {/* 顶部 */}
       <View
-        className='rounded-b-2xl relative overflow-hidden' style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px', paddingTop: '16px' }}
-        style={{
-          background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
-        }}
+        className='rounded-b-2xl relative overflow-hidden'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '16px', paddingTop: '16px', background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
       >
         <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
         <View className='flex flex-row items-center gap-3 relative'>
@@ -130,7 +128,7 @@ export default function Candidates() {
         {/* 新建候选人按钮 - 仅管理模式显示 */}
         {!isSelectMode && (
           <Button className='w-full btn-shimmer btn-press mb-4' onClick={goToCreate}>
-            <Plus size={16} />
+            <Plus size={16} color='#fff' />
             <Text className='ml-2'>新建候选人</Text>
           </Button>
         )}

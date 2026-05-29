@@ -69,8 +69,8 @@ export default function Dashboard() {
     <View className='min-h-full bg-background'>
       {/* 顶部深蓝区域：用户信息 + 经验条 */}
       <View
-        className='rounded-b-3xl relative overflow-hidden' style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '24px', paddingBottom: '32px' }}
-        style={{ background: 'linear-gradient(135deg, #2D3A35 0%, #3A4A44 50%, #4A6A5C 100%)' }}
+        className='rounded-b-3xl relative overflow-hidden'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '24px', paddingBottom: '32px', background: 'linear-gradient(135deg, #2D3A35 0%, #3A4A44 50%, #4A6A5C 100%)' }}
       >
         {/* 背景装饰圆 */}
         <View className='absolute -top-8 -right-8 w-32 h-32 rounded-full' style={{ background: 'radial-gradient(circle, rgba(91,154,111,0.2) 0%, transparent 70%)' }} />

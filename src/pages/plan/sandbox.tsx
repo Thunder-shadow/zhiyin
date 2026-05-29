@@ -5,12 +5,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Send, Bot, Sparkles } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback } from 'react'
-import { fetchStream } from '@/utils/stream'
+import { Network } from '@/network'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
-  streaming?: boolean
 }
 
 /** 获取系统状态栏高度 */
@@ -38,7 +37,7 @@ export default function PlanSandbox() {
     }, 50)
   }, [])
 
-  /** 发送消息 - 流式 */
+  /** 发送消息 - 使用非流式 API */
   const sendMessage = async () => {
     const trimmed = input.trim()
     if (!trimmed || isLoading) return
@@ -49,32 +48,32 @@ export default function PlanSandbox() {
     setIsLoading(true)
     setMessages(currentConversation)
 
-    const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
+    const aiMsg: ChatMessage = { role: 'assistant', content: '' }
 
-    await fetchStream(
-      '/api/ai/chat/stream',
-      {
-        action: 'career_plan',
-        conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
-      },
-      {
-        onChunk: (content) => {
-          aiMsg.content += content
-          aiMsg.streaming = true
-          setMessages([...currentConversation, { ...aiMsg }])
-          scrollToBottom()
+    try {
+      // 小程序端使用非流式 API，避免 enableChunked 不支持的问题
+      const response = await Network.request({
+        url: '/api/ai/chat',
+        method: 'POST',
+        data: {
+          action: 'career_plan',
+          conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
         },
-        onDone: () => {
-          aiMsg.streaming = false
-          setMessages([...currentConversation, { ...aiMsg }])
-          setIsLoading(false)
-        },
-        onError: () => {
-          setMessages([...currentConversation, { role: 'assistant', content: 'AI暂时无法回复，请稍后再试...', streaming: false }])
-          setIsLoading(false)
-        },
+      })
+
+      if (response.data?.code === 0 && response.data?.data?.message) {
+        aiMsg.content = response.data.data.message
+      } else {
+        aiMsg.content = '抱歉，AI暂时无法回复，请稍后再试...'
       }
-    )
+    } catch (err) {
+      console.error('Career plan error:', err)
+      aiMsg.content = '抱歉，AI暂时无法回复，请稍后再试...'
+    } finally {
+      setMessages([...currentConversation, { ...aiMsg }])
+      setIsLoading(false)
+      scrollToBottom()
+    }
   }
 
   const lastMsg = messages[messages.length - 1]
@@ -135,7 +134,6 @@ export default function PlanSandbox() {
                   <CardContent className='p-3'>
                     <Text className='block text-sm text-foreground leading-relaxed'>
                       {msg.content}
-                      {msg.streaming && <Text className='inline-block w-2 h-4 ml-1' style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>

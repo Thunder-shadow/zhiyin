@@ -202,20 +202,6 @@ export default function HrSim() {
     }
   }
 
-  /** 结束面试 */
-  const endInterview = () => {
-    Taro.showModal({
-      title: '结束面试',
-      content: '确定要结束这场面试吗？',
-      confirmText: '结束',
-      success: (res) => {
-        if (res.confirm) {
-          Taro.navigateBack()
-        }
-      },
-    })
-  }
-
   /** 跳转到候选人列表页面 */
   const goToCandidates = () => {
     Taro.navigateTo({ url: '/pages/hr-sim/candidates?mode=select' })
@@ -227,10 +213,8 @@ export default function HrSim() {
       <View className='min-h-full bg-background pb-safe'>
         {/* 顶部 */}
         <View
-          className='rounded-b-2xl relative overflow-hidden' style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '24px', paddingTop: '16px' }}
-          style={{
-            background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
-          }}
+          className='rounded-b-2xl relative overflow-hidden'
+          style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '24px', paddingTop: '16px', background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
         >
           <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
           <View className='flex flex-row items-center gap-3 relative'>
@@ -315,10 +299,8 @@ export default function HrSim() {
     <View className='min-h-full bg-background flex flex-col'>
       {/* 顶部 */}
       <View
-        className='flex flex-row items-center gap-3' style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}
-        style={{
-          background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
-        }}
+        className='flex flex-row items-center gap-3'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
       >
         <View className='flex-1'>
           <Text className='block text-white font-bold text-sm'>{candidate?.name || '面试中'}</Text>

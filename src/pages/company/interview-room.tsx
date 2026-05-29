@@ -2,7 +2,7 @@
 import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Bot, User, Trophy, Star, ArrowLeft } from 'lucide-react-taro'
+import { Send, Bot, User, Trophy, Star, ArrowLeft, Building } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Network } from '@/network'

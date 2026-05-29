@@ -109,7 +109,7 @@ export default function CreateJob() {
             onClick={handleCreate}
             disabled={loading}
           >
-            <Save size={16} />
+            <Save size={16} color='#fff' />
             <Text className='ml-2'>{loading ? '创建中...' : '创建任务'}</Text>
           </Button>
         </View>

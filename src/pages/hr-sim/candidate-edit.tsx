@@ -141,7 +141,7 @@ export default function CandidateEdit() {
             onClick={handleSave}
             disabled={loading}
           >
-            <Save size={16} />
+            <Save size={16} color='#fff' />
             <Text className='ml-2'>{loading ? '保存中...' : '保存'}</Text>
           </Button>
         </View>
