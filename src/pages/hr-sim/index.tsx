@@ -9,6 +9,9 @@ import Taro from '@tarojs/taro'
 import { useState, useRef, useEffect } from 'react'
 import { Network } from '@/network'
 import { fetchStream } from '@/utils/stream'
+import { useKeyboardOffset } from '@/lib/hooks/use-keyboard-offset'
+
+const AI_MAX_CHARS = 250
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -31,6 +34,7 @@ export default function HrSim() {
   const [hrNotes, setHrNotes] = useState('')
   const [loaded, setLoaded] = useState(false)
   const scrollRef = useRef('')
+  const keyboardOffset = useKeyboardOffset()
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 80)
@@ -48,29 +52,55 @@ export default function HrSim() {
     setIsLoading(true)
 
     const newMessages: ChatMessage[] = []
+    let reachedLimit = false
 
     await fetchStream(
       '/api/ai/chat/stream',
       { action: 'hr_sim_response', resume_index: index, conversation: [] },
       {
         onChunk: (content) => {
+          if (reachedLimit) return
           if (newMessages.length === 0) {
-            newMessages.push({ role: 'assistant', content, streaming: true })
-          } else {
-            newMessages[0].content += content
+            newMessages.push({ role: 'assistant', content: '', streaming: true })
           }
+          const msg = newMessages[0]
+          const remaining = AI_MAX_CHARS - msg.content.length
+          if (remaining <= 0) {
+            reachedLimit = true
+            msg.streaming = false
+            newMessages[0] = { ...msg }
+            setMessages([...newMessages])
+            setIsLoading(false)
+            return
+          }
+          msg.content += content.substring(0, remaining)
+          if (msg.content.length >= AI_MAX_CHARS) {
+            reachedLimit = true
+            msg.streaming = false
+          }
+          newMessages[0] = { ...msg }
           setMessages([...newMessages])
           scrollToBottom()
         },
         onDone: () => {
-          if (newMessages.length > 0) newMessages[0].streaming = false
+          if (newMessages.length > 0) {
+            // Don't replace content if it already exists
+            if (!newMessages[0].content || newMessages[0].content.trim() === '') {
+              newMessages[0].content = '候选人思考中...'
+            }
+            newMessages[0].streaming = false
+          }
           setMessages([...newMessages])
           setIsLoading(false)
         },
         onError: () => {
           if (newMessages.length === 0) {
             newMessages.push({ role: 'assistant', content: '候选人准备中，请稍后...' })
+          } else if (!newMessages[0].content || newMessages[0].content.trim() === '') {
+            // Only show error if no content was received
+            newMessages[0].content = '候选人准备中，请稍后...'
           }
+          if (newMessages.length > 0) newMessages[0].streaming = false
           setMessages([...newMessages])
           setIsLoading(false)
         },
@@ -93,6 +123,8 @@ export default function HrSim() {
     const newMessages = [...currentConversation, aiMsg]
     setMessages([...newMessages])
 
+    let reachedLimit = false
+
     await fetchStream(
       '/api/ai/chat/stream',
       {
@@ -102,19 +134,40 @@ export default function HrSim() {
       },
       {
         onChunk: (content) => {
-          aiMsg.content += content
+          if (reachedLimit) return
+          const remaining = AI_MAX_CHARS - aiMsg.content.length
+          if (remaining <= 0) {
+            reachedLimit = true
+            aiMsg.streaming = false
+            newMessages[newMessages.length - 1] = { ...aiMsg }
+            setMessages([...newMessages])
+            setIsLoading(false)
+            return
+          }
+          aiMsg.content += content.substring(0, remaining)
+          if (aiMsg.content.length >= AI_MAX_CHARS) {
+            reachedLimit = true
+            aiMsg.streaming = false
+          }
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
           scrollToBottom()
         },
         onDone: () => {
+          // Don't replace content if it already exists
+          if (!aiMsg.content || aiMsg.content.trim() === '') {
+            aiMsg.content = '候选人思考中...'
+          }
           aiMsg.streaming = false
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
           setIsLoading(false)
         },
         onError: () => {
-          aiMsg.content = '候选人思考中...'
+          // Only show error if no content was received
+          if (!aiMsg.content || aiMsg.content.trim() === '') {
+            aiMsg.content = '候选人暂时无法回复，请稍后再试...'
+          }
           aiMsg.streaming = false
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
@@ -234,11 +287,18 @@ export default function HrSim() {
 
   /** 面试对话阶段 */
   return (
-    <View className="flex flex-col h-screen bg-background">
-      {/* 顶部 */}
+    <View className="flex flex-col bg-background" style={{ height: '100vh', position: 'relative' }}>
+      {/* 顶部 - fixed */}
       <View
         className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
+        style={{
+          background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+        }}
       >
         <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
         <View className="flex flex-row items-center gap-3 relative">
@@ -255,13 +315,19 @@ export default function HrSim() {
         </View>
       </View>
 
-      {/* 聊天区 */}
-      <ScrollView className="flex-1 px-4 pt-4 pb-2" scrollY scrollIntoView={scrollRef.current} scrollWithAnimation>
+      {/* 聊天区 - scrollable middle area */}
+      <ScrollView
+        className="flex-1 px-4"
+        style={{ paddingTop: '90px', paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 80}px` : '160px' }}
+        scrollY
+        scrollIntoView={scrollRef.current}
+        scrollWithAnimation
+      >
         {messages.map((msg, idx) => (
           <View key={idx} id={`msg-${idx}`} className={`mb-3 ${msg.role === 'user' ? 'anim-slide-in-right' : 'anim-slide-in-left'}`}>
             {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2 max-w-[85%]">
-                <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
+                <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1" style={{ overflow: 'hidden' }}>
                   <Bot size={14} color="#fff" />
                 </View>
                 <Card className="shadow-card">
@@ -270,12 +336,17 @@ export default function HrSim() {
                       {msg.content}
                       {msg.streaming && <Text className="inline-block w-2 h-4 bg-violet-500 ml-1 align-middle cursor-blink" />}
                     </Text>
+                    {msg.streaming && (
+                      <Text className="block text-xs mt-1" style={{ color: msg.content.length >= AI_MAX_CHARS * 0.9 ? '#EF4444' : '#9CA3AF' }}>
+                        {msg.content.length}/{AI_MAX_CHARS}
+                      </Text>
+                    )}
                   </CardContent>
                 </Card>
               </View>
             ) : (
               <View className="flex flex-row items-start gap-2 max-w-[85%] ml-auto flex-row-reverse">
-                <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
+                <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1" style={{ overflow: 'hidden' }}>
                   <Text className="text-white text-xs font-bold">HR</Text>
                 </View>
                 <Card className="shadow-card" style={{ background: 'linear-gradient(135deg, #5B21B6, #7C3AED)' }}>
@@ -291,7 +362,7 @@ export default function HrSim() {
         {isLoading && messages[messages.length - 1]?.role === 'user' && (
           <View className="mb-3 anim-slide-in-left">
             <View className="flex flex-row items-start gap-2 max-w-[85%]">
-              <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
+              <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1" style={{ overflow: 'hidden' }}>
                 <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">
@@ -309,40 +380,52 @@ export default function HrSim() {
         <View id="msg-bottom-hr" />
       </ScrollView>
 
-      {/* 输入区 */}
-      <View className="flex flex-row items-center gap-2 px-3 py-3 bg-card border-t border-outline-variant border-opacity-15">
-        <View className="flex-1 bg-muted rounded-full px-4 py-2">
-          <Input
-            className="w-full text-sm text-foreground"
-            placeholder="向候选人提问..."
-            value={input}
-            onInput={(e) => setInput(e.detail.value)}
-            onConfirm={sendMessage}
-            confirmType="send"
-            disabled={isLoading}
-          />
+      {/* 底部输入区 - fixed, adapts to keyboard */}
+      <View
+        className="bg-card border-t border-outline-variant border-opacity-15"
+        style={{
+          position: 'fixed',
+          bottom: keyboardOffset > 0 ? `${keyboardOffset}px` : 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+        }}
+      >
+        {/* 输入行 */}
+        <View className="flex flex-row items-center gap-2 px-3 py-3">
+          <View className="flex-1 bg-muted rounded-full px-4 py-2">
+            <Input
+              className="w-full text-sm text-foreground"
+              placeholder="向候选人提问..."
+              value={input}
+              onInput={(e) => setInput(e.detail.value)}
+              onConfirm={sendMessage}
+              confirmType="send"
+              disabled={isLoading}
+            />
+          </View>
+          <View className="flex-shrink-0">
+            <Button
+              size="sm"
+              className="bg-primary rounded-full btn-shimmer btn-press"
+              onClick={sendMessage}
+              disabled={!input.trim() || isLoading}
+            >
+              <Send size={16} color="#fff" />
+            </Button>
+          </View>
         </View>
-        <View className="flex-shrink-0">
-          <Button
-            size="sm"
-            className="bg-primary rounded-full btn-shimmer btn-press"
-            onClick={sendMessage}
-            disabled={!input.trim() || isLoading}
-          >
-            <Send size={16} color="#fff" />
-          </Button>
-        </View>
-      </View>
 
-      {/* 结束模拟按钮 */}
-      {messages.length > 1 && (
-        <View className="px-4 pb-4 pt-1 bg-card">
-          <Button variant="outline" className="w-full btn-hover-lift btn-press" onClick={endSimulation}>
-            <FileCheck size={14} color="#8B5CF6" />
-            <Text>结束面试 · 查看招聘笔记</Text>
-          </Button>
-        </View>
-      )}
+        {/* 结束模拟按钮 */}
+        {messages.length > 1 && (
+          <View className="px-4 pb-4 pt-1">
+            <Button variant="outline" className="w-full btn-hover-lift btn-press" onClick={endSimulation}>
+              <FileCheck size={14} color="#8B5CF6" />
+              <Text>结束面试 · 查看招聘笔记</Text>
+            </Button>
+          </View>
+        )}
+      </View>
     </View>
   )
 }
