@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Building, MapPin, GraduationCap, Plus, Briefcase, Trophy, Swords } from 'lucide-react-taro'
+import { Search, Building, MapPin, GraduationCap, Plus, Swords } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
@@ -13,19 +13,9 @@ const statusMap: Record<string, { label: string; color: string; bgColor: string;
   rejected: { label: '已失败', color: '#EF4444', bgColor: 'bg-destructive bg-opacity-15', icon: '😢' },
 }
 
-const industryFilters = [
-  { key: 'all', label: '全部' },
-  { key: 'internet', label: '互联网' },
-  { key: 'finance', label: '金融' },
-  { key: 'education', label: '教育' },
-  { key: 'medical', label: '医疗' },
-  { key: 'manufacturing', label: '制造业' },
-]
-
 /** 副本大厅 - 任务列表 */
 export default function CompanyHall() {
   const [jobCards, setJobCards] = useState<any[]>([])
-  const [filter, setFilter] = useState<string>('all')
   const [searchText, setSearchText] = useState('')
   const [loaded, setLoaded] = useState(false)
 
@@ -46,9 +36,7 @@ export default function CompanyHall() {
   }
 
   const filteredCards = jobCards.filter(c => {
-    const matchFilter = filter === 'all' || c.industry === filter
-    const matchSearch = !searchText || (c.company || '').includes(searchText) || (c.position || '').includes(searchText)
-    return matchFilter && matchSearch
+    return !searchText || (c.company || '').includes(searchText) || (c.position || '').includes(searchText)
   })
 
   const handleCardClick = (card: any) => {
@@ -77,21 +65,6 @@ export default function CompanyHall() {
               onInput={(e) => setSearchText(e.detail.value)}
             />
           </View>
-        </View>
-      </View>
-
-      {/* 筛选标签栏 */}
-      <View className={`px-4 pb-3 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-        <View className='flex flex-row gap-2 overflow-x-auto pb-1'>
-          {industryFilters.map((item) => (
-            <View
-              key={item.key}
-              className={`flex-shrink-0 px-4 py-2 rounded-full transition-all ${filter === item.key ? 'bg-primary shadow-card' : 'bg-muted'}`}
-              onClick={() => setFilter(item.key)}
-            >
-              <Text className={`text-xs font-semibold ${filter === item.key ? 'text-primary-foreground' : 'text-muted-foreground'}`}>{item.label}</Text>
-            </View>
-          ))}
         </View>
       </View>
 
@@ -176,16 +149,13 @@ export default function CompanyHall() {
         </View>
       )}
 
-      {/* 底部悬浮按钮 */}
+      {/* 底部悬浮按钮 - 小圆形 */}
       <View
-        className='fixed right-4 bg-primary rounded-full shadow-float px-5 py-3 btn-pulse btn-press'
+        className='fixed right-4 w-12 h-12 bg-primary rounded-full shadow-float flex items-center justify-center btn-press'
         style={{ bottom: 80 }}
         onClick={() => Taro.navigateTo({ url: '/pages/company/create' })}
       >
-        <View className='flex flex-row items-center gap-2'>
-          <Plus size={16} color='#FFFFFF' />
-          <Text className='text-sm font-semibold text-primary-foreground'>创建任务</Text>
-        </View>
+        <Plus size={22} color='#FFFFFF' />
       </View>
     </View>
   )
