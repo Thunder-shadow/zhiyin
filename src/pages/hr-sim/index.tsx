@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Send, FileCheck, User, Bot, Eye, BookOpen, ChevronRight } from 'lucide-react-taro'
+import { ArrowLeft, Send, FileCheck, User, Bot, Eye, ChevronRight, Clock } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useEffect } from 'react'
 import { Network } from '@/network'
@@ -24,12 +23,12 @@ const RESUME_PROFILES = [
 ]
 
 export default function HrSim() {
-  const [step, setStep] = useState<'select' | 'interview' | 'result'>('select')
+  const [step, setStep] = useState<'select' | 'interview'>('select')
   const [resumeIndex, setResumeIndex] = useState(0)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [hrNotes, setHrNotes] = useState('')
+
   const [loaded, setLoaded] = useState(false)
   const scrollRef = useRef('')
   const keyboardOffset = useKeyboardOffset()
@@ -39,8 +38,15 @@ export default function HrSim() {
   }, [])
 
   const scrollToBottom = () => {
-    scrollRef.current = Date.now().toString()
+    scrollRef.current = 'msg-bottom-hr-' + Date.now()
   }
+
+  /** 键盘弹起时自动滚动到底部 */
+  useEffect(() => {
+    if (keyboardOffset > 0) {
+      setTimeout(() => scrollToBottom(), 150)
+    }
+  }, [keyboardOffset])
 
   /** 开始面试 */
   const startInterview = async (index: number) => {
@@ -140,31 +146,13 @@ export default function HrSim() {
     )
   }
 
-  /** 结束模拟 */
-  const endSimulation = async () => {
-    setIsLoading(true)
-    try {
-      const res = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: {
-          action: 'hr_sim_response',
-          resume_index: resumeIndex,
-          end: true,
-          conversation: messages.map(m => ({ role: m.role, content: m.content }))
-        }
-      })
-      console.log('HR sim end response:', res.data)
-      const data = res.data?.data || res.data
-      setHrNotes(data?.hr_notes || data?.message || '招聘笔记生成失败')
-      setStep('result')
-    } catch (err) {
-      console.error('End simulation error:', err)
-      setHrNotes('招聘笔记生成失败，请稍后再试')
-      setStep('result')
-    } finally {
-      setIsLoading(false)
-    }
+  /** 结束模拟 - 跳转到报告生成页面 */
+  const endSimulation = () => {
+    // 缓存对话记录
+    Taro.setStorageSync('hr_sim_conversation', messages)
+    Taro.navigateTo({
+      url: `/pages/hr-sim/report?candidateName=${encodeURIComponent(RESUME_PROFILES[resumeIndex].name)}&resumeIndex=${resumeIndex}`
+    })
   }
 
   /** 选择简历阶段 */
@@ -210,39 +198,23 @@ export default function HrSim() {
             </CardContent>
           </Card>
         ))}
-      </View>
-    )
-  }
 
-  /** 结果阶段 */
-  if (step === 'result') {
-    return (
-      <View className="min-h-full bg-background px-4 pt-6">
-        <View className={`flex flex-row items-center gap-2 mb-6 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#6366F1" />
-          </View>
-          <Text className="block text-xl font-bold text-foreground">招聘笔记</Text>
-        </View>
-
-        <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-          <CardContent className="p-4">
-            <View className="flex flex-row items-center gap-2 mb-3">
-              <View className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <FileCheck size={16} color="#10B981" />
+        {/* 查看历史报告入口 */}
+        <View className={`mt-2 ${loaded ? 'anim-fade-in-up anim-delay-5' : 'opacity-0'}`}>
+          <Card className="shadow-card card-hover" onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/history' })}>
+            <CardContent className="p-3">
+              <View className="flex flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                  <Clock size={20} color="#7C3AED" />
+                </View>
+                <View className="flex-1">
+                  <Text className="block text-sm font-semibold text-foreground">历史招聘笔记</Text>
+                  <Text className="block text-xs text-muted-foreground">查看往期面试评估报告</Text>
+                </View>
+                <ChevronRight size={16} color="#6B7B7480" />
               </View>
-              <Text className="block font-semibold text-foreground">你的评估 vs 真实情况</Text>
-            </View>
-            <Separator className="mb-3" />
-            <Text className="block text-sm text-foreground leading-relaxed whitespace-pre-wrap">{hrNotes}</Text>
-          </CardContent>
-        </Card>
-
-        <View className={`mt-4 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
-          <Button className="w-full btn-shimmer btn-press" onClick={() => { setStep('select'); setMessages([]); setHrNotes('') }}>
-            <BookOpen size={16} color="#fff" />
-            <Text>再来一轮</Text>
-          </Button>
+            </CardContent>
+          </Card>
         </View>
       </View>
     )
