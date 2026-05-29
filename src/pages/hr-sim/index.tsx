@@ -158,7 +158,7 @@ export default function HrSimIndex() {
       '/api/ai/chat/stream',
       {
         action: 'hr_sim',
-        conversation: messagesRef.current.filter(m => m.role === 'user').map(m => ({
+        conversation: messagesRef.current.map(m => ({
           role: m.role,
           content: m.content
         })),

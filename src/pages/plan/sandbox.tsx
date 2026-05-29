@@ -59,7 +59,7 @@ export default function CareerSandbox() {
       '/api/ai/chat/stream',
       {
         action: 'career_plan',
-        conversation: messagesRef.current.filter(m => m.role === 'user').map(m => ({
+        conversation: messagesRef.current.map(m => ({
           role: m.role,
           content: m.content
         }))
