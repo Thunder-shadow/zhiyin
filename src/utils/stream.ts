@@ -112,6 +112,7 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
   return new Promise<void>((resolve) => {
     let buffer = ''
     let resolved = false
+    let hasReceivedChunks = false
 
     const finish = () => {
       if (!resolved) {
@@ -129,6 +130,11 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
         header: { 'Content-Type': 'application/json' },
         enableChunked: true,
         success: (res) => {
+          // 如果已经通过 onChunkReceived 处理过，不再处理
+          if (hasReceivedChunks) {
+            finish()
+            return
+          }
           // 部分小程序不支持 enableChunked，走完整响应
           if (res.statusCode === 200 && res.data) {
             const text = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
@@ -138,8 +144,10 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
           }
           finish()
         },
-        fail: (err) => {
-          callbacks.onError('请求失败')
+        fail: (_err) => {
+          if (!hasReceivedChunks) {
+            callbacks.onError('请求失败')
+          }
           finish()
         }
       })
@@ -147,6 +155,7 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
       // 监听分块数据（微信小程序）
       if (requestTask && typeof requestTask.onChunkReceived === 'function') {
         requestTask.onChunkReceived((res) => {
+          hasReceivedChunks = true
           try {
             const uint8 = new Uint8Array(res.data)
             let text = ''
@@ -161,12 +170,15 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
                   codePoint = uint8[i]
                   i += 1
                 } else if ((uint8[i] & 0xe0) === 0xc0) {
+                  if (i + 1 >= uint8.length) break
                   codePoint = ((uint8[i] & 0x1f) << 6) | (uint8[i + 1] & 0x3f)
                   i += 2
                 } else if ((uint8[i] & 0xf0) === 0xe0) {
+                  if (i + 2 >= uint8.length) break
                   codePoint = ((uint8[i] & 0x0f) << 12) | ((uint8[i + 1] & 0x3f) << 6) | (uint8[i + 2] & 0x3f)
                   i += 3
                 } else if ((uint8[i] & 0xf8) === 0xf0) {
+                  if (i + 3 >= uint8.length) break
                   codePoint = ((uint8[i] & 0x07) << 18) | ((uint8[i + 1] & 0x3f) << 12) | ((uint8[i + 2] & 0x3f) << 6) | (uint8[i + 3] & 0x3f)
                   i += 4
                 } else {
@@ -200,6 +212,7 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
               }
             }
           } catch (e) {
+            // 解析失败，忽略这个 chunk
           }
         })
       }
