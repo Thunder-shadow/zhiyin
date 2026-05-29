@@ -62,7 +62,7 @@ export default function ResumeList() {
 
         {/* 统计信息 */}
         <View className="flex flex-row items-center gap-4 mt-2 relative">
-          <View className="flex flex-row items-center gap-1.5">
+          <View className="flex flex-row items-center gap-2">
             <FileText size={14} color="rgba(255,255,255,0.7)" />
             <Text className="text-white text-xs" style={{ opacity: 0.8 }}>{resumes.length} 份简历</Text>
           </View>
@@ -102,7 +102,7 @@ export default function ResumeList() {
                       </View>
                       <View className="flex-1">
                         <Text className="block font-semibold text-foreground text-sm">{resume.version_name || '未命名简历'}</Text>
-                        <View className="flex flex-row items-center gap-1.5 mt-1">
+                        <View className="flex flex-row items-center gap-2 mt-1">
                           <Calendar size={10} color="#6B7B74" />
                           <Text className="text-muted-foreground text-xs">
                             {resume.created_at ? new Date(resume.created_at).toLocaleDateString() : ''}

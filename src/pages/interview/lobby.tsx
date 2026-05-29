@@ -53,7 +53,7 @@ export default function InterviewLobby() {
       {/* 训练概览卡片 */}
       <View className="px-4 pt-3 pb-2">
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <View className="h-1.5" style={{ background: 'linear-gradient(90deg, #E26A5C, #FF6B35, #D4A574)' }} />
+          <View className="h-2" style={{ background: 'linear-gradient(90deg, #E26A5C, #FF6B35, #D4A574)' }} />
           <CardContent className="p-4">
             <View className="flex flex-row items-center justify-between">
               <View className="flex flex-row items-center gap-2">
@@ -87,7 +87,7 @@ export default function InterviewLobby() {
                   <View className="flex flex-row items-center gap-2">
                     <Text className="block text-base font-semibold text-foreground">{mode.title}</Text>
                     {mode.type === 'stress' && (
-                      <View className="px-1.5 py-0.5 rounded bg-accent">
+                      <View className="px-2 py-1 rounded bg-accent">
                         <Text className="text-xs font-bold text-accent-foreground" style={{ fontSize: '9px' }}>推荐</Text>
                       </View>
                     )}

@@ -67,7 +67,7 @@ export default function Achievements() {
                   </View>
                   <View className="flex-1">
                     <Text className="block text-sm font-medium text-foreground">{t.title}</Text>
-                    <Text className="block text-xs text-muted-foreground mt-0.5">需要 {t.minExp} EXP</Text>
+                    <Text className="block text-xs text-muted-foreground mt-1">需要 {t.minExp} EXP</Text>
                   </View>
                 </View>
               ))}

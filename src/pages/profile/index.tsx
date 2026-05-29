@@ -69,7 +69,7 @@ export default function Profile() {
       <View className="mx-4 mt-3 mb-6">
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           {/* 渐变装饰条 */}
-          <View className="h-1.5" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F)' }} />
+          <View className="h-2" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F)' }} />
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-3">
               {/* 头像带光环 */}
@@ -82,7 +82,7 @@ export default function Profile() {
               {/* 用户名和等级 */}
               <View className="flex-1 min-w-0">
                 <Text className="block text-base font-semibold text-foreground">{userInfo.nick_name}</Text>
-                <View className="mt-1 px-2.5 py-1 rounded-full bg-primary-container inline-flex self-start">
+                <View className="mt-1 px-3 py-1 rounded-full bg-primary-container inline-flex self-start">
                   <Text className="text-xs font-semibold text-primary">Lv.{userInfo.level} {userInfo.title}</Text>
                 </View>
               </View>
@@ -100,7 +100,7 @@ export default function Profile() {
               ].map((stat, idx) => (
                 <View key={stat.label} className="flex flex-col items-center">
                   <Text className="text-lg font-bold text-foreground">{stat.value}</Text>
-                  <Text className="text-xs text-muted-foreground mt-0.5">{stat.label}</Text>
+                  <Text className="text-xs text-muted-foreground mt-1">{stat.label}</Text>
                   {idx < 2 && <View className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-4 bg-outline-variant bg-opacity-20" />}
                 </View>
               ))}

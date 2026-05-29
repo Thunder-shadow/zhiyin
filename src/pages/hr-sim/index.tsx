@@ -1,12 +1,12 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition={false} 防止键盘推页面
+import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Send, FileCheck, User, Bot, Eye, BookOpen, ChevronRight } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { Network } from '@/network'
 import { fetchStream } from '@/utils/stream'
 
@@ -29,16 +29,20 @@ export default function HrSim() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [hrNotes, setHrNotes] = useState('')
-  const [loaded, setLoaded] = useState(false)
   const scrollRef = useRef('')
+  const scrollViewRef = useRef<any>(null)
 
-  useEffect(() => {
-    setTimeout(() => setLoaded(true), 80)
+  /** 滚动到底部 */
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      scrollRef.current = Date.now().toString()
+    }, 50)
   }, [])
 
-  const scrollToBottom = () => {
-    scrollRef.current = Date.now().toString()
-  }
+  /** 键盘弹起时仅滚动聊天区 */
+  const handleInputFocus = useCallback(() => {
+    scrollToBottom()
+  }, [scrollToBottom])
 
   /** 开始面试 */
   const startInterview = async (index: number) => {
@@ -155,14 +159,14 @@ export default function HrSim() {
   if (step === 'select') {
     return (
       <View className="min-h-full bg-background px-4 pt-6">
-        <View className={`flex flex-row items-center gap-2 mb-6 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#6366F1" />
+        <View className="flex flex-row items-center gap-2 mb-6">
+          <View onClick={() => Taro.navigateBack()} className="p-1">
+            <ArrowLeft size={20} color="var(--color-primary)" />
           </View>
           <Text className="block text-xl font-bold text-foreground">HR反向模拟</Text>
         </View>
 
-        <View className={`mb-4 ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
+        <View className="mb-4">
           <Text className="block text-sm text-muted-foreground mb-1">选择候选人简历</Text>
           <Text className="block text-xs text-muted-foreground" style={{ opacity: 0.6 }}>你将扮演HR面试这位候选人，考察你的选人眼光</Text>
         </View>
@@ -170,7 +174,7 @@ export default function HrSim() {
         {RESUME_PROFILES.map((profile, idx) => (
           <Card
             key={idx}
-            className={`mb-3 shadow-card card-hover ${loaded ? `anim-fade-in-up anim-delay-${idx + 2}` : 'opacity-0'}`}
+            className="mb-3 shadow-card"
             onClick={() => startInterview(idx)}
           >
             <CardContent className="p-4">
@@ -189,7 +193,7 @@ export default function HrSim() {
                   <Text className="block text-xs text-muted-foreground mt-1">{profile.school}</Text>
                   <Text className="block text-xs text-muted-foreground mt-1" style={{ opacity: 0.7 }}>{profile.summary}</Text>
                 </View>
-                <ChevronRight size={16} color="#6B7B7480" />
+                <ChevronRight size={16} color="#6B7B74" />
               </View>
             </CardContent>
           </Card>
@@ -202,18 +206,18 @@ export default function HrSim() {
   if (step === 'result') {
     return (
       <View className="min-h-full bg-background px-4 pt-6">
-        <View className={`flex flex-row items-center gap-2 mb-6 ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
-            <ArrowLeft size={20} color="#6366F1" />
+        <View className="flex flex-row items-center gap-2 mb-6">
+          <View onClick={() => Taro.navigateBack()} className="p-1">
+            <ArrowLeft size={20} color="var(--color-primary)" />
           </View>
           <Text className="block text-xl font-bold text-foreground">招聘笔记</Text>
         </View>
 
-        <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
+        <Card className="shadow-card">
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-2 mb-3">
-              <View className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <FileCheck size={16} color="#10B981" />
+              <View className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#05966910' }}>
+                <FileCheck size={16} color="#059669" />
               </View>
               <Text className="block font-semibold text-foreground">你的评估 vs 真实情况</Text>
             </View>
@@ -222,8 +226,8 @@ export default function HrSim() {
           </CardContent>
         </Card>
 
-        <View className={`mt-4 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
-          <Button className="w-full btn-shimmer btn-press" onClick={() => { setStep('select'); setMessages([]); setHrNotes('') }}>
+        <View className="mt-4">
+          <Button className="w-full" onClick={() => { setStep('select'); setMessages([]); setHrNotes('') }}>
             <BookOpen size={16} color="#fff" />
             <Text>再来一轮</Text>
           </Button>
@@ -232,53 +236,65 @@ export default function HrSim() {
     )
   }
 
-  /** 面试对话阶段 */
+  /** 面试对话阶段 - 关键修复：键盘弹起不推页面 */
   return (
-    <View className="flex flex-col h-screen bg-background">
-      {/* 顶部 */}
+    <View className="flex flex-col" style={{ height: '100dvh' }}>
+      {/* 顶部固定导航栏 */}
       <View
-        className="px-4 pt-4 pb-3 rounded-b-2xl relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
+        className="px-4 pt-4 pb-3 flex-shrink-0"
+        style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
-        <View className="absolute -top-4 -right-4 w-20 h-20 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-        <View className="flex flex-row items-center gap-3 relative">
-          <View onClick={() => Taro.navigateBack()} className="p-1 btn-press">
+        <View className="flex flex-row items-center gap-3">
+          <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="#fff" />
           </View>
           <View className="flex-1">
             <Text className="block text-white font-bold text-base">HR模拟面试</Text>
-            <Text className="block text-gray-300 text-xs">候选人: {RESUME_PROFILES[resumeIndex].name}</Text>
+            <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>候选人: {RESUME_PROFILES[resumeIndex].name}</Text>
           </View>
-          <Badge className="bg-accent text-white border-none text-xs badge-glow">
+          <Badge className="border-none text-xs" style={{ backgroundColor: '#E26A5C', color: '#fff' }}>
             <Eye size={12} color="#fff" /> 评估中
           </Badge>
         </View>
       </View>
 
-      {/* 聊天区 */}
-      <ScrollView className="flex-1 px-4 pt-4 pb-2" scrollY scrollIntoView={scrollRef.current} scrollWithAnimation>
+      {/* 聊天区 - 自动填充剩余高度，键盘弹起不影响此区域 */}
+      <ScrollView
+        className="flex-1 px-4 pt-4"
+        scrollY
+        scrollIntoView={scrollRef.current}
+        scrollWithAnimation
+        ref={scrollViewRef}
+        style={{}}
+      >
         {messages.map((msg, idx) => (
-          <View key={idx} id={`msg-${idx}`} className={`mb-3 ${msg.role === 'user' ? 'anim-slide-in-right' : 'anim-slide-in-left'}`}>
+          <View key={idx} id={`msg-${idx}`} className="mb-3">
             {msg.role === 'assistant' ? (
-              <View className="flex flex-row items-start gap-2 max-w-[85%]">
-                <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
+              <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                  style={{ backgroundColor: '#3A4A44' }}
+                >
                   <Bot size={14} color="#fff" />
                 </View>
                 <Card className="shadow-card">
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
-                      {msg.streaming && <Text className="inline-block w-2 h-4 bg-violet-500 ml-1 align-middle cursor-blink" />}
+                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1 align-middle" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>
               </View>
             ) : (
-              <View className="flex flex-row items-start gap-2 max-w-[85%] ml-auto flex-row-reverse">
-                <View className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0 mt-1">
+              <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                  style={{ backgroundColor: '#E26A5C' }}
+                >
                   <Text className="text-white text-xs font-bold">HR</Text>
                 </View>
-                <Card className="shadow-card" style={{ background: 'linear-gradient(135deg, #5B21B6, #7C3AED)' }}>
+                <Card className="shadow-card" style={{ backgroundColor: '#3A4A44' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -288,61 +304,79 @@ export default function HrSim() {
           </View>
         ))}
 
-        {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <View className="mb-3 anim-slide-in-left">
-            <View className="flex flex-row items-start gap-2 max-w-[85%]">
-              <View className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-1">
+        {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
+          <View className="mb-3">
+            <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
+              <View
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                style={{ backgroundColor: '#3A4A44' }}
+              >
                 <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">
                 <CardContent className="p-3">
                   <View className="flex flex-row items-center gap-1">
-                    <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" />
-                    <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" style={{ animationDelay: '0.2s' }} />
-                    <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" style={{ animationDelay: '0.4s' }} />
+                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />
+                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite 0.2s' }} />
+                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite 0.4s' }} />
                   </View>
                 </CardContent>
               </Card>
             </View>
           </View>
         )}
-        <View id="msg-bottom-hr" />
+        {/* 底部锚点 + 为输入栏预留空间 */}
+        <View id="msg-bottom-hr" style={{ height: '1px' }} />
+        <View style={{ height: '120px' }} />
       </ScrollView>
 
-      {/* 输入区 */}
-      <View className="flex flex-row items-center gap-2 px-3 py-3 bg-card border-t border-outline-variant border-opacity-15">
-        <View className="flex-1 bg-muted rounded-full px-4 py-2">
-          <Input
-            className="w-full text-sm text-foreground"
-            placeholder="向候选人提问..."
-            value={input}
-            onInput={(e) => setInput(e.detail.value)}
-            onConfirm={sendMessage}
-            confirmType="send"
-            disabled={isLoading}
-          />
+      {/* 输入区 - 固定底部，键盘弹起不推动页面 */}
+      <View
+        className="flex-shrink-0 px-3 pt-3 pb-4 bg-card"
+        style={{ borderTop: '1px solid var(--color-outline-variant)' }}
+      >
+        <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
+          <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
+            <TaroInput
+              style={{ width: '100%', fontSize: '14px', color: 'var(--color-foreground)', backgroundColor: 'transparent' }}
+              placeholder="向候选人提问..."
+              placeholderStyle="color: var(--color-muted-foreground)"
+              value={input}
+              onInput={(e) => setInput(e.detail.value)}
+              onConfirm={sendMessage}
+              confirmType="send"
+              disabled={isLoading}
+              adjustPosition={false}
+              onFocus={handleInputFocus}
+            />
+          </View>
+          <View style={{ flexShrink: 0 }}>
+            <Button
+              size="sm"
+              className="rounded-full"
+              style={{ backgroundColor: '#3A4A44' }}
+              onClick={sendMessage}
+              disabled={!input.trim() || isLoading}
+            >
+              <Send size={16} color="#fff" />
+            </Button>
+          </View>
         </View>
-        <View className="flex-shrink-0">
-          <Button
-            size="sm"
-            className="bg-primary rounded-full btn-shimmer btn-press"
-            onClick={sendMessage}
-            disabled={!input.trim() || isLoading}
-          >
-            <Send size={16} color="#fff" />
-          </Button>
-        </View>
-      </View>
 
-      {/* 结束模拟按钮 */}
-      {messages.length > 1 && (
-        <View className="px-4 pb-4 pt-1 bg-card">
-          <Button variant="outline" className="w-full btn-hover-lift btn-press" onClick={endSimulation}>
-            <FileCheck size={14} color="#8B5CF6" />
-            <Text>结束面试 · 查看招聘笔记</Text>
-          </Button>
-        </View>
-      )}
+        {messages.length > 1 && (
+          <View className="mt-2">
+            <Button
+              variant="outline"
+              className="w-full text-sm"
+              onClick={endSimulation}
+              disabled={isLoading}
+            >
+              <FileCheck size={14} color="#3A4A44" />
+              <Text>结束面试 · 查看招聘笔记</Text>
+            </Button>
+          </View>
+        )}
+      </View>
     </View>
   )
 }

@@ -73,7 +73,7 @@ export default function Index() {
       <View className="px-4 pt-3">
         <Card className={`shadow-card overflow-hidden ${loaded ? 'anim-fade-in-up' : 'opacity-0'}`}>
           {/* 渐变顶部装饰条 */}
-          <View className="h-1.5" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F, #D4A574)' }} />
+          <View className="h-2" style={{ background: 'linear-gradient(90deg, #3A4A44, #5B9A6F, #D4A574)' }} />
           <CardContent className="p-4">
             <View className="flex flex-row items-center gap-3">
               {/* 头像带光环 */}
@@ -106,7 +106,7 @@ export default function Index() {
               {/* 右侧连续活跃徽章 */}
               {gameState.streak > 0 && (
                 <View className="flex-shrink-0 flex flex-col items-center gap-1">
-                  <View className="flex flex-row items-center px-2.5 py-1 rounded-lg bg-warning bg-opacity-20 badge-glow">
+                  <View className="flex flex-row items-center px-3 py-1 rounded-lg bg-warning bg-opacity-20 badge-glow">
                     <Flame size={14} color="#D4A574" />
                     <Text className="text-xs font-semibold text-warning ml-1">{gameState.streak}天</Text>
                   </View>
@@ -138,7 +138,7 @@ export default function Index() {
                 </View>
                 {/* 箭头连接符 */}
                 {idx < funnelStages.length - 1 && (
-                  <View className="flex flex-row justify-center my-1.5">
+                  <View className="flex flex-row justify-center my-2">
                     <Text className="text-muted-foreground text-xs" style={{ opacity: 0.4 }}>▼</Text>
                   </View>
                 )}
@@ -183,7 +183,7 @@ export default function Index() {
               <View className="flex-1 min-w-0">
                 <View className="flex flex-row items-center gap-2">
                   <Text className="block text-sm font-semibold text-foreground">HR反向模拟</Text>
-                  <View className="px-1.5 py-0.5 rounded bg-accent">
+                  <View className="px-2 py-1 rounded bg-accent">
                     <Text className="text-xs font-bold text-accent-foreground" style={{ fontSize: '9px' }}>NEW</Text>
                   </View>
                 </View>

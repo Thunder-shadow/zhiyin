@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Building, MapPin, GraduationCap, Briefcase, Plus } from 'lucide-react-taro'
+import { Search, Building, MapPin, GraduationCap, Plus } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
@@ -143,13 +143,13 @@ export default function CompanyHall() {
                   {/* 底部标签 */}
                   <View className="flex flex-row items-center gap-2">
                     {card.location && (
-                      <View className="flex flex-row items-center gap-1 px-2.5 py-1 rounded-full bg-muted">
+                      <View className="flex flex-row items-center gap-1 px-3 py-1 rounded-full bg-muted">
                         <MapPin size={10} color="#6B7B74" />
                         <Text className="text-xs font-medium text-muted-foreground" style={{ fontSize: '10px' }}>{card.location}</Text>
                       </View>
                     )}
                     {card.education && (
-                      <View className="flex flex-row items-center gap-1 px-2.5 py-1 rounded-full bg-muted">
+                      <View className="flex flex-row items-center gap-1 px-3 py-1 rounded-full bg-muted">
                         <GraduationCap size={10} color="#6B7B74" />
                         <Text className="text-xs font-medium text-muted-foreground" style={{ fontSize: '10px' }}>{card.education}</Text>
                       </View>
@@ -168,7 +168,7 @@ export default function CompanyHall() {
         style={{ bottom: 80 }}
         onClick={() => Taro.navigateTo({ url: '/pages/company/detail?mode=add' })}
       >
-        <View className="flex flex-row items-center gap-1.5">
+        <View className="flex flex-row items-center gap-2">
           <Plus size={16} color="#FFFFFF" />
           <Text className="text-sm font-semibold text-primary-foreground">领任务</Text>
         </View>

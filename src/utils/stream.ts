@@ -150,13 +150,34 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
       if (requestTask && typeof requestTask.onChunkReceived === 'function') {
         requestTask.onChunkReceived((res) => {
           try {
-            const TextDecoderClass = (globalThis as any).TextDecoder
-            const decoder = TextDecoderClass ? new TextDecoderClass() : { decode: (arr: Uint8Array) => {
-              let str = ''
-              for (let i = 0; i < arr.length; i++) { str += String.fromCharCode(arr[i]) }
-              return str
-            }}
-            const text = decoder.decode(new Uint8Array(res.data))
+            const uint8 = new Uint8Array(res.data)
+            let text = ''
+            if (typeof TextDecoder !== 'undefined') {
+              text = new TextDecoder('utf-8').decode(uint8)
+            } else {
+              // 手动 UTF-8 解码，支持中文等多字节字符
+              let i = 0
+              while (i < uint8.length) {
+                let codePoint: number
+                if (uint8[i] < 0x80) {
+                  codePoint = uint8[i]
+                  i += 1
+                } else if ((uint8[i] & 0xe0) === 0xc0) {
+                  codePoint = ((uint8[i] & 0x1f) << 6) | (uint8[i + 1] & 0x3f)
+                  i += 2
+                } else if ((uint8[i] & 0xf0) === 0xe0) {
+                  codePoint = ((uint8[i] & 0x0f) << 12) | ((uint8[i + 1] & 0x3f) << 6) | (uint8[i + 2] & 0x3f)
+                  i += 3
+                } else if ((uint8[i] & 0xf8) === 0xf0) {
+                  codePoint = ((uint8[i] & 0x07) << 18) | ((uint8[i + 1] & 0x3f) << 12) | ((uint8[i + 2] & 0x3f) << 6) | (uint8[i + 3] & 0x3f)
+                  i += 4
+                } else {
+                  codePoint = uint8[i]
+                  i += 1
+                }
+                text += String.fromCodePoint(codePoint)
+              }
+            }
             buffer += text
 
             const lines = buffer.split('\n')
