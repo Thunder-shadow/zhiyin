@@ -151,8 +151,20 @@ export default function CompanyHall() {
 
       {/* 底部悬浮按钮 - 小圆形 */}
       <View
-        className='fixed right-4 w-12 h-12 bg-primary rounded-full shadow-float flex items-center justify-center btn-press'
-        style={{ bottom: 80 }}
+        style={{
+          position: 'fixed',
+          right: '16px',
+          bottom: '80px',
+          width: '48px',
+          height: '48px',
+          backgroundColor: '#3A4A44',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 999,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
         onClick={() => Taro.navigateTo({ url: '/pages/company/create' })}
       >
         <Plus size={22} color='#FFFFFF' />
