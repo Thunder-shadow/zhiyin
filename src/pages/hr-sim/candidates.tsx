@@ -1,11 +1,11 @@
 import { View, Text, ScrollView } from '@tarojs/components'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Plus, User, ChevronRight, Pencil, Trash2 } from 'lucide-react-taro'
-import Taro from '@tarojs/taro'
-import { useState, useEffect } from 'react'
+import Taro, { useDidShow } from '@tarojs/taro'
+import { useState } from 'react'
 import { Network } from '@/network'
+import { ArrowLeft, Plus, Pencil, Trash2, ChevronRight, User } from 'lucide-react-taro'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface HrCandidate {
   id: string
@@ -25,10 +25,11 @@ export default function HrCandidates() {
   const [loading, setLoading] = useState(true)
   const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
+  useDidShow(() => {
+    setLoaded(false)
     setTimeout(() => setLoaded(true), 80)
     loadCandidates()
-  }, [])
+  })
 
   const loadCandidates = async () => {
     try {
