@@ -28,22 +28,10 @@ async function bootstrap() {
 
   // 全局拦截器：统一将 POST 请求的 201 状态码改为 200
   app.useGlobalInterceptors(new HttpStatusInterceptor());
-  // 1. 开启优雅关闭 Hooks (关键!)
+  // 开启优雅关闭 Hooks
   app.enableShutdownHooks();
 
-  // 2. 解析端口
   const port = parsePort();
-  try {
-    await app.listen(port);
-    console.log(`Server running on http://localhost:${port}`);
-  } catch (err) {
-    if (err.code === 'EADDRINUSE') {
-      console.error(`❌ 端口 \({port} 被占用! 请运行 'npx kill-port \){port}' 然后重试。`);
-      process.exit(1);
-    } else {
-      throw err;
-    }
-  }
-  console.log(`Application is running on: http://localhost:3000`);
+  await app.listen(port);
 }
 bootstrap();

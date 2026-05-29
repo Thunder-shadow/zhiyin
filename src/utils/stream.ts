@@ -103,7 +103,6 @@ async function fetchStreamH5(fullUrl: string, body: Record<string, any>, callbac
       }
     }
   } catch (err) {
-    console.error('Stream H5 error:', err)
     callbacks.onError('网络连接失败')
   }
 }
@@ -140,7 +139,6 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
           finish()
         },
         fail: (err) => {
-          console.error('Stream miniapp fail:', err)
           callbacks.onError('请求失败')
           finish()
         }
@@ -202,12 +200,10 @@ async function fetchStreamMiniApp(fullUrl: string, body: Record<string, any>, ca
               }
             }
           } catch (e) {
-            console.error('Chunk parse error:', e)
           }
         })
       }
     } catch (err) {
-      console.error('Stream miniapp error:', err)
       callbacks.onError('请求失败')
       finish()
     }

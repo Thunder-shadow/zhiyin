@@ -33,14 +33,12 @@ export default function ResumeEditor() {
   const loadResume = async (id: string) => {
     try {
       const res = await Network.request({ url: `/api/resumes/${id}` })
-      console.log('Resume detail:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const d = res.data.data
         setVersionName(d.version_name || '')
         setContentText(d.content_text || '')
       }
     } catch (err) {
-      console.log('Load resume error:', err)
     } finally {
       setTimeout(() => setLoaded(true), 80)
     }
@@ -57,13 +55,11 @@ export default function ResumeEditor() {
         method,
         data: { version_name: versionName, content_text: contentText }
       })
-      console.log('Save resume:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         if (!resumeId) setResumeId(res.data.data.id)
         Taro.showToast({ title: '保存成功', icon: 'success' })
       }
     } catch (err) {
-      console.log('Save resume error:', err)
     } finally {
       setIsSaving(false)
     }
@@ -78,12 +74,10 @@ export default function ResumeEditor() {
         method: 'POST',
         data: { action: 'resume_match', resume_text: contentText, jd_text: jdText, resume_id: resumeId }
       })
-      console.log('Match result:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         setMatchResult(res.data.data)
       }
     } catch (err) {
-      console.log('Match error:', err)
     } finally {
       setIsMatching(false)
     }

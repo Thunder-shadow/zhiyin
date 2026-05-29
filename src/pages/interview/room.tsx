@@ -57,7 +57,7 @@ export default function InterviewRoom() {
 
     await fetchStream(
       '/api/ai/chat/stream',
-      { action: modeInfo.action, position: '产品经理', company: '字节跳动' },
+      { action: modeInfo.action },
       {
         onChunk: (content) => {
           if (newMessages.length === 0) {

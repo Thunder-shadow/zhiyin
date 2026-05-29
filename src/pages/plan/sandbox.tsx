@@ -102,7 +102,6 @@ export default function CareerSandbox() {
         setMessages([...messagesRef.current])
       }
     } catch (err) {
-      console.error('发送消息失败:', err)
       const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
       if (msgIndex !== -1) {
         messagesRef.current[msgIndex] = {

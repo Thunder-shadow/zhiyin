@@ -45,7 +45,6 @@ export default function Candidates() {
         setCandidates(res.data.data || [])
       }
     } catch (err) {
-      console.error('Load candidates error:', err)
     } finally {
       setLoading(false)
     }
@@ -85,7 +84,6 @@ export default function Candidates() {
             Taro.showToast({ title: '删除成功', icon: 'success' })
             loadCandidates()
           } catch (err) {
-            console.error('Delete error:', err)
             Taro.showToast({ title: '删除失败', icon: 'none' })
           }
         }

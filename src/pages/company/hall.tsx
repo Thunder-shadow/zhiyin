@@ -31,7 +31,7 @@ export default function CompanyHall() {
         setJobCards(res.data.data)
       }
     } catch (err) {
-      console.log('Load job cards error:', err)
+      // error handled silently
     }
   }
 

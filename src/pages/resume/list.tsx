@@ -19,12 +19,10 @@ export default function ResumeList() {
   const loadResumes = async () => {
     try {
       const res = await Network.request({ url: '/api/resumes' })
-      console.log('Resumes response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         setResumes(res.data.data)
       }
     } catch (err) {
-      console.log('Load resumes error:', err)
     } finally {
       setTimeout(() => setLoaded(true), 80)
     }

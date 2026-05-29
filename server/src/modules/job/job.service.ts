@@ -20,13 +20,13 @@ export class JobService {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) { console.error('List jobs error:', error); return []; }
+    if (error) { return []; }
     return data;
   }
 
   async detail(id: string) {
     const { data, error } = await this.client.from('job_cards').select('*').eq('id', id).single();
-    if (error) { console.error('Get job error:', error); return null; }
+    if (error) { return null; }
     return data;
   }
 
@@ -40,7 +40,7 @@ export class JobService {
       .select()
       .single();
 
-    if (error) { console.error('Create job error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
@@ -52,12 +52,12 @@ export class JobService {
       .select()
       .single();
 
-    if (error) { console.error('Update job error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
   async remove(id: string) {
     const { error } = await this.client.from('job_cards').delete().eq('id', id);
-    if (error) { console.error('Delete job error:', error); throw error; }
+    if (error) { throw error; }
   }
 }

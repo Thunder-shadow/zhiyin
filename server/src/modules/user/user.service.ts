@@ -42,7 +42,6 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Create user error:', error);
       throw error;
     }
 
@@ -75,7 +74,6 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Update user error:', error);
       throw error;
     }
 
@@ -117,7 +115,7 @@ export class UserService {
       .select()
       .single();
 
-    if (error) console.error('Add exp error:', error);
+    if (error) throw error;
     return data;
   }
 }

@@ -28,7 +28,6 @@ export default function Index() {
   const loadGameState = async () => {
     try {
       const res = await Network.request({ url: '/api/user/profile' })
-      console.log('Dashboard game state:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const d = res.data.data
         setGameState({
@@ -44,7 +43,6 @@ export default function Index() {
         })
       }
     } catch (err) {
-      console.log('Load game state error:', err)
     } finally {
       // loaded
     }

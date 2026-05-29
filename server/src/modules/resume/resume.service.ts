@@ -20,13 +20,13 @@ export class ResumeService {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) { console.error('List resumes error:', error); return []; }
+    if (error) { return []; }
     return data;
   }
 
   async detail(id: string) {
     const { data, error } = await this.client.from('resumes').select('*').eq('id', id).single();
-    if (error) { console.error('Get resume error:', error); return null; }
+    if (error) { return null; }
     return data;
   }
 
@@ -40,7 +40,7 @@ export class ResumeService {
       .select()
       .single();
 
-    if (error) { console.error('Create resume error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
@@ -52,12 +52,12 @@ export class ResumeService {
       .select()
       .single();
 
-    if (error) { console.error('Update resume error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
   async remove(id: string) {
     const { error } = await this.client.from('resumes').delete().eq('id', id);
-    if (error) { console.error('Delete resume error:', error); throw error; }
+    if (error) { throw error; }
   }
 }

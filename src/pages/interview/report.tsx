@@ -16,7 +16,6 @@ export default function InterviewReport() {
       try {
         setReport(JSON.parse(decodeURIComponent(params.data)))
       } catch (e) {
-        console.log('Parse report error:', e)
       }
     }
     setTimeout(() => setLoaded(true), 80)

@@ -1,6 +1,6 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
-import { FileText, Sparkles, Swords, BookOpen, Settings, ChevronRight, Footprints, Mic, Send, Trophy, ClipboardList } from 'lucide-react-taro'
+import { FileText, Sparkles, BookOpen, Settings, ChevronRight, Footprints, Mic, Send, Trophy, ClipboardList } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Network } from '@/network'
@@ -27,7 +27,6 @@ export default function Profile() {
   const loadProfile = async () => {
     try {
       const res = await Network.request({ url: '/api/user/profile' })
-      console.log('Profile response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const d = res.data.data
         setUserInfo({
@@ -42,7 +41,6 @@ export default function Profile() {
         })
       }
     } catch (err) {
-      console.log('Load profile error:', err)
     } finally {
       // loaded
     }
@@ -58,7 +56,6 @@ export default function Profile() {
   const menuItems = [
     { label: '简历库', path: '/pages/resume/list', Icon: FileText, iconBg: 'bg-emerald-50', iconColor: '#10B981' },
     { label: '职业规划', path: '/pages/plan/sandbox', Icon: Sparkles, iconBg: 'bg-violet-50', iconColor: '#7C5CFC' },
-    { label: '训练记录', path: '/pages/dashboard/index', Icon: Swords, iconBg: 'bg-orange-50', iconColor: '#E8864A' },
     { label: '求职笔记', path: '/pages/profile/achievements', Icon: BookOpen, iconBg: 'bg-blue-50', iconColor: '#3B82F6' },
     { label: '招聘笔记', path: '/pages/hr-sim/history', Icon: ClipboardList, iconBg: 'bg-purple-50', iconColor: '#8B5CF6' },
     { label: '设置与帮助', path: '', Icon: Settings, iconBg: 'bg-gray-50', iconColor: '#6B7B74' },

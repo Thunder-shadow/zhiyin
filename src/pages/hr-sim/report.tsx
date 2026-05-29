@@ -69,7 +69,6 @@ export default function HrReport() {
       // 保存到数据库
       saveReport(notes, conversation)
     } catch (err) {
-      console.error('Generate report error:', err)
       setHrNotes('报告生成失败，请稍后再试')
       setStep('result')
     }
@@ -88,8 +87,7 @@ export default function HrReport() {
         }
       })
     } catch (err) {
-      console.error('Save report error:', err)
-    }
+      }
   }
 
   return (

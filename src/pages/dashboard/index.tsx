@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Swords, FileText, Building, Map, Trophy, TrendingUp, Target, ChevronRight } from 'lucide-react-taro'
+import { FileText, Building, Map, Trophy, TrendingUp, Target, ChevronRight } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Network } from '@/network'
@@ -32,7 +32,6 @@ export default function Dashboard() {
   const loadDashboard = async () => {
     try {
       const res = await Network.request({ url: '/api/dashboard' })
-      console.log('Dashboard response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const d = res.data.data
         setUserInfo({
@@ -48,7 +47,7 @@ export default function Dashboard() {
         })
       }
     } catch (err) {
-      console.log('Dashboard load error:', err)
+
     }
   }
 

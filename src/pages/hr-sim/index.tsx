@@ -129,7 +129,6 @@ export default function HrSimIndex() {
         setMessages([...tempMessages])
       }
     } catch (err) {
-      console.error('初始化面试失败:', err)
       tempMessages[0] = {
         id: tempId,
         role: 'assistant',
@@ -202,7 +201,6 @@ export default function HrSimIndex() {
         setMessages([...messagesRef.current])
       }
     } catch (err) {
-      console.error('发送消息失败:', err)
       const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
       if (msgIndex !== -1) {
         messagesRef.current[msgIndex] = {

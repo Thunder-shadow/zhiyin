@@ -28,7 +28,6 @@ export class HrReportService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('List HR reports error:', error);
       return [];
     }
 
@@ -72,7 +71,6 @@ export class HrReportService {
       .single();
 
     if (error) {
-      console.error('Save HR report error:', error);
       throw error;
     }
 
@@ -96,7 +94,6 @@ export class HrReportService {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Delete HR report error:', error);
       throw error;
     }
 
@@ -121,7 +118,6 @@ export class HrReportService {
       .single();
 
     if (error) {
-      console.error('Get HR report detail error:', error);
       return null;
     }
 

@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { User, Flame, Users, ChevronRight, Star, Clock } from 'lucide-react-taro'
+import { User, Flame, Users } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 
@@ -41,11 +41,6 @@ export default function InterviewLobby() {
       iconColor: '#7C5CFC',
       gradient: 'from-violet-500 to-indigo-600',
     },
-  ]
-
-  const trainingRecords = [
-    { id: 1, title: '字节跳动·产品经理', score: 82, time: '2小时前', scoreColor: '#5B9A6F' },
-    { id: 2, title: '腾讯·前端开发', score: 76, time: '昨天', scoreColor: '#D4A574' },
   ]
 
   return (
@@ -106,44 +101,6 @@ export default function InterviewLobby() {
         ))}
       </View>
 
-      {/* 最近训练记录 */}
-      <View className={`px-4 pt-4 pb-6 ${loaded ? 'anim-fade-in-up anim-delay-5' : 'opacity-0'}`}>
-        <Text className='block text-base font-semibold text-foreground mb-3'>最近训练</Text>
-
-        <Card className='shadow-card overflow-hidden'>
-          <CardContent className='p-0'>
-            {trainingRecords.length > 0 ? trainingRecords.map((record, idx) => (
-              <View key={record.id}>
-                {idx > 0 && <View className='h-px bg-outline-variant bg-opacity-15 mx-4' />}
-                <View
-                  className='flex flex-row items-center px-4 py-4 btn-press'
-                  onClick={() => Taro.navigateTo({ url: `/pages/interview/report?id=${record.id}` })}
-                >
-                  <View className='w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center flex-shrink-0'>
-                    <Star size={18} color='#3A4A44' />
-                  </View>
-                  <View className='flex-1 min-w-0 ml-3'>
-                    <Text className='block text-sm font-medium text-foreground truncate'>{record.title}</Text>
-                    <View className='flex flex-row items-center gap-2 mt-1'>
-                      <Clock size={10} color='#6B7B74' />
-                      <Text className='text-xs text-muted-foreground'>{record.time}</Text>
-                    </View>
-                  </View>
-                  <View className='flex flex-col items-center mr-2'>
-                    <Text className='text-lg font-bold' style={{ color: record.scoreColor }}>{record.score}</Text>
-                    <Text className='text-xs text-muted-foreground' style={{ fontSize: '9px' }}>综合评分</Text>
-                  </View>
-                  <ChevronRight size={14} color='#6B7B7480' />
-                </View>
-              </View>
-            )) : (
-              <View className='p-6 flex flex-col items-center'>
-                <Text className='block text-muted-foreground text-sm'>还没有训练记录</Text>
-              </View>
-            )}
-          </CardContent>
-        </Card>
-      </View>
     </View>
   )
 }

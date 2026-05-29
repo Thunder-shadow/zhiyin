@@ -21,13 +21,13 @@ export class InterviewService {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) { console.error('List interviews error:', error); return []; }
+    if (error) { return []; }
     return data;
   }
 
   async detail(id: string) {
     const { data, error } = await this.client.from('interviews').select('*').eq('id', id).single();
-    if (error) { console.error('Get interview error:', error); return null; }
+    if (error) { return null; }
     return data;
   }
 
@@ -41,7 +41,7 @@ export class InterviewService {
       .select()
       .single();
 
-    if (error) { console.error('Create interview error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
@@ -53,7 +53,7 @@ export class InterviewService {
       .select()
       .single();
 
-    if (error) { console.error('Update conversation error:', error); throw error; }
+    if (error) { throw error; }
     return data;
   }
 
@@ -111,10 +111,9 @@ export class InterviewService {
         .select()
         .single();
 
-      if (error) { console.error('Save report error:', error); throw error; }
+      if (error) { throw error; }
       return data;
     } catch (err) {
-      console.error('Generate report LLM error:', err);
       // 返回默认报告
       return {
         ...interview,

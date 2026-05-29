@@ -27,7 +27,6 @@ export class HrCandidateService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('List HR candidates error:', error);
       return [];
     }
 
@@ -52,7 +51,6 @@ export class HrCandidateService {
       .single();
 
     if (error) {
-      console.error('Get HR candidate detail error:', error);
       return null;
     }
 
@@ -97,7 +95,6 @@ export class HrCandidateService {
       .single();
 
     if (error) {
-      console.error('Create HR candidate error:', error);
       throw error;
     }
 
@@ -136,7 +133,6 @@ export class HrCandidateService {
       .single();
 
     if (error) {
-      console.error('Update HR candidate error:', error);
       throw error;
     }
 
@@ -160,7 +156,6 @@ export class HrCandidateService {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Delete HR candidate error:', error);
       throw error;
     }
 

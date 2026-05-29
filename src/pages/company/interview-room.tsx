@@ -194,7 +194,7 @@ export default function DungeonInterviewRoom() {
         setJobInfo(res.data.data)
       }
     } catch (err) {
-      console.error('Load job error:', err)
+      // error handled silently
     }
   }
 
@@ -212,7 +212,7 @@ export default function DungeonInterviewRoom() {
         },
       })
     } catch (err) {
-      console.error('Update job status error:', err)
+      // error handled silently
     }
   }
 

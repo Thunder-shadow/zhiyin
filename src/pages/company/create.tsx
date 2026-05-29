@@ -73,7 +73,6 @@ export default function CreateJob() {
       Taro.showToast({ title: '创建成功', icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1200)
     } catch (err) {
-      console.error('Create job error:', err)
       Taro.showToast({ title: '创建失败', icon: 'error' })
     } finally {
       setLoading(false)

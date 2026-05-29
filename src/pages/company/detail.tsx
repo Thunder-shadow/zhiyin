@@ -34,7 +34,6 @@ export default function CompanyDetail() {
   const loadCard = async (id: string) => {
     try {
       const res = await Network.request({ url: `/api/jobs/${id}` })
-      console.log('Card detail response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const data = res.data.data
         setCompany(data.company || '')
@@ -50,7 +49,7 @@ export default function CompanyDetail() {
         }
       }
     } catch (err) {
-      console.log('Load card error:', err)
+
     }
   }
 
@@ -68,7 +67,6 @@ export default function CompanyDetail() {
         method: 'POST',
         data: { company, position, jd_text: jdText, industry, salary, location, education }
       })
-      console.log('Save job response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         const savedCard = res.data.data
         setCardId(savedCard.id)
@@ -82,7 +80,6 @@ export default function CompanyDetail() {
               method: 'POST',
               data: { action: 'strategy', jd_text: jdText }
             })
-            console.log('AI strategy response:', aiRes.data)
             if (aiRes.data?.code === 0 && aiRes.data?.data) {
               const strategyData = aiRes.data.data
               setStrategy(strategyData)
@@ -101,7 +98,6 @@ export default function CompanyDetail() {
               })
             }
           } catch (aiErr) {
-            console.log('AI parse error:', aiErr)
             Taro.showToast({ title: 'AI解析失败，请稍后重试', icon: 'none' })
           } finally {
             setStrategyLoading(false)
@@ -111,7 +107,6 @@ export default function CompanyDetail() {
         Taro.showToast({ title: '任务领取成功', icon: 'success' })
       }
     } catch (err) {
-      console.log('Save job error:', err)
       Taro.showToast({ title: '保存失败', icon: 'none' })
     } finally {
       setSaving(false)
@@ -130,7 +125,6 @@ export default function CompanyDetail() {
         method: 'POST',
         data: { action: 'strategy', jd_text: jdText }
       })
-      console.log('AI re-parse response:', aiRes.data)
       if (aiRes.data?.code === 0 && aiRes.data?.data) {
         const strategyData = aiRes.data.data
         setStrategy(strategyData)
@@ -150,7 +144,6 @@ export default function CompanyDetail() {
         }
       }
     } catch (err) {
-      console.log('Re-parse error:', err)
       Taro.showToast({ title: 'AI解析失败', icon: 'none' })
     } finally {
       setStrategyLoading(false)

@@ -34,7 +34,6 @@ export default function HrHistory() {
         setReports(res.data.data || [])
       }
     } catch (err) {
-      console.error('Load reports error:', err)
     } finally {
       setLoading(false)
     }
@@ -59,7 +58,6 @@ export default function HrHistory() {
       await Network.request({ url: `/api/hr-reports/${id}`, method: 'DELETE' })
       setReports(prev => prev.filter(r => r.id !== id))
     } catch (err) {
-      console.error('Delete report error:', err)
       Taro.showToast({ title: '删除失败', icon: 'none' })
     }
   }

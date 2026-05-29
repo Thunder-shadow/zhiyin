@@ -68,7 +68,6 @@ export default function CandidateEdit() {
         })
       }
     } catch (err) {
-      console.error('Load candidate error:', err)
       Taro.showToast({ title: '加载失败', icon: 'error' })
     }
   }
@@ -95,7 +94,6 @@ export default function CandidateEdit() {
       Taro.showToast({ title: '保存成功', icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1200)
     } catch (err) {
-      console.error('Save candidate error:', err)
       Taro.showToast({ title: '保存失败', icon: 'error' })
     } finally {
       setLoading(false)
