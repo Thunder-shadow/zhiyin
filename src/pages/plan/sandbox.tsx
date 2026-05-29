@@ -1,31 +1,34 @@
-// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition={false} 防止键盘推页面
+// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition 防止键盘推页面
 import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Send, Compass, Target, TrendingUp, Shield, ArrowLeft, Sparkles } from 'lucide-react-taro'
+import { Card, CardContent } from '@/components/ui/card'
+import { ArrowLeft, Send, Bot, Sparkles } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback } from 'react'
 import { fetchStream } from '@/utils/stream'
 
 interface ChatMessage {
-  role: 'user' | 'ai'
+  role: 'user' | 'assistant'
   content: string
   streaming?: boolean
 }
 
-/** 职业规划沙盘 - AI流式对话 + 画像 + 路径卡片 */
-export default function Sandbox() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'ai', content: '你好！我是你的职业导航师。告诉我你的专业、兴趣和目标，我会帮你规划最佳职业路径。' }
-  ])
-  const [inputText, setInputText] = useState('')
+/** 获取系统状态栏高度 */
+function getStatusBarHeight(): number {
+  try {
+    const sysInfo = Taro.getSystemInfoSync()
+    return sysInfo.statusBarHeight || 0
+  } catch {
+    return 0
+  }
+}
+
+export default function PlanSandbox() {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [profile, setProfile] = useState<any>(null)
-  const [pathData, setPathData] = useState<any[]>([])
-  const [showResult, setShowResult] = useState(false)
   const scrollRef = useRef('')
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const statusBarHeight = getStatusBarHeight()
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -33,115 +36,119 @@ export default function Sandbox() {
     }, 50)
   }, [])
 
-  const handleKeyboardHeight = useCallback((e) => {
-    const h = e.height || 0
-    setKeyboardHeight(h)
-    if (h > 0) scrollToBottom()
-  }, [scrollToBottom])
-
-  /** 流式发送消息 */
+  /** 发送消息 - 流式 */
   const sendMessage = async () => {
-    const trimmed = inputText.trim()
+    const trimmed = input.trim()
     if (!trimmed || isLoading) return
 
     const userMsg: ChatMessage = { role: 'user', content: trimmed }
-    const currentMessages = [...messages, userMsg]
-    setMessages(currentMessages)
-    setInputText('')
+    const currentConversation = [...messages, userMsg]
+    setInput('')
     setIsLoading(true)
+    setMessages(currentConversation)
 
-    const aiMsg: ChatMessage = { role: 'ai', content: '', streaming: true }
-    const newMessages = [...currentMessages, aiMsg]
-    setMessages([...newMessages])
-
-    const conversation = currentMessages.map(m => ({
-      role: m.role === 'ai' ? 'assistant' as const : 'user' as const,
-      content: m.content
-    }))
+    const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
 
     await fetchStream(
       '/api/ai/chat/stream',
-      { action: 'career_plan', conversation },
+      {
+        action: 'career_plan',
+        conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
+      },
       {
         onChunk: (content) => {
           aiMsg.content += content
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          aiMsg.streaming = true
+          setMessages([...currentConversation, { ...aiMsg }])
           scrollToBottom()
         },
-        onDone: (data) => {
+        onDone: () => {
           aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { ...aiMsg }])
           setIsLoading(false)
-
-          // 处理结构化数据
-          if (data) {
-            if (data.profile) setProfile(data.profile)
-            if (data.paths) setPathData(data.paths)
-            if (data.profile && data.paths) setShowResult(true)
-          }
         },
         onError: () => {
-          aiMsg.content = '抱歉，出了点问题，请再试一次。'
-          aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { role: 'assistant', content: 'AI暂时无法回复，请稍后再试...', streaming: false }])
           setIsLoading(false)
         },
       }
     )
   }
 
+  const lastMsg = messages[messages.length - 1]
+  const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
+
   return (
     <View className="flex flex-col" style={{ height: '100vh' }}>
-      {/* 顶部 - 使用安全区域 */}
+      {/* 自定义顶部导航栏 */}
       <View
         className="flex-shrink-0 px-4 pb-3"
-        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', backgroundColor: '#7C3AED' }}
+        style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className="flex flex-row items-center gap-3">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="#fff" />
           </View>
           <View className="flex-1 min-w-0">
-            <View className="flex flex-row items-center gap-2">
-              <Compass size={20} color="#fff" />
-              <Text className="block text-white font-bold text-lg">职业规划沙盘</Text>
-            </View>
-            <Text className="block text-purple-200 text-xs mt-1">AI导航师帮你找到最佳职业路径</Text>
+            <Text className="block text-white font-bold text-base">职业沙盘</Text>
+            <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>AI帮你规划职业路径</Text>
           </View>
-          <Badge className="bg-accent text-white border-none text-xs">
-            <Sparkles size={12} color="#fff" /> AI
-          </Badge>
+          <View className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+            <Sparkles size={14} color="#fff" />
+          </View>
         </View>
       </View>
 
-      {/* 对话区域 */}
-      <ScrollView className="flex-1 px-4 py-4" scrollY scrollIntoView={scrollRef.current} scrollWithAnimation>
+      {/* 聊天区 */}
+      <ScrollView
+        className="flex-1 px-4 pt-4"
+        scrollY
+        scrollIntoView={scrollRef.current}
+        scrollWithAnimation
+      >
+        {messages.length === 0 && (
+          <View className="flex items-center justify-center pt-16">
+            <Card className="shadow-card w-full">
+              <CardContent className="p-6 text-center">
+                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#8B5CF615' }}>
+                  <Sparkles size={32} color="#8B5CF6" />
+                </View>
+                <Text className="block text-lg font-bold text-foreground mb-2">职业沙盘</Text>
+                <Text className="block text-sm text-muted-foreground mb-1">告诉我你的职业困惑，AI帮你分析</Text>
+                <Text className="block text-xs text-muted-foreground" style={{ opacity: 0.6 }}>例如：&ldquo;我是前端开发，想转产品经理，该怎么规划？&rdquo;</Text>
+              </CardContent>
+            </Card>
+          </View>
+        )}
+
         {messages.map((msg, idx) => (
-          <View
-            key={idx}
-            id={`msg-${idx}`}
-            className={`flex flex-col mb-4 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-          >
-            {msg.role === 'ai' ? (
+          <View key={idx} id={`msg-${idx}`} className="mb-3">
+            {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
-                <View className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ backgroundColor: '#7C3AED' }}>
-                  <Compass size={14} color="#fff" />
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#3A4A44' }}
+                >
+                  <Bot size={14} color="#fff" />
                 </View>
                 <Card className="shadow-card">
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
-                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1" style={{ backgroundColor: '#7C3AED', animation: 'blink 1s step-end infinite' }} />}
+                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>
               </View>
             ) : (
-              <View style={{ maxWidth: '85%' }}>
-                <Card className="shadow-card" style={{ backgroundColor: '#7C3AED' }}>
+              <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#6B7B74' }}
+                >
+                  <Text className="text-white text-xs font-bold">我</Text>
+                </View>
+                <Card className="shadow-card" style={{ backgroundColor: '#3A4A44' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -151,116 +158,51 @@ export default function Sandbox() {
           </View>
         ))}
 
-        {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
-          <View className="flex flex-row items-start gap-2 mb-3">
-            <View className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#7C3AED' }}>
-              <Compass size={14} color="#fff" />
-            </View>
-            <Card className="shadow-card">
-              <CardContent className="p-3">
-                <Text className="block text-xs text-muted-foreground">导航师思考中...</Text>
-              </CardContent>
-            </Card>
-          </View>
-        )}
-
-        {/* 画像 + 路径结果 */}
-        {showResult && profile && (
-          <Card className="shadow-card mt-4">
-            <CardContent className="p-4">
-              <View className="flex flex-row items-center gap-2 mb-3">
-                <Shield size={16} color="#8B5CF6" />
-                <Text className="block font-semibold text-foreground">你的职业画像</Text>
+        {showThinking && (
+          <View className="mb-3" id="msg-thinking">
+            <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
+              <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44' }}>
+                <Bot size={14} color="#fff" />
               </View>
-              <View className="flex flex-col gap-2">
-                {profile.strengths && (
-                  <View>
-                    <Text className="block text-xs text-muted-foreground mb-1">优势</Text>
-                    <View className="flex flex-row flex-wrap gap-1">
-                      {(profile.strengths as string[]).map((s: string, i: number) => (
-                        <Badge key={i} className="bg-emerald-50 text-emerald-600 border-none text-xs">{s}</Badge>
-                      ))}
-                    </View>
-                  </View>
-                )}
-                {profile.interests && (
-                  <View>
-                    <Text className="block text-xs text-muted-foreground mb-1">兴趣</Text>
-                    <View className="flex flex-row flex-wrap gap-1">
-                      {(profile.interests as string[]).map((s: string, i: number) => (
-                        <Badge key={i} className="bg-blue-50 text-blue-600 border-none text-xs">{s}</Badge>
-                      ))}
-                    </View>
-                  </View>
-                )}
-              </View>
-            </CardContent>
-          </Card>
-        )}
-
-        {showResult && pathData.length > 0 && (
-          <View className="mt-4">
-            <Text className="block font-semibold text-foreground mb-2">推荐路径</Text>
-            {pathData.map((path, idx) => (
-              <Card key={idx} className="shadow-card mb-3">
-                <CardContent className="p-4">
-                  <View className="flex flex-row items-center gap-2 mb-2">
-                    <Target size={16} color="#FF6B35" />
-                    <Text className="block font-semibold text-foreground">{path.name || `路径 ${idx + 1}`}</Text>
-                    {path.fit_score && (
-                      <Badge className="bg-accent text-white border-none text-xs">
-                        {path.fit_score}%匹配
-                      </Badge>
-                    )}
-                  </View>
-                  <Text className="block text-sm text-muted-foreground leading-relaxed">{path.description || ''}</Text>
-                  {path.milestones && (
-                    <View className="mt-2 flex flex-col gap-1">
-                      {(path.milestones as string[]).map((m: string, mi: number) => (
-                        <View key={mi} className="flex flex-row items-center gap-2">
-                          <TrendingUp size={12} color="#8B5CF6" />
-                          <Text className="block text-xs text-muted-foreground">{m}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )}
+              <Card className="shadow-card">
+                <CardContent className="p-3">
+                  <Text className="block text-xs text-muted-foreground">AI思考中...</Text>
                 </CardContent>
               </Card>
-            ))}
+            </View>
           </View>
         )}
         <View id="msg-bottom-sandbox" style={{ height: '1px' }} />
         <View style={{ height: '80px' }} />
       </ScrollView>
 
-      {/* 输入区域 - 跟随键盘高度 */}
+      {/* 输入区 */}
       <View
         className="flex-shrink-0 px-3 pt-3 bg-card"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', borderTop: '1px solid var(--color-outline-variant)', marginBottom: `${keyboardHeight}px` }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)', borderTop: '1px solid var(--color-outline-variant)' }}
       >
         <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
           <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
             <TaroInput
               style={{ width: '100%', fontSize: '14px', color: 'var(--color-foreground)', backgroundColor: 'transparent' }}
-              placeholder="告诉我你的职业目标..."
+              placeholder="描述你的职业困惑..."
               placeholderStyle="color: var(--color-muted-foreground)"
-              value={inputText}
-              onInput={(e) => setInputText(e.detail.value)}
+              value={input}
+              onInput={(e) => setInput(e.detail.value)}
               onConfirm={sendMessage}
               confirmType="send"
               disabled={isLoading}
-              adjustPosition={false}
+              adjustPosition
               onFocus={scrollToBottom}
-              onKeyboardHeightChange={handleKeyboardHeight}
             />
           </View>
           <View style={{ flexShrink: 0 }}>
             <Button
               size="sm"
               className="rounded-full"
-              style={{ backgroundColor: '#7C3AED' }}
+              style={{ backgroundColor: '#3A4A44' }}
               onClick={sendMessage}
-              disabled={isLoading || !inputText.trim()}
+              disabled={!input.trim() || isLoading}
             >
               <Send size={16} color="#fff" />
             </Button>

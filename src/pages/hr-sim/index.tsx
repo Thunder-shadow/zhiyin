@@ -22,6 +22,16 @@ const RESUME_PROFILES = [
   { name: '王芳', school: '复旦·金融学', summary: '2段投行实习，英语专八', tag: '综合型', color: '#10B981' },
 ]
 
+/** 获取系统状态栏高度 */
+function getStatusBarHeight(): number {
+  try {
+    const sysInfo = Taro.getSystemInfoSync()
+    return sysInfo.statusBarHeight || 0
+  } catch {
+    return 0
+  }
+}
+
 export default function HrSim() {
   const [step, setStep] = useState<'select' | 'interview' | 'result'>('select')
   const [resumeIndex, setResumeIndex] = useState(0)
@@ -30,7 +40,7 @@ export default function HrSim() {
   const [isLoading, setIsLoading] = useState(false)
   const [hrNotes, setHrNotes] = useState('')
   const scrollRef = useRef('')
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const statusBarHeight = getStatusBarHeight()
 
   /** 滚动到底部 */
   const scrollToBottom = useCallback(() => {
@@ -38,17 +48,6 @@ export default function HrSim() {
       scrollRef.current = Date.now().toString()
     }, 50)
   }, [])
-
-  /** 键盘弹起时仅滚动聊天区 + 记录键盘高度 */
-  const handleInputFocus = useCallback(() => {
-    scrollToBottom()
-  }, [scrollToBottom])
-
-  const handleKeyboardHeight = useCallback((e) => {
-    const h = e.height || 0
-    setKeyboardHeight(h)
-    if (h > 0) scrollToBottom()
-  }, [scrollToBottom])
 
   /** 开始面试 */
   const startInterview = async (index: number) => {
@@ -95,13 +94,12 @@ export default function HrSim() {
 
     const userMsg: ChatMessage = { role: 'user', content: trimmed }
     const currentConversation = [...messages, userMsg]
-    setMessages(currentConversation)
     setInput('')
     setIsLoading(true)
+    // 先只设置用户消息，不预设空的 assistant 消息
+    setMessages(currentConversation)
 
     const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
-    const newMessages = [...currentConversation, aiMsg]
-    setMessages([...newMessages])
 
     await fetchStream(
       '/api/ai/chat/stream',
@@ -113,21 +111,17 @@ export default function HrSim() {
       {
         onChunk: (content) => {
           aiMsg.content += content
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          aiMsg.streaming = true
+          setMessages([...currentConversation, { ...aiMsg }])
           scrollToBottom()
         },
         onDone: () => {
           aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { ...aiMsg }])
           setIsLoading(false)
         },
         onError: () => {
-          aiMsg.content = '候选人暂时无法回复，请稍后再试...'
-          aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { role: 'assistant', content: '候选人暂时无法回复，请稍后再试...', streaming: false }])
           setIsLoading(false)
         },
       }
@@ -164,7 +158,7 @@ export default function HrSim() {
   /** 选择简历阶段 */
   if (step === 'select') {
     return (
-      <View className="min-h-full bg-background px-4 pt-6">
+      <View className="min-h-full bg-background px-4" style={{ paddingTop: `${statusBarHeight + 12}px` }}>
         <View className="flex flex-row items-center gap-2 mb-6">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="var(--color-primary)" />
@@ -213,7 +207,7 @@ export default function HrSim() {
   /** 结果阶段 */
   if (step === 'result') {
     return (
-      <View className="min-h-full bg-background px-4 pt-6">
+      <View className="min-h-full bg-background px-4" style={{ paddingTop: `${statusBarHeight + 12}px` }}>
         <View className="flex flex-row items-center gap-2 mb-6">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="var(--color-primary)" />
@@ -245,12 +239,16 @@ export default function HrSim() {
   }
 
   /** 面试对话阶段 */
+  // 判断是否显示"思考中"：isLoading 且 最后一条消息是 user 且 还没有 assistant 回复内容
+  const lastMsg = messages[messages.length - 1]
+  const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
+
   return (
     <View className="flex flex-col" style={{ height: '100vh' }}>
-      {/* 顶部固定导航栏 - 使用安全区域 */}
+      {/* 自定义顶部导航栏 - 适配系统状态栏 */}
       <View
         className="flex-shrink-0 px-4 pb-3"
-        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
+        style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className="flex flex-row items-center gap-3">
           <View onClick={() => Taro.navigateBack()} className="p-1">
@@ -310,9 +308,9 @@ export default function HrSim() {
           </View>
         ))}
 
-        {/* 仅在AI正在思考且最后一条是用户消息时显示loading */}
-        {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
-          <View className="mb-3">
+        {/* 仅在AI正在思考且还没有开始回复时显示 */}
+        {showThinking && (
+          <View className="mb-3" id="msg-thinking">
             <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
               <View
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -333,10 +331,10 @@ export default function HrSim() {
         <View style={{ height: '80px' }} />
       </ScrollView>
 
-      {/* 输入区 - 固定底部，跟随键盘高度 */}
+      {/* 输入区 - 固定底部，adjustPosition={true} 让系统自动处理键盘弹起 */}
       <View
         className="flex-shrink-0 px-3 pt-3 bg-card"
-        style={{ paddingBottom: `max(env(safe-area-inset-bottom), 12px)`, borderTop: '1px solid var(--color-outline-variant)', marginBottom: `${keyboardHeight}px` }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)', borderTop: '1px solid var(--color-outline-variant)' }}
       >
         <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
           <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
@@ -349,9 +347,8 @@ export default function HrSim() {
               onConfirm={sendMessage}
               confirmType="send"
               disabled={isLoading}
-              adjustPosition={false}
-              onFocus={handleInputFocus}
-              onKeyboardHeightChange={handleKeyboardHeight}
+              adjustPosition
+              onFocus={scrollToBottom}
             />
           </View>
           <View style={{ flexShrink: 0 }}>

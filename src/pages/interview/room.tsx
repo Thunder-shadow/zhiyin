@@ -1,9 +1,8 @@
-// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition={false} 防止键盘推页面
+// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition 防止键盘推页面
 import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Swords, Send, ArrowLeft, Zap } from 'lucide-react-taro'
+import { ArrowLeft, Send, Bot, User } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback } from 'react'
 import { fetchStream } from '@/utils/stream'
@@ -14,18 +13,32 @@ interface ChatMessage {
   streaming?: boolean
 }
 
+const MODES: Record<string, { title: string; label: string; action: string }> = {
+  single: { title: '单人模拟面', label: 'AI面试官', action: 'interview_single' },
+  pressure: { title: '压力面试', label: '严厉面试官', action: 'interview_pressure' },
+  group: { title: 'AI群面', label: '群面官', action: 'interview_group' },
+}
+
+/** 获取系统状态栏高度 */
+function getStatusBarHeight(): number {
+  try {
+    const sysInfo = Taro.getSystemInfoSync()
+    return sysInfo.statusBarHeight || 0
+  } catch {
+    return 0
+  }
+}
+
 export default function InterviewRoom() {
-  const params = Taro.getCurrentInstance().router?.params || {}
-  const type = (params.type as string) || 'single'
+  const mode = Taro.getCurrentInstance().router?.params?.mode || 'single'
+  const modeInfo = MODES[mode] || MODES.single
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [hasStarted, setHasStarted] = useState(false)
   const scrollRef = useRef('')
-  const [roundCount, setRoundCount] = useState(0)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
-
-  const typeLabel = type === 'stress' ? '压力面' : type === 'group' ? '群面' : '单面'
+  const statusBarHeight = getStatusBarHeight()
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -33,22 +46,16 @@ export default function InterviewRoom() {
     }, 50)
   }, [])
 
-  const handleKeyboardHeight = useCallback((e) => {
-    const h = e.height || 0
-    setKeyboardHeight(h)
-    if (h > 0) scrollToBottom()
-  }, [scrollToBottom])
-
-  /** 开始面试 - 流式 */
+  /** 开始面试 */
   const startInterview = async () => {
     setIsLoading(true)
+    setHasStarted(true)
+
     const newMessages: ChatMessage[] = []
-    setMessages([])
-    setRoundCount(0)
 
     await fetchStream(
       '/api/ai/chat/stream',
-      { action: 'interview_start', type, conversation: [] },
+      { action: modeInfo.action, position: '产品经理', company: '字节跳动' },
       {
         onChunk: (content) => {
           if (newMessages.length === 0) {
@@ -66,7 +73,7 @@ export default function InterviewRoom() {
         },
         onError: () => {
           if (newMessages.length === 0) {
-            newMessages.push({ role: 'assistant', content: '面试官似乎走神了，请再试一次...' })
+            newMessages.push({ role: 'assistant', content: '面试官准备中，请稍后再试...' })
           }
           setMessages([...newMessages])
           setIsLoading(false)
@@ -75,99 +82,99 @@ export default function InterviewRoom() {
     )
   }
 
-  // 初始化面试
-  useState(() => {
-    startInterview()
-  })
-
-  /** 发送消息 - 流式 */
+  /** 发送回复 - 流式 */
   const sendMessage = async () => {
     const trimmed = input.trim()
     if (!trimmed || isLoading) return
 
     const userMsg: ChatMessage = { role: 'user', content: trimmed }
     const currentConversation = [...messages, userMsg]
-    setMessages(currentConversation)
     setInput('')
     setIsLoading(true)
-    setRoundCount(prev => prev + 1)
+    setMessages(currentConversation)
 
     const aiMsg: ChatMessage = { role: 'assistant', content: '', streaming: true }
-    const newMessages = [...currentConversation, aiMsg]
-    setMessages([...newMessages])
 
     await fetchStream(
       '/api/ai/chat/stream',
       {
-        action: 'interview_follow_up',
-        type,
+        action: modeInfo.action,
         conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
       },
       {
         onChunk: (content) => {
           aiMsg.content += content
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          aiMsg.streaming = true
+          setMessages([...currentConversation, { ...aiMsg }])
           scrollToBottom()
         },
         onDone: () => {
           aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { ...aiMsg }])
           setIsLoading(false)
         },
         onError: () => {
-          aiMsg.content = '面试官似乎走神了，请再试一次...'
-          aiMsg.streaming = false
-          newMessages[newMessages.length - 1] = { ...aiMsg }
-          setMessages([...newMessages])
+          setMessages([...currentConversation, { role: 'assistant', content: '面试官暂时无法回复，请稍后再试...', streaming: false }])
           setIsLoading(false)
         },
       }
     )
   }
 
-  /** 结束面试 */
-  const endInterview = () => {
-    Taro.navigateTo({
-      url: `/pages/interview/report?type=${type}&rounds=${roundCount}`
-    })
-  }
+  const lastMsg = messages[messages.length - 1]
+  const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
 
   return (
     <View className="flex flex-col" style={{ height: '100vh' }}>
-      {/* 顶部导航栏 */}
+      {/* 自定义顶部导航栏 */}
       <View
-        className="flex-shrink-0 px-4 pb-3 rounded-b-2xl"
-        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', background: 'linear-gradient(135deg, #2D3A35 0%, #3A4A44 50%, #4A6A5C 100%)' }}
+        className="flex-shrink-0 px-4 pb-3"
+        style={{ paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className="flex flex-row items-center gap-3">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="#fff" />
           </View>
           <View className="flex-1 min-w-0">
-            <Text className="block text-white font-bold text-base">面试训练</Text>
-            <Text className="block text-gray-300 text-xs">{typeLabel}模式 · 第{roundCount + 1}轮</Text>
+            <Text className="block text-white font-bold text-base">{modeInfo.title}</Text>
+            <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{modeInfo.label}</Text>
           </View>
-          <Badge className="bg-accent text-white border-none text-xs">
-            <Swords size={12} color="#fff" /> 训练中
-          </Badge>
         </View>
       </View>
 
-      {/* 聊天区域 */}
+      {/* 聊天区 */}
       <ScrollView
-        className="flex-1 px-4 pt-4 pb-2"
+        className="flex-1 px-4 pt-4"
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
       >
+        {!hasStarted && messages.length === 0 && (
+          <View className="flex items-center justify-center pt-20">
+            <Card className="shadow-card w-full">
+              <CardContent className="p-6 text-center">
+                <View className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: '#3A4A4415' }}>
+                  <Bot size={32} color="#3A4A44" />
+                </View>
+                <Text className="block text-lg font-bold text-foreground mb-2">{modeInfo.title}</Text>
+                <Text className="block text-sm text-muted-foreground mb-4">AI将扮演{modeInfo.label}与你对话</Text>
+                <Button className="w-full" style={{ backgroundColor: '#3A4A44' }} onClick={startInterview}>
+                  <Text>开始面试</Text>
+                </Button>
+              </CardContent>
+            </Card>
+          </View>
+        )}
+
         {messages.map((msg, idx) => (
           <View key={idx} id={`msg-${idx}`} className="mb-3">
             {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
-                <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44' }}>
-                  <Swords size={14} color="#fff" />
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#3A4A44' }}
+                >
+                  <Bot size={14} color="#fff" />
                 </View>
                 <Card className="shadow-card">
                   <CardContent className="p-3">
@@ -180,10 +187,13 @@ export default function InterviewRoom() {
               </View>
             ) : (
               <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
-                <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#E26A5C' }}>
-                  <Text className="text-white text-xs font-bold">我</Text>
+                <View
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: '#E26A5C' }}
+                >
+                  <User size={14} color="#fff" />
                 </View>
-                <Card className="shadow-card" style={{ background: 'linear-gradient(135deg, #3A4A44, #4A6A5C)' }}>
+                <Card className="shadow-card" style={{ backgroundColor: '#3A4A44' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -193,12 +203,11 @@ export default function InterviewRoom() {
           </View>
         ))}
 
-        {/* AI正在思考时显示loading - 仅在最后一条是用户消息且正在加载时 */}
-        {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
-          <View className="mb-3">
+        {showThinking && (
+          <View className="mb-3" id="msg-thinking">
             <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
               <View className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3A4A44' }}>
-                <Swords size={14} color="#fff" />
+                <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">
                 <CardContent className="p-3">
@@ -208,15 +217,14 @@ export default function InterviewRoom() {
             </View>
           </View>
         )}
-
-        <View id="msg-bottom" style={{ height: '1px' }} />
+        <View id="msg-bottom-interview" style={{ height: '1px' }} />
         <View style={{ height: '80px' }} />
       </ScrollView>
 
-      {/* 底部输入区 - 跟随键盘高度 */}
+      {/* 输入区 */}
       <View
         className="flex-shrink-0 px-3 pt-3 bg-card"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', borderTop: '1px solid var(--color-outline-variant)', marginBottom: `${keyboardHeight}px` }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)', borderTop: '1px solid var(--color-outline-variant)' }}
       >
         <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
           <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
@@ -228,10 +236,9 @@ export default function InterviewRoom() {
               onInput={(e) => setInput(e.detail.value)}
               onConfirm={sendMessage}
               confirmType="send"
-              disabled={isLoading}
-              adjustPosition={false}
+              disabled={isLoading || !hasStarted}
+              adjustPosition
               onFocus={scrollToBottom}
-              onKeyboardHeightChange={handleKeyboardHeight}
             />
           </View>
           <View style={{ flexShrink: 0 }}>
@@ -240,22 +247,12 @@ export default function InterviewRoom() {
               className="rounded-full"
               style={{ backgroundColor: '#3A4A44' }}
               onClick={sendMessage}
-              disabled={!input.trim() || isLoading}
+              disabled={!input.trim() || isLoading || !hasStarted}
             >
               <Send size={16} color="#fff" />
             </Button>
           </View>
         </View>
-
-        {/* 结束面试按钮 */}
-        {roundCount > 0 && (
-          <View className="mt-2">
-            <Button variant="outline" className="w-full" onClick={endInterview}>
-              <Zap size={14} color="#5B9A6F" />
-              <Text>结束面试 · 查看报告</Text>
-            </Button>
-          </View>
-        )}
       </View>
     </View>
   )
