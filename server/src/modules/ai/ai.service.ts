@@ -25,6 +25,7 @@ export class AiService {
       case 'interview_follow_up':
       case 'interview_report':
         return this.handleInterviewChat(body, headers);
+      case 'hr_sim':
       case 'hr_sim_response':
         return this.handleHrSim(body, headers);
       default:
@@ -45,6 +46,7 @@ export class AiService {
       case 'interview_follow_up':
         yield* this.handleInterviewChatStream(body, headers);
         break;
+      case 'hr_sim':
       case 'hr_sim_response':
         yield* this.handleHrSimStream(body, headers);
         break;

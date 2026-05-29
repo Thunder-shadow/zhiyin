@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Send, Bot, User, Swords, ArrowLeft } from 'lucide-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { fetchStream } from '@/utils/stream'
+import { Network } from '@/network'
 
 interface Message {
   id: string
@@ -39,8 +39,21 @@ export default function HrSimIndex() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const scrollRef = useRef('')
   const statusBarHeight = getStatusBarHeight()
+  const messagesRef = useRef<Message[]>([])
+
+  // 监听键盘高度变化
+  useEffect(() => {
+    const listener = (res: { height: number }) => {
+      setKeyboardHeight(res.height > 0 ? res.height : 0)
+    }
+    Taro.onKeyboardHeightChange(listener)
+    return () => {
+      Taro.offKeyboardHeightChange(listener)
+    }
+  }, [])
 
   const scrollToBottom = useCallback(() => {
     scrollRef.current = 'scroll-' + Date.now()
@@ -52,6 +65,7 @@ export default function HrSimIndex() {
   /** 初始化面试对话 */
   const initInterview = useCallback(async (c: typeof candidate) => {
     if (!c) return
+
     // 生成开场白
     const openingPrompt = `你是一个正在参加面试的求职者。以下是你的背景信息：
 
@@ -66,81 +80,143 @@ export default function HrSimIndex() {
 
 回复长度控制在50字以内。`
 
+    const tempId = 'init-' + Date.now()
     const tempMessages: Message[] = [{
-      id: 'init-' + Date.now(),
+      id: tempId,
       role: 'assistant',
       content: '',
       isThinking: true,
     }]
-    setMessages(tempMessages)
+    messagesRef.current = tempMessages
+    setMessages([...tempMessages])
+    setIsLoading(true)
     scrollToBottom()
 
-    await fetchStream(
-      '/api/ai/chat/stream',
-      { action: 'interview_chat', prompt: openingPrompt },
-      {
-        onChunk: (content) => {
-          if (tempMessages.length === 0 || tempMessages[0].role !== 'assistant') {
-            tempMessages.push({ id: 'init-' + Date.now(), role: 'assistant', content, isThinking: false })
-          } else {
-            tempMessages[0].content += content
+    try {
+      const res = await Network.request({
+        url: '/api/ai/chat',
+        method: 'POST',
+        data: {
+          action: 'hr_sim',
+          prompt: openingPrompt,
+          candidate: {
+            id: c.id,
+            name: c.name,
+            school: c.school,
+            major: c.major,
           }
-          setMessages([...tempMessages])
-          scrollToBottom()
-        },
-        onDone: () => {
-          if (tempMessages[0]) tempMessages[0].isThinking = false
-          setMessages([...tempMessages])
-          setIsLoading(false)
-        },
-        onError: () => {
-          if (tempMessages[0]) {
-            tempMessages[0].content = '抱歉，面试官暂时无法启动。请稍后重试。'
-            tempMessages[0].isThinking = false
-          }
-          setMessages([...tempMessages])
-          setIsLoading(false)
-        },
+        }
+      })
+
+      if (res.data.code === 200 && res.data.data) {
+        const reply = res.data.data.reply || ''
+        tempMessages[0] = {
+          id: tempId,
+          role: 'assistant',
+          content: reply,
+          isThinking: false,
+        }
+        messagesRef.current = tempMessages
+        setMessages([...tempMessages])
+      } else {
+        tempMessages[0] = {
+          id: tempId,
+          role: 'assistant',
+          content: '抱歉，面试官暂时无法启动。请稍后重试。',
+          isThinking: false,
+        }
+        messagesRef.current = tempMessages
+        setMessages([...tempMessages])
       }
-    )
+    } catch (err) {
+      console.error('初始化面试失败:', err)
+      tempMessages[0] = {
+        id: tempId,
+        role: 'assistant',
+        content: '抱歉，面试官暂时无法启动。请稍后重试。',
+        isThinking: false,
+      }
+      messagesRef.current = tempMessages
+      setMessages([...tempMessages])
+    } finally {
+      setIsLoading(false)
+      scrollToBottom()
+    }
   }, [scrollToBottom])
 
-  /** 发送回复 - 流式 */
+  /** 发送回复 */
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim()
     if (!trimmed || isLoading) return
 
     const userMsg: Message = { id: 'user-' + Date.now(), role: 'user', content: trimmed }
-    const currentMessages = [...messages, userMsg]
+    messagesRef.current = [...messagesRef.current, userMsg]
+    setMessages([...messagesRef.current])
     setInput('')
     setIsLoading(true)
-    setMessages(currentMessages)
 
-    const aiMsg: Message = { id: 'ai-' + Date.now(), role: 'assistant', content: '', isThinking: false }
+    const aiMsg: Message = { id: 'ai-' + Date.now(), role: 'assistant', content: '', isThinking: true }
+    messagesRef.current = [...messagesRef.current, aiMsg]
+    setMessages([...messagesRef.current])
+    scrollToBottom()
 
-    await fetchStream(
-      '/api/ai/chat/stream',
-      {
-        action: 'interview_chat',
-        conversation: currentMessages.map(m => ({ role: m.role, content: m.content }))
-      },
-      {
-        onChunk: (content) => {
-          aiMsg.content += content
-          setMessages([...currentMessages, { ...aiMsg }])
-          scrollToBottom()
-        },
-        onDone: () => {
-          setMessages([...currentMessages, { ...aiMsg }])
-          setIsLoading(false)
-        },
-        onError: () => {
-          setMessages([...currentMessages, { id: 'ai-' + Date.now(), role: 'assistant', content: '面试官暂时无法回复，请稍后再试...', isThinking: false }])
-          setIsLoading(false)
-        },
+    try {
+      const res = await Network.request({
+        url: '/api/ai/chat',
+        method: 'POST',
+        data: {
+          action: 'hr_sim',
+          conversation: messagesRef.current.filter(m => m.role === 'user').map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          candidate: candidate ? {
+            id: candidate.id,
+            name: candidate.name,
+            school: candidate.school,
+            major: candidate.major,
+          } : undefined
+        }
+      })
+
+      if (res.data.code === 200 && res.data.data) {
+        const reply = res.data.data.reply || ''
+        const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
+        if (msgIndex !== -1) {
+          messagesRef.current[msgIndex] = {
+            ...aiMsg,
+            content: reply,
+            isThinking: false,
+          }
+        }
+        setMessages([...messagesRef.current])
+      } else {
+        const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
+        if (msgIndex !== -1) {
+          messagesRef.current[msgIndex] = {
+            ...aiMsg,
+            content: '面试官暂时无法回复，请稍后再试...',
+            isThinking: false,
+          }
+        }
+        setMessages([...messagesRef.current])
       }
-    )
-  }, [input, isLoading, messages, scrollToBottom])
+    } catch (err) {
+      console.error('发送消息失败:', err)
+      const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
+      if (msgIndex !== -1) {
+        messagesRef.current[msgIndex] = {
+          ...aiMsg,
+          content: '面试官暂时无法回复，请稍后再试...',
+          isThinking: false,
+        }
+      }
+      setMessages([...messagesRef.current])
+    } finally {
+      setIsLoading(false)
+      scrollToBottom()
+    }
+  }, [input, isLoading, candidate, scrollToBottom])
 
   useEffect(() => {
     // 检查是否有候选人参数
@@ -167,6 +243,7 @@ export default function HrSimIndex() {
     if (step === 'interview') {
       setStep('menu')
       setMessages([])
+      messagesRef.current = []
       setCandidate(null)
     } else {
       Taro.navigateBack()
@@ -333,10 +410,14 @@ export default function HrSimIndex() {
         <View id={scrollRef.current} className='h-4' />
       </ScrollView>
 
-      {/* 输入区 */}
+      {/* 输入区 - 固定在键盘上方 */}
       <View
         className='flex-shrink-0 px-4 py-3'
-        style={{ background: '#fff', borderTop: '1px solid #eee' }}
+        style={{
+          background: '#fff',
+          borderTop: '1px solid #eee',
+          paddingBottom: keyboardHeight > 0 ? `${keyboardHeight + 12}px` : '12px',
+        }}
       >
         <View
           className='flex flex-row items-center px-4 py-2 rounded-full'
@@ -349,7 +430,7 @@ export default function HrSimIndex() {
             value={input}
             onInput={(e) => setInput(e.detail.value)}
             disabled={isLoading}
-            adjustPosition={false}
+            adjustPosition
             onConfirm={sendMessage}
           />
           <View className='ml-2 flex-shrink-0'>
