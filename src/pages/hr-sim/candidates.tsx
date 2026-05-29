@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Plus, User, Pencil, Trash2, Swords, Search } from 'lucide-react-taro'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useRouter } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 
@@ -24,6 +24,10 @@ interface HrCandidate {
 }
 
 export default function Candidates() {
+  const router = useRouter()
+  const mode = router.params.mode || 'manage'
+  const isSelectMode = mode === 'select'
+
   const [candidates, setCandidates] = useState<HrCandidate[]>([])
   const [loading, setLoading] = useState(true)
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -112,18 +116,24 @@ export default function Candidates() {
         <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
         <View className='flex flex-row items-center gap-3 relative'>
           <View className='flex-1'>
-            <Text className='block text-white font-bold text-base'>选择候选人</Text>
-            <Text className='block text-gray-300 text-xs'>选择一个候选人开始面试</Text>
+            <Text className='block text-white font-bold text-base'>
+              {isSelectMode ? '选择候选人' : '候选人管理'}
+            </Text>
+            <Text className='block text-gray-300 text-xs'>
+              {isSelectMode ? '选择一个候选人开始面试' : '管理面试候选人资料'}
+            </Text>
           </View>
         </View>
       </View>
 
       <View className='px-4 pt-4'>
-        {/* 新建候选人按钮 */}
-        <Button className='w-full btn-shimmer btn-press mb-4' onClick={goToCreate}>
-          <Plus size={16} />
-          <Text className='ml-2'>新建候选人</Text>
-        </Button>
+        {/* 新建候选人按钮 - 仅管理模式显示 */}
+        {!isSelectMode && (
+          <Button className='w-full btn-shimmer btn-press mb-4' onClick={goToCreate}>
+            <Plus size={16} />
+            <Text className='ml-2'>新建候选人</Text>
+          </Button>
+        )}
 
         {/* 搜索框 */}
         <View className='bg-surface-container rounded-xl px-3 py-2 mb-4'>
@@ -223,22 +233,26 @@ export default function Candidates() {
                       <Swords size={14} color='#fff' />
                       <Text className='ml-1'>开始面试</Text>
                     </Button>
-                    <Button
-                      size='sm'
-                      variant='ghost'
-                      className='px-3 rounded-lg'
-                      onClick={() => goToEdit(candidate.id)}
-                    >
-                      <Pencil size={14} color='#6B7B74' />
-                    </Button>
-                    <Button
-                      size='sm'
-                      variant='ghost'
-                      className='px-3 rounded-lg'
-                      onClick={() => deleteCandidate(candidate)}
-                    >
-                      <Trash2 size={14} color='#E26A5C' />
-                    </Button>
+                    {!isSelectMode && (
+                      <>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          className='px-3 rounded-lg'
+                          onClick={() => goToEdit(candidate.id)}
+                        >
+                          <Pencil size={14} color='#6B7B74' />
+                        </Button>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          className='px-3 rounded-lg'
+                          onClick={() => deleteCandidate(candidate)}
+                        >
+                          <Trash2 size={14} color='#E26A5C' />
+                        </Button>
+                      </>
+                    )}
                   </View>
                 </CardContent>
               </Card>
