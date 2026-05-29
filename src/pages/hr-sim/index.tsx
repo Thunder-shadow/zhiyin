@@ -1,24 +1,31 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-import { View, Text } from '@tarojs/components'
-import { Input } from '@/components/ui/input'
+// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition 防止键盘推页面
+import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { User, Clock, ChevronRight, Swords, Bot, Send } from 'lucide-react-taro'
+import { Send, Bot, User, Swords, ArrowLeft } from 'lucide-react-taro'
 import Taro, { useRouter } from '@tarojs/taro'
-import { useState, useEffect, useRef, useCallback } from 'react'
-/* eslint-disable @typescript-eslint/no-require-imports */
-import { Network } from '@/network'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { fetchStream } from '@/utils/stream'
 
 interface Message {
   id: string
-  role: 'hr' | 'assistant' | 'thinking'
+  role: 'user' | 'assistant'
   content: string
   isThinking?: boolean
 }
 
-export default function HrSim() {
+function getStatusBarHeight(): number {
+  try {
+    const sysInfo = Taro.getSystemInfoSync()
+    return sysInfo.statusBarHeight || 0
+  } catch {
+    return 0
+  }
+}
+
+export default function HrSimIndex() {
   const router = useRouter()
-  const [step, setStep] = useState<'select' | 'interview'>('select')
+  const [step, setStep] = useState<'menu' | 'interview'>('menu')
   const [candidate, setCandidate] = useState<{
     id: string
     name: string
@@ -32,9 +39,15 @@ export default function HrSim() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [loaded, setLoaded] = useState(false)
-  const scrollRef = useRef<any>(null)
-  const abortRef = useRef<AbortController | null>(null)
+  const scrollRef = useRef('')
+  const statusBarHeight = getStatusBarHeight()
+
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current = 'scroll-' + Date.now()
+    setTimeout(() => {
+      Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
+    }, 50)
+  }, [])
 
   /** 初始化面试对话 */
   const initInterview = useCallback(async (c: typeof candidate) => {
@@ -53,45 +66,81 @@ export default function HrSim() {
 
 回复长度控制在50字以内。`
 
-    setMessages([{
-      id: Date.now().toString(),
+    const tempMessages: Message[] = [{
+      id: 'init-' + Date.now(),
       role: 'assistant',
       content: '',
       isThinking: true,
-    }])
+    }]
+    setMessages(tempMessages)
+    scrollToBottom()
 
-    try {
-      const response = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: { action: 'hr_sim_response', prompt: openingPrompt },
-      })
-
-      if (response.data?.code === 0 && response.data?.data?.reply) {
-        setMessages([{
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: response.data.data.reply,
-          isThinking: false,
-        }])
-      } else {
-        setMessages([{
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: '抱歉，面试官暂时无法启动。请稍后重试。',
-          isThinking: false,
-        }])
+    await fetchStream(
+      '/api/ai/chat/stream',
+      { action: 'interview_chat', prompt: openingPrompt },
+      {
+        onChunk: (content) => {
+          if (tempMessages.length === 0 || tempMessages[0].role !== 'assistant') {
+            tempMessages.push({ id: 'init-' + Date.now(), role: 'assistant', content, isThinking: false })
+          } else {
+            tempMessages[0].content += content
+          }
+          setMessages([...tempMessages])
+          scrollToBottom()
+        },
+        onDone: () => {
+          if (tempMessages[0]) tempMessages[0].isThinking = false
+          setMessages([...tempMessages])
+          setIsLoading(false)
+        },
+        onError: () => {
+          if (tempMessages[0]) {
+            tempMessages[0].content = '抱歉，面试官暂时无法启动。请稍后重试。'
+            tempMessages[0].isThinking = false
+          }
+          setMessages([...tempMessages])
+          setIsLoading(false)
+        },
       }
-    } catch (err) {
-      console.error('Init interview error:', err)
-      setMessages([{
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: '抱歉，面试官暂时无法启动。请稍后重试。',
-        isThinking: false,
-      }])
-    }
-  }, [])
+    )
+  }, [scrollToBottom])
+
+  /** 发送回复 - 流式 */
+  const sendMessage = useCallback(async () => {
+    const trimmed = input.trim()
+    if (!trimmed || isLoading) return
+
+    const userMsg: Message = { id: 'user-' + Date.now(), role: 'user', content: trimmed }
+    const currentMessages = [...messages, userMsg]
+    setInput('')
+    setIsLoading(true)
+    setMessages(currentMessages)
+
+    const aiMsg: Message = { id: 'ai-' + Date.now(), role: 'assistant', content: '', isThinking: false }
+
+    await fetchStream(
+      '/api/ai/chat/stream',
+      {
+        action: 'interview_chat',
+        conversation: currentMessages.map(m => ({ role: m.role, content: m.content }))
+      },
+      {
+        onChunk: (content) => {
+          aiMsg.content += content
+          setMessages([...currentMessages, { ...aiMsg }])
+          scrollToBottom()
+        },
+        onDone: () => {
+          setMessages([...currentMessages, { ...aiMsg }])
+          setIsLoading(false)
+        },
+        onError: () => {
+          setMessages([...currentMessages, { id: 'ai-' + Date.now(), role: 'assistant', content: '面试官暂时无法回复，请稍后再试...', isThinking: false }])
+          setIsLoading(false)
+        },
+      }
+    )
+  }, [input, isLoading, messages, scrollToBottom])
 
   useEffect(() => {
     // 检查是否有候选人参数
@@ -110,267 +159,209 @@ export default function HrSim() {
       setCandidate(c)
       setStep('interview')
       // 初始化面试对话
-      initInterview(c)
+      setTimeout(() => initInterview(c), 100)
     }
-    setTimeout(() => setLoaded(true), 80)
-    // 在 effect 中保存 ref 值到变量
-    const abortController = abortRef.current
-    return () => {
-      if (abortController) {
-        abortController.abort()
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.params, initInterview])
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      setTimeout(() => {
-        scrollRef.current?.scrollTo({ position: 0, animated: true })
-      }, 100)
-    }
-  }, [messages])
-
-  /** 发送消息 */
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'hr',
-      content: input.trim(),
-    }
-
-    setMessages(prev => [...prev, userMessage])
-    const currentInput = input
-    setInput('')
-    setIsLoading(true)
-
-    // 添加"思考中"指示器
-    const thinkingId = (Date.now() + 1).toString()
-    setMessages(prev => [...prev, {
-      id: thinkingId,
-      role: 'assistant',
-      content: '候选人思考中...',
-      isThinking: true,
-    }])
-
-    try {
-      const response = await Network.request({
-        url: '/api/ai/chat',
-        method: 'POST',
-        data: {
-          action: 'hr_sim_response',
-          prompt: currentInput,
-          history: messages.filter(m => !m.isThinking).map(m => ({
-            role: m.role === 'hr' ? 'user' : 'assistant',
-            content: m.content,
-          })),
-        },
-      })
-
-      // 移除"思考中"
-      setMessages(prev => prev.filter(m => m.id !== thinkingId))
-
-      if (response.data?.code === 0 && response.data?.data?.reply) {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 2).toString(),
-          role: 'assistant',
-          content: response.data.data.reply,
-          isThinking: false,
-        }])
-      } else {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 2).toString(),
-          role: 'assistant',
-          content: '抱歉，候选人暂时无法回复。',
-          isThinking: false,
-        }])
-      }
-    } catch (err) {
-      console.error('Send message error:', err)
-      // 移除"思考中"
-      setMessages(prev => prev.filter(m => m.id !== thinkingId))
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 2).toString(),
-        role: 'assistant',
-        content: '抱歉，候选人暂时无法回复。',
-        isThinking: false,
-      }])
-    } finally {
-      setIsLoading(false)
+  const handleBack = () => {
+    if (step === 'interview') {
+      setStep('menu')
+      setMessages([])
+      setCandidate(null)
+    } else {
+      Taro.navigateBack()
     }
   }
 
-  /** 跳转到候选人列表页面 */
-  const goToCandidates = () => {
-    Taro.navigateTo({ url: '/pages/hr-sim/candidates?mode=select' })
-  }
+  const lastMsg = messages[messages.length - 1]
+  const showThinking = isLoading && messages.length > 0 && lastMsg?.role === 'user'
 
-  // 选择候选人阶段
-  if (step === 'select') {
+  if (step === 'menu') {
     return (
-      <View className='min-h-full bg-background pb-safe'>
-        {/* 顶部 */}
+      <View style={{ minHeight: '100vh', background: '#F8F9F7' }}>
+        {/* 顶部导航 */}
         <View
-          className='rounded-b-2xl relative overflow-hidden'
-          style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '24px', paddingTop: '16px', background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
+          className='flex-shrink-0'
+          style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '12px', paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
         >
-          <View className='absolute -top-4 -right-4 w-20 h-20 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)' }} />
-          <View className='flex flex-row items-center gap-3 relative'>
-            <View className='flex-1'>
-              <Text className='block text-white font-bold text-base'>HR反向模拟</Text>
-              <Text className='block text-gray-300 text-xs'>扮演面试官，训练选人眼光</Text>
-            </View>
+          <View className='flex flex-row items-center gap-3'>
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={handleBack}
+              className='text-white hover:bg-white/20 rounded-full p-2 -ml-2'
+            >
+              <ArrowLeft size={24} color='#fff' />
+            </Button>
+            <Text className='block text-white font-bold text-lg'>HR反向模拟</Text>
           </View>
         </View>
 
-        <View style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '24px', paddingBottom: '24px' }}>
-          {/* 主入口卡片 */}
-          <View className={`${loaded ? 'anim-fade-in-up anim-delay-1' : 'opacity-0'}`}>
-            <Card className='shadow-card overflow-hidden' onClick={goToCandidates}>
-              <CardContent className='p-0'>
-                <View
-                  className='p-6 relative overflow-hidden'
-                  style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #A78BFA 100%)' }}
-                >
-                  <View className='absolute -top-6 -right-6 w-32 h-32 rounded-full' style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)' }} />
-                  <View className='flex flex-row items-center gap-4 relative'>
-                    <View className='w-16 h-16 rounded-2xl bg-white bg-opacity-20 flex items-center justify-center'>
-                      <Swords size={32} color='#fff' />
-                    </View>
-                    <View className='flex-1'>
-                      <Text className='block text-white font-bold text-lg mb-1'>开始面试</Text>
-                      <Text className='block text-white text-opacity-80 text-sm'>从候选人库选择，开始一场面试训练</Text>
-                    </View>
-                    <ChevronRight size={24} color='rgba(255,255,255,0.8)' />
-                  </View>
-                </View>
-              </CardContent>
-            </Card>
-          </View>
+        {/* 内容区 */}
+        <View className='p-4'>
+          <Text className='block text-sm mb-4' style={{ color: '#666' }}>
+            点击下方卡片开始面试扮演练习
+          </Text>
 
-          {/* 功能入口 */}
-          <View className={`mt-5 flex flex-col gap-3 ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
-            <Card className='shadow-card card-hover' onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/candidates' })}>
-              <CardContent className='p-4'>
-                <View className='flex flex-row items-center gap-3'>
-                  <View className='w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center'>
-                    <User size={24} color='#7C3AED' />
-                  </View>
-                  <View className='flex-1'>
-                    <Text className='block font-semibold text-foreground'>候选人管理</Text>
-                    <Text className='block text-xs text-muted-foreground mt-1'>创建、编辑候选人信息</Text>
-                  </View>
-                  <ChevronRight size={18} color='#6B7B7480' />
+          <Card className='mb-4' style={{ borderRadius: '16px' }}>
+            <CardContent className='p-5'>
+              <View className='flex flex-row items-center gap-3 mb-3'>
+                <View className='w-12 h-12 rounded-full flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #E26A5C 0%, #D45A4C 100%)' }}>
+                  <Swords size={24} color='#fff' />
                 </View>
-              </CardContent>
-            </Card>
-
-            <Card className='shadow-card card-hover' onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/history' })}>
-              <CardContent className='p-4'>
-                <View className='flex flex-row items-center gap-3'>
-                  <View className='w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center'>
-                    <Clock size={24} color='#7C3AED' />
-                  </View>
-                  <View className='flex-1'>
-                    <Text className='block font-semibold text-foreground'>历史招聘笔记</Text>
-                    <Text className='block text-xs text-muted-foreground mt-1'>查看往期面试评估报告</Text>
-                  </View>
-                  <ChevronRight size={18} color='#6B7B7480' />
+                <View className='flex-1 min-w-0'>
+                  <Text className='block text-base font-semibold text-gray-800'>开始面试练习</Text>
+                  <Text className='block text-sm' style={{ color: '#666' }}>选择候选人进行模拟面试</Text>
                 </View>
-              </CardContent>
-            </Card>
-          </View>
-
-          {/* 说明 */}
-          <View className={`mt-6 p-4 bg-violet-50 rounded-xl ${loaded ? 'anim-fade-in-up anim-delay-3' : 'opacity-0'}`}>
-            <Text className='block text-xs text-violet-700 leading-relaxed'>
-              在这里，你可以扮演HR面试官，与候选人进行模拟面试。通过观察候选人的回答表现，训练你的面试技巧和识人眼光。
-            </Text>
-          </View>
+              </View>
+              <Button
+                className='w-full'
+                style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)', borderRadius: '12px', height: '44px' }}
+                onClick={() => Taro.navigateTo({ url: '/pages/hr-sim/candidates' })}
+              >
+                <Text className='block text-white text-sm font-medium'>选择候选人</Text>
+              </Button>
+            </CardContent>
+          </Card>
         </View>
       </View>
     )
   }
 
-  // 面试阶段
   return (
-    <View className='min-h-full bg-background flex flex-col'>
-      {/* 顶部 */}
+    <View style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}>
+      {/* 自定义顶部导航栏 */}
       <View
-        className='flex flex-row items-center gap-3'
-        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', background: 'linear-gradient(135deg, #5B21B6 0%, #7C3AED 50%, #8B5CF6 100%)' }}
+        className='flex-shrink-0'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '12px', paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
-        <View className='flex-1'>
-          <Text className='block text-white font-bold text-sm'>{candidate?.name || '面试中'}</Text>
-          <Text className='block text-gray-300 text-xs'>{candidate?.school || ''}</Text>
-        </View>
-        <View className='w-10 h-10 rounded-full flex items-center justify-center' style={{ backgroundColor: candidate?.color || '#8B5CF6' }}>
-          <Text className='text-white text-sm font-bold'>{candidate?.name?.charAt(0) || '?'}</Text>
+        <View className='flex flex-row items-center gap-3'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={handleBack}
+            className='text-white hover:bg-white/20 rounded-full p-2 -ml-2'
+          >
+            <ArrowLeft size={24} color='#fff' />
+          </Button>
+          <View className='flex-1 min-w-0'>
+            <Text className='block text-white font-bold text-base'>HR反向模拟</Text>
+            {candidate && (
+              <Text className='block text-sm' style={{ color: 'rgba(255,255,255,0.7)' }}>{candidate.name}</Text>
+            )}
+          </View>
         </View>
       </View>
 
-      {/* 消息列表 */}
-      <View className='flex-1 overflow-y-auto p-4'>
-        {messages.map((msg) => (
-          <View key={msg.id} className={`flex ${msg.role === 'hr' ? 'flex-row-reverse' : 'flex-row'} mb-4`}>
-            {msg.role !== 'hr' && (
-              <View className='w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0' style={{ backgroundColor: candidate?.color || '#8B5CF6' }}>
-                <Text className='text-white text-xs font-bold'>{candidate?.name?.charAt(0) || '?'}</Text>
+      {/* 聊天区 */}
+      <ScrollView
+        className='flex-1'
+        style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '16px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' }}
+        scrollY
+        scrollIntoView={scrollRef.current}
+        scrollWithAnimation
+      >
+        {/* 候选人信息卡片 */}
+        {candidate && (
+          <Card className='mb-4' style={{ borderRadius: '12px', background: 'linear-gradient(135deg, #F0F4F2 0%, #E8EDE9 100%)' }}>
+            <CardContent className='p-4'>
+              <View className='flex flex-row items-center gap-3'>
+                <View
+                  className='w-12 h-12 rounded-full flex items-center justify-center'
+                  style={{ background: candidate.color }}
+                >
+                  <Text className='text-white font-bold text-lg'>{candidate.name.charAt(0)}</Text>
+                </View>
+                <View className='flex-1 min-w-0'>
+                  <Text className='block text-base font-semibold' style={{ color: '#3A4A44' }}>{candidate.name}</Text>
+                  <Text className='block text-xs' style={{ color: '#666' }}>{candidate.school} · {candidate.major}</Text>
+                  <Text className='block text-xs' style={{ color: '#E26A5C' }}>评级: {candidate.realLevel}</Text>
+                </View>
               </View>
-            )}
-            {msg.role === 'hr' && (
-              <View className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center ml-2 flex-shrink-0'>
-                <Bot size={16} color='#6B7B74' />
+            </CardContent>
+          </Card>
+        )}
+
+        {messages.map((msg) => (
+          <View
+            key={msg.id}
+            id={`msg-${msg.id}`}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+          >
+            {msg.role === 'assistant' && (
+              <View className='w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0' style={{ background: candidate?.color || '#8B5CF6' }}>
+                <Bot size={18} color='#fff' />
               </View>
             )}
             <View
-              className={`max-w-[80%] px-3 py-2 rounded-2xl ${
-                msg.role === 'hr'
-                  ? 'bg-primary text-on-primary rounded-tr-sm'
-                  : 'bg-gray-100 text-foreground rounded-tl-sm'
-              }`}
+              className={`max-w-[75%] px-4 py-3 ${msg.role === 'user' ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}
+              style={{
+                background: msg.role === 'user'
+                  ? 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)'
+                  : '#fff',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              }}
             >
-              {msg.isThinking ? (
-                <View className='flex flex-row items-center gap-1'>
-                  <Text className={`block text-xs ${msg.role === 'hr' ? 'text-white' : 'text-muted-foreground'}`}>
-                    {msg.content}
-                  </Text>
-                </View>
-              ) : (
-                <Text className={`block text-sm leading-relaxed ${msg.role === 'hr' ? 'text-white' : 'text-foreground'}`}>
-                  {msg.content}
+              <Text className='block text-sm' style={{ color: msg.role === 'user' ? '#fff' : '#333', lineHeight: '22px' }}>
+                {msg.content}
+              </Text>
+              {msg.isThinking && (
+                <Text className='block text-xs mt-1 animate-pulse' style={{ color: msg.role === 'user' ? 'rgba(255,255,255,0.7)' : '#999' }}>
+                  候选人思考中...
                 </Text>
               )}
             </View>
+            {msg.role === 'user' && (
+              <View className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center ml-2 flex-shrink-0'>
+                <User size={18} color='#666' />
+              </View>
+            )}
           </View>
         ))}
-      </View>
+
+        {showThinking && (
+          <View className='flex flex-row items-center gap-2 mb-4'>
+            <View className='w-8 h-8 rounded-full flex items-center justify-center mr-2' style={{ background: candidate?.color || '#8B5CF6' }}>
+              <Bot size={18} color='#fff' />
+            </View>
+            <View className='px-4 py-3 rounded-2xl rounded-tl-sm' style={{ background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <Text className='block text-xs' style={{ color: '#999' }}>候选人思考中...</Text>
+            </View>
+          </View>
+        )}
+
+        <View id={scrollRef.current} className='h-4' />
+      </ScrollView>
 
       {/* 输入区 */}
-      <View className='p-3 bg-background border-t border-outline-variant'>
-        <View className='flex flex-row items-end gap-2'>
-          <View className='flex-1'>
-            <Input
-              className='bg-surface-container rounded-full px-4 py-2'
-              placeholder='输入你的问题...'
-              value={input}
-              onInput={(e: any) => setInput(e.detail.value || '')}
-              disabled={isLoading}
-              onConfirm={sendMessage}
-              confirmType='send'
-            />
-          </View>
-          <View className='flex-shrink-0'>
+      <View
+        className='flex-shrink-0 px-4 py-3'
+        style={{ background: '#fff', borderTop: '1px solid #eee' }}
+      >
+        <View
+          className='flex flex-row items-center px-4 py-2 rounded-full'
+          style={{ background: '#F5F5F5' }}
+        >
+          <TaroInput
+            className='flex-1 text-sm'
+            style={{ minHeight: '36px', lineHeight: '36px' }}
+            placeholder='输入你的问题...'
+            value={input}
+            onInput={(e) => setInput(e.detail.value)}
+            disabled={isLoading}
+            adjustPosition={false}
+            onConfirm={sendMessage}
+          />
+          <View className='ml-2 flex-shrink-0'>
             <Button
               size='sm'
+              variant='ghost'
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className='rounded-full h-9 w-9 p-0 flex items-center justify-center'
-              style={{ background: input.trim() ? 'linear-gradient(135deg, #7C3AED, #8B5CF6)' : '#ccc' }}
+              className='rounded-full p-2'
+              style={{ background: input.trim() && !isLoading ? 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' : '#ddd' }}
             >
-              <Send size={16} color='#fff' />
+              <Send size={18} color={input.trim() && !isLoading ? '#fff' : '#999'} />
             </Button>
           </View>
         </View>

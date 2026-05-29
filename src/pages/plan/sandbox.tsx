@@ -2,10 +2,10 @@
 import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Bot, Sparkles, Loader } from 'lucide-react-taro'
+import { Send, Bot, Sparkles } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useRef, useCallback } from 'react'
-import { Network } from '@/network'
+import { fetchStream } from '@/utils/stream'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -30,9 +30,7 @@ export default function PlanSandbox() {
   const statusBarHeight = getStatusBarHeight()
 
   const scrollToBottom = useCallback(() => {
-    // 使用有效的 ID 格式（H5 端 ID 不能以数字开头）
-    scrollRef.current = `scroll-${Date.now()}`
-    // Backup: use Taro.pageScrollTo
+    scrollRef.current = 'scroll-' + Date.now()
     setTimeout(() => {
       Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
     }, 50)
@@ -53,80 +51,28 @@ export default function PlanSandbox() {
     setMessages([...currentConversation, { ...aiMsg }])
     scrollToBottom()
 
-    try {
-      // 构建对话历史（不含最后一条用户消息，因为会在流中补充）
-      const conversationHistory = currentConversation.map(m => ({ role: m.role, content: m.content }))
-
-      // 使用流式 API
-      const response = await Network.request({
-        url: '/api/ai/chat/stream',
-        method: 'POST',
-        data: {
-          action: 'career_plan',
-          conversation: conversationHistory,
+    await fetchStream(
+      '/api/ai/chat/stream',
+      {
+        action: 'career_plan',
+        conversation: currentConversation.map(m => ({ role: m.role, content: m.content }))
+      },
+      {
+        onChunk: (content) => {
+          aiMsg.content += content
+          setMessages([...currentConversation, { ...aiMsg }])
+          scrollToBottom()
         },
-      })
-
-      // 处理流式响应
-      const reader = response.data.getBody()
-      const decoder = new TextDecoder('utf-8')
-      let fullContent = ''
-
-      // eslint-disable-next-line no-restricted-syntax
-      for await (const chunk of reader) {
-        const text = decoder.decode(chunk, { stream: true })
-        const lines = text.split('\n')
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              if (data.content) {
-                fullContent += data.content
-                // 更新消息内容
-                setMessages(prev => {
-                  const updated = [...prev]
-                  const lastIdx = updated.length - 1
-                  if (lastIdx >= 0 && updated[lastIdx].role === 'assistant') {
-                    updated[lastIdx] = { ...updated[lastIdx], content: fullContent }
-                  }
-                  return updated
-                })
-              }
-            } catch {
-              // 忽略 JSON 解析错误
-            }
-          }
-        }
+        onDone: () => {
+          setMessages([...currentConversation, { ...aiMsg }])
+          setIsLoading(false)
+        },
+        onError: () => {
+          setMessages([...currentConversation, { role: 'assistant', content: '抱歉，AI暂时无法回复，请稍后再试...' }])
+          setIsLoading(false)
+        },
       }
-
-      // 检查是否有错误响应
-      if (!fullContent) {
-        // 检查是否有 error 标记
-        setMessages(prev => {
-          const updated = [...prev]
-          const lastIdx = updated.length - 1
-          if (lastIdx >= 0 && updated[lastIdx].role === 'assistant' && !updated[lastIdx].content) {
-            updated[lastIdx] = { ...updated[lastIdx], content: '抱歉，AI暂时无法回复，请稍后再试...' }
-          }
-          return updated
-        })
-      }
-    } catch (err) {
-      console.error('Career plan stream error:', err)
-      // 显示友好错误消息
-      setMessages(prev => {
-        const updated = [...prev]
-        const lastIdx = updated.length - 1
-        if (lastIdx >= 0 && updated[lastIdx].role === 'assistant') {
-          updated[lastIdx] = { ...updated[lastIdx], content: '抱歉，AI暂时无法回复，请稍后再试...' }
-        }
-        return updated
-      })
-    } finally {
-      setIsLoading(false)
-      scrollToBottom()
-    }
+    )
   }
 
   const lastMsg = messages[messages.length - 1]
@@ -140,12 +86,12 @@ export default function PlanSandbox() {
         style={{ paddingLeft: '16px', paddingRight: '16px', paddingBottom: '12px', paddingTop: `${statusBarHeight + 8}px`, background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className='flex flex-row items-center gap-3'>
-          <View className='flex-1 min-w-0'>
-            <Text className='block text-white font-bold text-base'>职业沙盘</Text>
-            <Text className='block text-sm' style={{ color: 'rgba(255,255,255,0.7)' }}>AI帮你规划职业路径</Text>
+          <View className='w-10 h-10 rounded-full flex items-center justify-center mr-1' style={{ background: 'rgba(255,255,255,0.2)' }}>
+            <Sparkles size={20} color='#fff' />
           </View>
-          <View className='w-8 h-8 rounded-full flex items-center justify-center' style={{ backgroundColor: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
-            <Sparkles size={14} color='#fff' />
+          <View>
+            <Text className='block text-white font-bold text-base'>职业沙盘</Text>
+            <Text className='block text-sm' style={{ color: 'rgba(255,255,255,0.7)' }}>AI职业导航师</Text>
           </View>
         </View>
       </View>
@@ -158,102 +104,100 @@ export default function PlanSandbox() {
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
       >
+        {/* 欢迎卡片 */}
         {messages.length === 0 && (
-          <View className='flex items-center justify-center pt-16'>
-            <Card className='shadow-card w-full'>
-              <CardContent className='p-6 text-center'>
-                <View className='w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center' style={{ backgroundColor: '#8B5CF615', overflow: 'hidden' }}>
-                  <Sparkles size={32} color='#8B5CF6' />
+          <Card className='mb-4' style={{ borderRadius: '16px', background: 'linear-gradient(135deg, #F0F4F2 0%, #E8EDE9 100%)' }}>
+            <CardContent className='p-5'>
+              <View className='flex flex-row items-center gap-3 mb-3'>
+                <View className='w-12 h-12 rounded-full flex items-center justify-center' style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}>
+                  <Sparkles size={24} color='#fff' />
                 </View>
-                <Text className='block text-lg font-bold text-foreground mb-2'>职业沙盘</Text>
-                <Text className='block text-sm text-muted-foreground mb-1'>告诉我你的职业困惑，AI帮你分析</Text>
-                <Text className='block text-xs text-muted-foreground' style={{ opacity: 0.6 }}>例如：&ldquo;我是前端开发，想转产品经理，该怎么规划？&rdquo;</Text>
-              </CardContent>
-            </Card>
-          </View>
+                <View className='flex-1'>
+                  <Text className='block text-base font-semibold' style={{ color: '#3A4A44' }}>欢迎来到职业沙盘</Text>
+                  <Text className='block text-sm' style={{ color: '#666' }}>我是你的职业导航师</Text>
+                </View>
+              </View>
+              <Text className='block text-sm' style={{ color: '#666', lineHeight: '22px' }}>
+                告诉我你的专业、兴趣、性格特点，我可以帮你规划职业发展路径。
+              </Text>
+            </CardContent>
+          </Card>
         )}
 
-        {messages.map((msg, idx) => (
-          <View key={idx} id={`msg-${idx}`} className='mb-3'>
-            {msg.role === 'assistant' ? (
-              <View className='flex flex-row items-start gap-2' style={{ maxWidth: '85%' }}>
-                <View
-                  className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0'
-                  style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
-                >
-                  <Bot size={14} color='#fff' />
-                </View>
-                <Card className='shadow-card'>
-                  <CardContent className='p-3'>
-                    <Text className='block text-sm text-foreground leading-relaxed'>
-                      {msg.content}
-                    </Text>
-                  </CardContent>
-                </Card>
+        {messages.map((msg) => (
+          <View
+            key={msg.role + '-' + msg.content.slice(0, 20)}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
+          >
+            {msg.role === 'assistant' && (
+              <View className='w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0' style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}>
+                <Bot size={18} color='#fff' />
               </View>
-            ) : (
-              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
-                <Card className='shadow-card' style={{ backgroundColor: '#3A4A44', maxWidth: '75%' }}>
-                  <CardContent className='p-3'>
-                    <Text className='block text-sm' style={{ color: '#fff' }}>
-                      {msg.content}
-                    </Text>
-                  </CardContent>
-                </Card>
+            )}
+            <View
+              className={`max-w-[75%] px-4 py-3 ${msg.role === 'user' ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm'}`}
+              style={{
+                background: msg.role === 'user'
+                  ? 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)'
+                  : '#fff',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              }}
+            >
+              <Text className='block text-sm' style={{ color: msg.role === 'user' ? '#fff' : '#333', lineHeight: '22px' }}>
+                {msg.content}
+              </Text>
+            </View>
+            {msg.role === 'user' && (
+              <View className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center ml-2 flex-shrink-0'>
+                <Text className='text-xs font-medium' style={{ color: '#666' }}>你</Text>
               </View>
             )}
           </View>
         ))}
 
-        {/* 思考中指示器 */}
         {showThinking && (
-          <View className='flex flex-row items-center gap-2 mb-3' id='thinking-indicator'>
-            <View
-              className='w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0'
-              style={{ backgroundColor: '#3A4A44', overflow: 'hidden' }}
-            >
-              <Bot size={14} color='#fff' />
+          <View className='flex flex-row items-center gap-2 mb-4'>
+            <View className='w-8 h-8 rounded-full flex items-center justify-center mr-2' style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}>
+              <Bot size={18} color='#fff' />
             </View>
-            <Card className='shadow-card'>
-              <CardContent className='p-3'>
-                <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
-                  <Loader size={14} color='#8B5CF6' className='animate-spin' />
-                  <Text className='block text-sm text-muted-foreground'>AI思考中...</Text>
-                </View>
-              </CardContent>
-            </Card>
+            <View className='px-4 py-3 rounded-2xl rounded-tl-sm' style={{ background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <Text className='block text-xs animate-pulse' style={{ color: '#999' }}>导航师思考中...</Text>
+            </View>
           </View>
         )}
+
+        <View id={scrollRef.current} className='h-4' />
       </ScrollView>
 
       {/* 输入区 */}
-      <View className='flex-shrink-0' style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: '#fff', borderTopWidth: '1px', borderTopColor: '#E5E5E5' }}>
-        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
-          <View style={{ flex: 1, backgroundColor: '#F5F5F5', borderRadius: '20px', padding: '10px 14px' }}>
-            <TaroInput
-              className='w-full'
-              style={{ fontSize: '15px' }}
-              value={input}
-              onInput={(e) => setInput(e.detail.value)}
-              placeholder='输入你的职业困惑...'
-              placeholderClass='text-muted-foreground'
-              disabled={isLoading}
-              adjustPosition
-            />
-          </View>
-          <View style={{ flexShrink: 0 }}>
+      <View
+        className='flex-shrink-0 px-4 py-3'
+        style={{ background: '#fff', borderTop: '1px solid #eee' }}
+      >
+        <View
+          className='flex flex-row items-center px-4 py-2 rounded-full'
+          style={{ background: '#F5F5F5' }}
+        >
+          <TaroInput
+            className='flex-1 text-sm'
+            style={{ minHeight: '36px', lineHeight: '36px' }}
+            placeholder='告诉我你的专业和兴趣...'
+            value={input}
+            onInput={(e) => setInput(e.detail.value)}
+            disabled={isLoading}
+            adjustPosition={false}
+            onConfirm={sendMessage}
+          />
+          <View className='ml-2 flex-shrink-0'>
             <Button
+              size='sm'
+              variant='ghost'
               onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              size='icon'
-              className='w-10 h-10 rounded-full'
-              style={{ backgroundColor: isLoading || !input.trim() ? '#E5E5E5' : '#3A4A44', border: 'none' }}
+              disabled={!input.trim() || isLoading}
+              className='rounded-full p-2'
+              style={{ background: input.trim() && !isLoading ? 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' : '#ddd' }}
             >
-              {isLoading ? (
-                <Loader size={18} color='#999' />
-              ) : (
-                <Send size={18} color='#fff' />
-              )}
+              <Send size={18} color={input.trim() && !isLoading ? '#fff' : '#999'} />
             </Button>
           </View>
         </View>

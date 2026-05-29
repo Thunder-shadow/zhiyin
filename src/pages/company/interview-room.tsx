@@ -176,7 +176,7 @@ export default function DungeonInterviewRoom() {
   const scrollRef = useRef('')
 
   const scrollToBottom = useCallback(() => {
-    scrollRef.current = Date.now().toString()
+    scrollRef.current = 'scroll-' + Date.now()
     setTimeout(() => {
       Taro.pageScrollTo({ scrollTop: 99999, duration: 100 }).catch(() => {})
     }, 50)
