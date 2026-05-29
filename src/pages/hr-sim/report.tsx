@@ -1,7 +1,7 @@
 import { View, Text } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, FileCheck, Loader2, BookOpen, ExternalLink } from 'lucide-react-taro'
+import { ArrowLeft, FileCheck, Loader, BookOpen, ExternalLink } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect, useRef } from 'react'
 import { Network } from '@/network'
@@ -141,7 +141,7 @@ export default function HrReport() {
                   className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
                   style={{ background: 'linear-gradient(135deg, #EDE9FE, #E0E7FF)' }}
                 >
-                  <Loader2 size={36} color="#7C3AED" className="animate-spin" />
+                  <Loader size={36} color="#7C3AED" className="animate-spin" />
                 </View>
                 <Text className="block text-base font-semibold text-foreground mb-2">
                   正在生成招聘笔记...

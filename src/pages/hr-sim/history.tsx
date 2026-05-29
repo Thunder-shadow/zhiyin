@@ -160,18 +160,21 @@ export default function HrHistory() {
                       <View className="flex flex-row items-center justify-between mb-1">
                         <Text className="block font-semibold text-foreground">{report.candidate_name}</Text>
                         <View
-                          className="p-1.5 rounded-full btn-press"
+                          className="p-2 rounded-full btn-press"
                           onClick={(e) => deleteReport(report.id, e)}
                         >
                           <Trash2 size={14} color="#9CA3AF" />
                         </View>
                       </View>
-                      <Text className="block text-sm text-muted-foreground leading-relaxed" style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}>
+                      <Text
+                        className="block text-sm text-muted-foreground leading-relaxed"
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
                         {report.report_content}
                       </Text>
                       <View className="flex flex-row items-center gap-1 mt-2">

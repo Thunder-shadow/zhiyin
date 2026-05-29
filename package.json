@@ -8,7 +8,7 @@
     "build:pack": "pnpm exec concurrently --kill-others-on-fail --kill-signal SIGKILL -n weapp,tt -c yellow,cyan \"pnpm build:weapp\" \"pnpm build:tt\"",
     "build:server": "pnpm --filter server build",
     "build:tt": "taro build --type tt",
-    "build:weapp": "taro build --type weapp",
+    "build:weapp": "taro build --type weapp && cp dist/app.json app.json",
     "build:web": "taro build --type h5",
     "dev": "pnpm exec concurrently --kill-others --kill-signal SIGKILL -n web,server -c blue,green \"pnpm dev:web\" \"pnpm dev:server\"",
     "dev:server": "pnpm --filter server dev",

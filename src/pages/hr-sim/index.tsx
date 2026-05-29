@@ -286,10 +286,13 @@ export default function HrSim() {
                         <View className="flex flex-row items-center gap-2">
                           <Text className="block font-semibold text-foreground">{candidate.name}</Text>
                           {candidate.tag && (
-                            <Badge className="text-xs border-none" style={{
-                              backgroundColor: `${candidate.color || '#8B5CF6'}15`,
-                              color: candidate.color || '#8B5CF6'
-                            }}>
+                            <Badge
+                              className="text-xs border-none"
+                              style={{
+                                backgroundColor: `${candidate.color || '#8B5CF6'}15`,
+                                color: candidate.color || '#8B5CF6',
+                              }}
+                            >
                               {candidate.tag}
                             </Badge>
                           )}

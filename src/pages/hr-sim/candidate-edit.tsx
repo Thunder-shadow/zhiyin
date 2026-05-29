@@ -1,4 +1,5 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+/* eslint-disable no-restricted-syntax */
+import { View, Text, ScrollView, Textarea } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -203,13 +204,11 @@ export default function CandidateEdit() {
             <View className="mb-4">
               <Text className="block text-sm font-medium text-foreground mb-2">背景经历</Text>
               <View className="bg-muted rounded-lg px-3 py-2">
-                <Input
-                  className="w-full text-sm"
+                <Textarea
+                  className="w-full text-sm bg-transparent"
                   placeholder="教育背景、实习经历、项目经验等"
                   value={formData.background}
                   onInput={(e) => update('background', e.detail.value)}
-                  multiline
-                  autoHeight
                   style={{ minHeight: '60px' }}
                 />
               </View>
@@ -218,13 +217,11 @@ export default function CandidateEdit() {
             <View className="mb-4">
               <Text className="block text-sm font-medium text-foreground mb-2">性格特点</Text>
               <View className="bg-muted rounded-lg px-3 py-2">
-                <Input
-                  className="w-full text-sm"
+                <Textarea
+                  className="w-full text-sm bg-transparent"
                   placeholder="如：外向能说、技术宅、沉稳干练等"
                   value={formData.personality}
                   onInput={(e) => update('personality', e.detail.value)}
-                  multiline
-                  autoHeight
                   style={{ minHeight: '60px' }}
                 />
               </View>
@@ -236,7 +233,7 @@ export default function CandidateEdit() {
                 {LEVEL_OPTIONS.map(opt => (
                   <View
                     key={opt.value}
-                    className={`flex-1 px-3 py-2.5 rounded-xl border-2 ${
+                    className={`flex-1 px-3 py-3 rounded-xl border-2 ${
                       formData.real_level === opt.value
                         ? 'border-primary bg-primary bg-opacity-10'
                         : 'border-outline-variant border-opacity-20 bg-muted'

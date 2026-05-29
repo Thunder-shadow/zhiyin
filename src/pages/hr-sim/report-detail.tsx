@@ -1,6 +1,5 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, FileCheck, User, Clock, MessageSquare } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'

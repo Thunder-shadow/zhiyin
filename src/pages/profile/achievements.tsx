@@ -85,8 +85,8 @@ export default function Achievements() {
             >
               <CardContent className="p-3 flex flex-col items-center">
                 <View
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${badge.unlocked ? 'badge-glow' : ''}`} style={{ overflow: 'hidden' }}
-                  style={{ backgroundColor: badge.unlocked ? badge.color : '#E5E7EB' }}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${badge.unlocked ? 'badge-glow' : ''}`}
+                  style={{ overflow: 'hidden', backgroundColor: badge.unlocked ? badge.color : '#E5E7EB' }}
                 >
                   <badge.icon size={24} color={badge.unlocked ? '#fff' : '#9CA3AF'} />
                 </View>

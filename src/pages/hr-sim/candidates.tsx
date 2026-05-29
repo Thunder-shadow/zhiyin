@@ -2,7 +2,7 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Plus, User, ChevronRight, Edit, Trash2 } from 'lucide-react-taro'
+import { ArrowLeft, Plus, User, ChevronRight, Pencil, Trash2 } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
 import { useState, useEffect } from 'react'
 import { Network } from '@/network'
@@ -201,7 +201,7 @@ export default function HrCandidates() {
                         Taro.navigateTo({ url: `/pages/hr-sim/candidate-edit?id=${candidate.id}` })
                       }}
                     >
-                      <Edit size={14} />
+                      <Pencil size={14} color="#6B7B74" />
                       <Text className="ml-1">编辑</Text>
                     </Button>
                     <Button
