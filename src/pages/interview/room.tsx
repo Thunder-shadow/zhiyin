@@ -14,9 +14,9 @@ interface ChatMessage {
 }
 
 const MODES: Record<string, { title: string; label: string; action: string }> = {
-  single: { title: '单人模拟面', label: 'AI面试官', action: 'interview_single' },
-  pressure: { title: '压力面试', label: '严厉面试官', action: 'interview_pressure' },
-  group: { title: 'AI群面', label: '群面官', action: 'interview_group' },
+  single: { title: '单人模拟面', label: 'AI面试官', action: 'interview_chat' },
+  pressure: { title: '压力面试', label: '严厉面试官', action: 'interview_chat' },
+  group: { title: 'AI群面', label: '群面官', action: 'interview_chat' },
 }
 
 /** 获取系统状态栏高度 */
