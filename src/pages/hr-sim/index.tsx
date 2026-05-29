@@ -64,7 +64,7 @@ export default function HrSim() {
       const response = await Network.request({
         url: '/api/ai/chat',
         method: 'POST',
-        data: { action: 'hr_interview', prompt: openingPrompt },
+        data: { action: 'hr_sim_response', prompt: openingPrompt },
       })
 
       if (response.data?.code === 0 && response.data?.data?.reply) {
@@ -160,7 +160,7 @@ export default function HrSim() {
         url: '/api/ai/chat',
         method: 'POST',
         data: {
-          action: 'hr_interview',
+          action: 'hr_sim_response',
           prompt: currentInput,
           history: messages.filter(m => !m.isThinking).map(m => ({
             role: m.role === 'hr' ? 'user' : 'assistant',
