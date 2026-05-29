@@ -1,11 +1,11 @@
-import { View, Text, ScrollView } from '@tarojs/components'
+// eslint-disable-next-line no-restricted-syntax -- 聊天输入框需使用原生 Input 以支持 adjustPosition={false} 防止键盘推页面
+import { View, Text, ScrollView, Input as TaroInput } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Send, Compass, Target, TrendingUp, Shield, ArrowLeft, Sparkles } from 'lucide-react-taro'
 import Taro from '@tarojs/taro'
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { fetchStream } from '@/utils/stream'
 
 interface ChatMessage {
@@ -25,10 +25,19 @@ export default function Sandbox() {
   const [pathData, setPathData] = useState<any[]>([])
   const [showResult, setShowResult] = useState(false)
   const scrollRef = useRef('')
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
-  const scrollToBottom = () => {
-    scrollRef.current = Date.now().toString()
-  }
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      scrollRef.current = Date.now().toString()
+    }, 50)
+  }, [])
+
+  const handleKeyboardHeight = useCallback((e) => {
+    const h = e.height || 0
+    setKeyboardHeight(h)
+    if (h > 0) scrollToBottom()
+  }, [scrollToBottom])
 
   /** 流式发送消息 */
   const sendMessage = async () => {
@@ -85,21 +94,24 @@ export default function Sandbox() {
   }
 
   return (
-    <View className="flex flex-col h-screen bg-background">
-      {/* 顶部 */}
-      <View className="bg-violet-500 px-4 pt-4 pb-3 rounded-b-2xl">
+    <View className="flex flex-col" style={{ height: '100vh' }}>
+      {/* 顶部 - 使用安全区域 */}
+      <View
+        className="flex-shrink-0 px-4 pb-3"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', backgroundColor: '#7C3AED' }}
+      >
         <View className="flex flex-row items-center gap-3">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="#fff" />
           </View>
-          <View className="flex-1">
+          <View className="flex-1 min-w-0">
             <View className="flex flex-row items-center gap-2">
               <Compass size={20} color="#fff" />
               <Text className="block text-white font-bold text-lg">职业规划沙盘</Text>
             </View>
             <Text className="block text-purple-200 text-xs mt-1">AI导航师帮你找到最佳职业路径</Text>
           </View>
-          <Badge className="bg-accent text-white border-none text-xs badge-glow">
+          <Badge className="bg-accent text-white border-none text-xs">
             <Sparkles size={12} color="#fff" /> AI
           </Badge>
         </View>
@@ -111,25 +123,25 @@ export default function Sandbox() {
           <View
             key={idx}
             id={`msg-${idx}`}
-            className={`flex flex-col mb-4 ${msg.role === 'user' ? 'items-end anim-slide-in-right' : 'items-start anim-slide-in-left'}`}
+            className={`flex flex-col mb-4 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
           >
             {msg.role === 'ai' ? (
-              <View className="flex flex-row items-start gap-2 max-w-[85%]">
-                <View className="w-7 h-7 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0 mt-1">
+              <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
+                <View className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ backgroundColor: '#7C3AED' }}>
                   <Compass size={14} color="#fff" />
                 </View>
-                <Card className="shadow-sm">
+                <Card className="shadow-card">
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
-                      {msg.streaming && <Text className="inline-block w-2 h-4 bg-violet-500 ml-1 align-middle cursor-blink" />}
+                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1" style={{ backgroundColor: '#7C3AED', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>
               </View>
             ) : (
-              <View className="max-w-[85%]">
-                <Card className="shadow-sm bg-violet-600">
+              <View style={{ maxWidth: '85%' }}>
+                <Card className="shadow-card" style={{ backgroundColor: '#7C3AED' }}>
                   <CardContent className="p-3">
                     <Text className="block text-sm text-white leading-relaxed">{msg.content}</Text>
                   </CardContent>
@@ -139,18 +151,14 @@ export default function Sandbox() {
           </View>
         ))}
 
-        {isLoading && messages[messages.length - 1]?.role === 'user' && (
-          <View className="flex flex-row items-start gap-2 mb-3 anim-slide-in-left">
-            <View className="w-7 h-7 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0">
+        {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
+          <View className="flex flex-row items-start gap-2 mb-3">
+            <View className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#7C3AED' }}>
               <Compass size={14} color="#fff" />
             </View>
-            <Card className="shadow-sm">
+            <Card className="shadow-card">
               <CardContent className="p-3">
-                <View className="flex flex-row items-center gap-1">
-                  <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" />
-                  <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" style={{ animationDelay: '0.2s' }} />
-                  <View className="w-2 h-2 bg-violet-500 rounded-full dot-typewriter" style={{ animationDelay: '0.4s' }} />
-                </View>
+                <Text className="block text-xs text-muted-foreground">导航师思考中...</Text>
               </CardContent>
             </Card>
           </View>
@@ -158,7 +166,7 @@ export default function Sandbox() {
 
         {/* 画像 + 路径结果 */}
         {showResult && profile && (
-          <Card className="shadow-sm mt-4 anim-fade-in-up">
+          <Card className="shadow-card mt-4">
             <CardContent className="p-4">
               <View className="flex flex-row items-center gap-2 mb-3">
                 <Shield size={16} color="#8B5CF6" />
@@ -167,7 +175,7 @@ export default function Sandbox() {
               <View className="flex flex-col gap-2">
                 {profile.strengths && (
                   <View>
-                    <Text className="block text-xs text-gray-500 mb-1">优势</Text>
+                    <Text className="block text-xs text-muted-foreground mb-1">优势</Text>
                     <View className="flex flex-row flex-wrap gap-1">
                       {(profile.strengths as string[]).map((s: string, i: number) => (
                         <Badge key={i} className="bg-emerald-50 text-emerald-600 border-none text-xs">{s}</Badge>
@@ -177,7 +185,7 @@ export default function Sandbox() {
                 )}
                 {profile.interests && (
                   <View>
-                    <Text className="block text-xs text-gray-500 mb-1">兴趣</Text>
+                    <Text className="block text-xs text-muted-foreground mb-1">兴趣</Text>
                     <View className="flex flex-row flex-wrap gap-1">
                       {(profile.interests as string[]).map((s: string, i: number) => (
                         <Badge key={i} className="bg-blue-50 text-blue-600 border-none text-xs">{s}</Badge>
@@ -194,24 +202,24 @@ export default function Sandbox() {
           <View className="mt-4">
             <Text className="block font-semibold text-foreground mb-2">推荐路径</Text>
             {pathData.map((path, idx) => (
-              <Card key={idx} className={`shadow-sm mb-3 card-hover anim-fade-in-up anim-delay-${idx}`}>
+              <Card key={idx} className="shadow-card mb-3">
                 <CardContent className="p-4">
                   <View className="flex flex-row items-center gap-2 mb-2">
                     <Target size={16} color="#FF6B35" />
                     <Text className="block font-semibold text-foreground">{path.name || `路径 ${idx + 1}`}</Text>
                     {path.fit_score && (
-                      <Badge className="bg-accent text-white border-none text-xs badge-glow">
+                      <Badge className="bg-accent text-white border-none text-xs">
                         {path.fit_score}%匹配
                       </Badge>
                     )}
                   </View>
-                  <Text className="block text-sm text-gray-600 leading-relaxed">{path.description || ''}</Text>
+                  <Text className="block text-sm text-muted-foreground leading-relaxed">{path.description || ''}</Text>
                   {path.milestones && (
                     <View className="mt-2 flex flex-col gap-1">
                       {(path.milestones as string[]).map((m: string, mi: number) => (
                         <View key={mi} className="flex flex-row items-center gap-2">
                           <TrendingUp size={12} color="#8B5CF6" />
-                          <Text className="block text-xs text-gray-500">{m}</Text>
+                          <Text className="block text-xs text-muted-foreground">{m}</Text>
                         </View>
                       ))}
                     </View>
@@ -221,37 +229,42 @@ export default function Sandbox() {
             ))}
           </View>
         )}
-        <View id="msg-bottom-sandbox" />
+        <View id="msg-bottom-sandbox" style={{ height: '1px' }} />
+        <View style={{ height: '80px' }} />
       </ScrollView>
 
-      {/* 输入区域 */}
+      {/* 输入区域 - 跟随键盘高度 */}
       <View
-        style={{
-          display: 'flex', flexDirection: 'row', gap: '8px',
-          padding: '12px', backgroundColor: '#fff',
-          borderTop: '1px solid #e5e5e5', alignItems: 'center'
-        }}
+        className="flex-shrink-0 px-3 pt-3 bg-card"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)', borderTop: '1px solid var(--color-outline-variant)', marginBottom: `${keyboardHeight}px` }}
       >
-        <View style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '20px', padding: '8px 12px' }}>
-          <Input
-            style={{ width: '100%', fontSize: '14px', backgroundColor: 'transparent' }}
-            placeholder="告诉我你的职业目标..."
-            value={inputText}
-            onInput={(e) => setInputText(e.detail.value)}
-            onConfirm={sendMessage}
-            confirmType="send"
-            disabled={isLoading}
-          />
-        </View>
-        <View style={{ flexShrink: 0 }}>
-          <Button
-            size="sm"
-            className="btn-shimmer"
-            onClick={sendMessage}
-            disabled={isLoading || !inputText.trim()}
-          >
-            <Send size={16} color="#fff" />
-          </Button>
+        <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
+          <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
+            <TaroInput
+              style={{ width: '100%', fontSize: '14px', color: 'var(--color-foreground)', backgroundColor: 'transparent' }}
+              placeholder="告诉我你的职业目标..."
+              placeholderStyle="color: var(--color-muted-foreground)"
+              value={inputText}
+              onInput={(e) => setInputText(e.detail.value)}
+              onConfirm={sendMessage}
+              confirmType="send"
+              disabled={isLoading}
+              adjustPosition={false}
+              onFocus={scrollToBottom}
+              onKeyboardHeightChange={handleKeyboardHeight}
+            />
+          </View>
+          <View style={{ flexShrink: 0 }}>
+            <Button
+              size="sm"
+              className="rounded-full"
+              style={{ backgroundColor: '#7C3AED' }}
+              onClick={sendMessage}
+              disabled={isLoading || !inputText.trim()}
+            >
+              <Send size={16} color="#fff" />
+            </Button>
+          </View>
         </View>
       </View>
     </View>

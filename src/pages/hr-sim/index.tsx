@@ -30,7 +30,7 @@ export default function HrSim() {
   const [isLoading, setIsLoading] = useState(false)
   const [hrNotes, setHrNotes] = useState('')
   const scrollRef = useRef('')
-  const scrollViewRef = useRef<any>(null)
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   /** 滚动到底部 */
   const scrollToBottom = useCallback(() => {
@@ -39,9 +39,15 @@ export default function HrSim() {
     }, 50)
   }, [])
 
-  /** 键盘弹起时仅滚动聊天区 */
+  /** 键盘弹起时仅滚动聊天区 + 记录键盘高度 */
   const handleInputFocus = useCallback(() => {
     scrollToBottom()
+  }, [scrollToBottom])
+
+  const handleKeyboardHeight = useCallback((e) => {
+    const h = e.height || 0
+    setKeyboardHeight(h)
+    if (h > 0) scrollToBottom()
   }, [scrollToBottom])
 
   /** 开始面试 */
@@ -73,7 +79,7 @@ export default function HrSim() {
         },
         onError: () => {
           if (newMessages.length === 0) {
-            newMessages.push({ role: 'assistant', content: '候选人准备中，请稍后...' })
+            newMessages.push({ role: 'assistant', content: '候选人准备中，请稍后再试...' })
           }
           setMessages([...newMessages])
           setIsLoading(false)
@@ -118,7 +124,7 @@ export default function HrSim() {
           setIsLoading(false)
         },
         onError: () => {
-          aiMsg.content = '候选人思考中...'
+          aiMsg.content = '候选人暂时无法回复，请稍后再试...'
           aiMsg.streaming = false
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
@@ -180,12 +186,12 @@ export default function HrSim() {
             <CardContent className="p-4">
               <View className="flex flex-row items-center gap-3">
                 <View
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: `${profile.color}15` }}
                 >
                   <User size={24} color={profile.color} />
                 </View>
-                <View className="flex-1">
+                <View className="flex-1 min-w-0">
                   <View className="flex flex-row items-center gap-2">
                     <Text className="block font-semibold text-foreground">{profile.name}</Text>
                     <Badge className="text-xs border-none" style={{ backgroundColor: `${profile.color}15`, color: profile.color }}>{profile.tag}</Badge>
@@ -193,7 +199,9 @@ export default function HrSim() {
                   <Text className="block text-xs text-muted-foreground mt-1">{profile.school}</Text>
                   <Text className="block text-xs text-muted-foreground mt-1" style={{ opacity: 0.7 }}>{profile.summary}</Text>
                 </View>
-                <ChevronRight size={16} color="#6B7B74" />
+                <View className="flex-shrink-0">
+                  <ChevronRight size={16} color="#6B7B74" />
+                </View>
               </View>
             </CardContent>
           </Card>
@@ -236,19 +244,19 @@ export default function HrSim() {
     )
   }
 
-  /** 面试对话阶段 - 关键修复：键盘弹起不推页面 */
+  /** 面试对话阶段 */
   return (
-    <View className="flex flex-col" style={{ height: '100dvh' }}>
-      {/* 顶部固定导航栏 */}
+    <View className="flex flex-col" style={{ height: '100vh' }}>
+      {/* 顶部固定导航栏 - 使用安全区域 */}
       <View
-        className="px-4 pt-4 pb-3 flex-shrink-0"
-        style={{ background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
+        className="flex-shrink-0 px-4 pb-3"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 12px)', background: 'linear-gradient(135deg, #3A4A44 0%, #4A5E52 100%)' }}
       >
         <View className="flex flex-row items-center gap-3">
           <View onClick={() => Taro.navigateBack()} className="p-1">
             <ArrowLeft size={20} color="#fff" />
           </View>
-          <View className="flex-1">
+          <View className="flex-1 min-w-0">
             <Text className="block text-white font-bold text-base">HR模拟面试</Text>
             <Text className="block text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>候选人: {RESUME_PROFILES[resumeIndex].name}</Text>
           </View>
@@ -258,21 +266,19 @@ export default function HrSim() {
         </View>
       </View>
 
-      {/* 聊天区 - 自动填充剩余高度，键盘弹起不影响此区域 */}
+      {/* 聊天区 - 自动填充剩余高度 */}
       <ScrollView
         className="flex-1 px-4 pt-4"
         scrollY
         scrollIntoView={scrollRef.current}
         scrollWithAnimation
-        ref={scrollViewRef}
-        style={{}}
       >
         {messages.map((msg, idx) => (
           <View key={idx} id={`msg-${idx}`} className="mb-3">
             {msg.role === 'assistant' ? (
               <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
                 <View
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: '#3A4A44' }}
                 >
                   <Bot size={14} color="#fff" />
@@ -281,7 +287,7 @@ export default function HrSim() {
                   <CardContent className="p-3">
                     <Text className="block text-sm text-foreground leading-relaxed">
                       {msg.content}
-                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1 align-middle" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
+                      {msg.streaming && <Text className="inline-block w-2 h-4 ml-1" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />}
                     </Text>
                   </CardContent>
                 </Card>
@@ -289,7 +295,7 @@ export default function HrSim() {
             ) : (
               <View className="flex flex-row items-start gap-2 ml-auto" style={{ maxWidth: '85%', flexDirection: 'row-reverse' }}>
                 <View
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: '#E26A5C' }}
                 >
                   <Text className="text-white text-xs font-bold">HR</Text>
@@ -304,36 +310,33 @@ export default function HrSim() {
           </View>
         ))}
 
+        {/* 仅在AI正在思考且最后一条是用户消息时显示loading */}
         {isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'user' && (
           <View className="mb-3">
             <View className="flex flex-row items-start gap-2" style={{ maxWidth: '85%' }}>
               <View
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: '#3A4A44' }}
               >
                 <Bot size={14} color="#fff" />
               </View>
               <Card className="shadow-card">
                 <CardContent className="p-3">
-                  <View className="flex flex-row items-center gap-1">
-                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite' }} />
-                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite 0.2s' }} />
-                    <View className="w-2 h-2 rounded-full" style={{ backgroundColor: '#3A4A44', animation: 'blink 1s step-end infinite 0.4s' }} />
-                  </View>
+                  <Text className="block text-xs text-muted-foreground">候选人思考中...</Text>
                 </CardContent>
               </Card>
             </View>
           </View>
         )}
-        {/* 底部锚点 + 为输入栏预留空间 */}
+        {/* 底部锚点 */}
         <View id="msg-bottom-hr" style={{ height: '1px' }} />
-        <View style={{ height: '120px' }} />
+        <View style={{ height: '80px' }} />
       </ScrollView>
 
-      {/* 输入区 - 固定底部，键盘弹起不推动页面 */}
+      {/* 输入区 - 固定底部，跟随键盘高度 */}
       <View
-        className="flex-shrink-0 px-3 pt-3 pb-4 bg-card"
-        style={{ borderTop: '1px solid var(--color-outline-variant)' }}
+        className="flex-shrink-0 px-3 pt-3 bg-card"
+        style={{ paddingBottom: `max(env(safe-area-inset-bottom), 12px)`, borderTop: '1px solid var(--color-outline-variant)', marginBottom: `${keyboardHeight}px` }}
       >
         <View style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
           <View style={{ flex: 1, backgroundColor: 'var(--color-muted)', borderRadius: '20px', padding: '8px 12px' }}>
@@ -348,6 +351,7 @@ export default function HrSim() {
               disabled={isLoading}
               adjustPosition={false}
               onFocus={handleInputFocus}
+              onKeyboardHeightChange={handleKeyboardHeight}
             />
           </View>
           <View style={{ flexShrink: 0 }}>
