@@ -508,13 +508,16 @@ ${isFirstMessage ? '这是面试开始，请做简短的自我介绍。' : ''}`;
 
     // 支持 prompt 参数（用于开场白）
     if (body.prompt) {
+      console.log('HR sim - handling prompt:', body.prompt.substring(0, 100));
       const messages = [
         { role: 'system' as const, content: systemPrompt },
         { role: 'user' as const, content: body.prompt }
       ];
 
       try {
+        console.log('HR sim - calling LLM...');
         const response = await client.invoke(messages, { temperature: 0.8 });
+        console.log('HR sim - LLM response:', response?.content?.substring(0, 100) || '(empty)');
         return { reply: response.content };
       } catch (err) {
         console.error('HR sim prompt LLM error:', err);

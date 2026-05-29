@@ -79,8 +79,8 @@ export default function CareerSandbox() {
         }
       })
 
-      if (res.data.code === 200 && res.data.data) {
-        const reply = res.data.data.reply || res.data.data.content || ''
+      if (res.data && (res.data.data || res.data.message || res.data.content)) {
+        const reply = res.data.data?.reply || res.data.data?.content || res.data.message || res.data.content || ''
         const msgIndex = messagesRef.current.findIndex(m => m.id === aiMsg.id)
         if (msgIndex !== -1) {
           messagesRef.current[msgIndex] = {

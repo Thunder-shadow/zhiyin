@@ -108,8 +108,8 @@ export default function HrSimIndex() {
         }
       })
 
-      if (res.data.code === 200 && res.data.data) {
-        const reply = res.data.data.reply || ''
+      if (res.data && (res.data.data || res.data.reply)) {
+        const reply = res.data.data?.reply || res.data.reply || ''
         tempMessages[0] = {
           id: tempId,
           role: 'assistant',
