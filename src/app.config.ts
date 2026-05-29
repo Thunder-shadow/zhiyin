@@ -9,6 +9,8 @@ export default defineAppConfig({
     'pages/resume/list',
     'pages/resume/editor',
     'pages/company/detail',
+    'pages/company/create',
+    'pages/company/interview-room',
     'pages/interview/room',
     'pages/interview/report',
     'pages/hr-sim/index',

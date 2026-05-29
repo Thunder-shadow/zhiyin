@@ -48,6 +48,9 @@ export class AiService {
       case 'hr_sim_response':
         yield* this.handleHrSimStream(body, headers);
         break;
+      case 'interview_dungeon':
+        yield* this.handleDungeonInterviewStream(body, headers);
+        break;
       case 'interview_report':
         // 面试报告使用非流式
         try {
@@ -487,6 +490,92 @@ ${isFirstMessage ? '这是面试开始，请做简短的自我介绍。' : ''}`;
     } catch (err) {
       console.error('HR sim chat LLM error:', err);
       return { message: '候选人思考中...' };
+    }
+  }
+
+  /** 副本面试 - 流式 */
+  private async *handleDungeonInterviewStream(body: {
+    company?: string;
+    position?: string;
+    description?: string;
+    round?: number;
+    max_rounds?: number;
+    force_decision?: boolean;
+    conversation?: any[];
+    [key: string]: any;
+  }, headers: Record<string, string>): AsyncGenerator<StreamChunk> {
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(headers);
+    const client = new LLMClient(config, customHeaders);
+
+    const company = body.company || '该公司';
+    const position = body.position || '岗位';
+    const description = body.description || '';
+    const round = body.round || 0;
+    const maxRounds = body.max_rounds || 30;
+    const forceDecision = body.force_decision || false;
+    const conversation = body.conversation || [];
+
+    const systemPrompt = `你是${company}的${position}面试官。
+
+## 面试规则
+1. 你是专业的面试官，正在面试一位求职者
+2. 面试最多进行${maxRounds}轮对话
+3. 你需要在${maxRounds}轮内评估求职者是否适合这个岗位
+4. 评估维度：专业能力、沟通表达、逻辑思维、岗位匹配度
+${description ? `5. 岗位要求：${description}` : ''}
+
+## 面试流程
+- 第1-5轮：自我介绍、基本情况了解
+- 第6-15轮：专业能力考察（技术问题、项目经验）
+- 第16-25轮：综合能力考察（情景题、压力题）
+- 第26-${maxRounds}轮：收尾阶段，做出最终判断
+
+## 判断标准
+- 如果求职者表现优秀，在任何一轮都可以提前给出Offer
+- 如果求职者表现明显不符合，可以在15轮后提前结束
+- 必须在${maxRounds}轮内给出明确结果
+
+## 输出格式
+当你决定给出结果时，必须使用以下格式：
+[OFFER_DECISION:PASS] 或 [OFFER_DECISION:FAIL]
+
+并在后面附上评语和评分（1-10分）：
+[EVALUATION]
+专业能力：X/10
+沟通表达：X/10
+逻辑思维：X/10
+岗位匹配：X/10
+综合评分：X/10
+[/EVALUATION]
+
+## 注意事项
+- 保持专业和友好
+- 问题要有针对性，根据岗位调整
+- 适时追问，深入了解求职者能力
+- 不要问与岗位无关的问题${forceDecision ? `
+
+**重要：面试已达到${maxRounds}轮上限，请在本轮回复中立即给出最终判断（[OFFER_DECISION:PASS]或[OFFER_DECISION:FAIL]）和评分。**` : ''}`;
+
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...conversation.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: String(m.content) }))
+    ];
+
+    try {
+      const stream = client.stream(messages, { temperature: 0.7 });
+      let fullContent = '';
+      for await (const chunk of stream) {
+        if (chunk.content) {
+          const text = chunk.content.toString();
+          fullContent += text;
+          yield { type: 'content', content: text };
+        }
+      }
+      yield { type: 'done', data: { message: fullContent } };
+    } catch (err) {
+      console.error('Dungeon interview stream error:', err);
+      yield { type: 'error', message: '面试官思考中...' };
     }
   }
 }

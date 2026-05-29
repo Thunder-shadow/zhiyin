@@ -1,34 +1,33 @@
 import { View, Text } from '@tarojs/components'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Search, Building, MapPin, GraduationCap, Plus } from 'lucide-react-taro'
+import { Search, Building, MapPin, GraduationCap, Plus, Briefcase, Trophy, Swords } from 'lucide-react-taro'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { Network } from '@/network'
 
-/** 副本大厅 - 岗位浏览 */
+const statusMap: Record<string, { label: string; color: string; bgColor: string; icon: string }> = {
+  pending: { label: '待挑战', color: '#3B82F6', bgColor: '', icon: '⚔️' },
+  interviewing: { label: '面试中', color: '#F59E0B', bgColor: '', icon: '🎤' },
+  offer: { label: '已拿Offer', color: '#10B981', bgColor: 'bg-success bg-opacity-15', icon: '🎉' },
+  rejected: { label: '已失败', color: '#EF4444', bgColor: 'bg-destructive bg-opacity-15', icon: '😢' },
+}
+
+const industryFilters = [
+  { key: 'all', label: '全部' },
+  { key: 'internet', label: '互联网' },
+  { key: 'finance', label: '金融' },
+  { key: 'education', label: '教育' },
+  { key: 'medical', label: '医疗' },
+  { key: 'manufacturing', label: '制造业' },
+]
+
+/** 副本大厅 - 任务列表 */
 export default function CompanyHall() {
   const [jobCards, setJobCards] = useState<any[]>([])
   const [filter, setFilter] = useState<string>('all')
   const [searchText, setSearchText] = useState('')
   const [loaded, setLoaded] = useState(false)
-
-  const industryFilters = [
-    { key: 'all', label: '全部' },
-    { key: 'internet', label: '互联网' },
-    { key: 'finance', label: '金融' },
-    { key: 'education', label: '教育' },
-    { key: 'medical', label: '医疗' },
-    { key: 'manufacturing', label: '制造业' },
-  ]
-
-  const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
-    interested: { label: '攻略中', color: '#5B9A6F', bgColor: 'bg-success bg-opacity-15' },
-    applied: { label: '已投递', color: '#6B7B74', bgColor: 'bg-surface-container-high' },
-    interviewing: { label: '面试中', color: '#3B82F6', bgColor: '' },
-    offer: { label: 'Offer', color: '#5B9A6F', bgColor: 'bg-success bg-opacity-15' },
-    rejected: { label: '已结束', color: '#E26A5C', bgColor: 'bg-destructive bg-opacity-15' },
-  }
 
   useDidShow(() => {
     loadJobCards()
@@ -38,22 +37,29 @@ export default function CompanyHall() {
   const loadJobCards = async () => {
     try {
       const res = await Network.request({ url: '/api/jobs' })
-      console.log('JobCards response:', res.data)
       if (res.data?.code === 0 && res.data?.data) {
         setJobCards(res.data.data)
       }
     } catch (err) {
       console.log('Load job cards error:', err)
-    } finally {
-      // loaded
     }
   }
 
   const filteredCards = jobCards.filter(c => {
-    const matchFilter = filter === 'all' || c.industry === filter || c.status === filter
+    const matchFilter = filter === 'all' || c.industry === filter
     const matchSearch = !searchText || (c.company || '').includes(searchText) || (c.position || '').includes(searchText)
     return matchFilter && matchSearch
   })
+
+  const handleCardClick = (card: any) => {
+    if (card.status === 'pending' || card.status === 'interviewing') {
+      // 进入面试房间
+      Taro.navigateTo({ url: `/pages/company/interview-room?jobId=${card.id}` })
+    } else {
+      // 已完成的面试，查看详情
+      Taro.navigateTo({ url: `/pages/company/interview-room?jobId=${card.id}` })
+    }
+  }
 
   return (
     <View className='min-h-full bg-background'>
@@ -89,7 +95,7 @@ export default function CompanyHall() {
         </View>
       </View>
 
-      {/* 岗位卡片列表 */}
+      {/* 任务卡片列表 */}
       {filteredCards.length === 0 ? (
         <View className='px-4'>
           <Card className={`shadow-card ${loaded ? 'anim-fade-in-up anim-delay-2' : 'opacity-0'}`}>
@@ -97,13 +103,13 @@ export default function CompanyHall() {
               <View className='w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-3' style={{ overflow: 'hidden' }}>
                 <Building size={28} color='#B8C2BB' />
               </View>
-              <Text className='block text-muted-foreground text-sm font-medium mt-1'>这里还没有你的副本</Text>
-              <Text className='block text-muted-foreground text-xs mt-1' style={{ opacity: 0.6 }}>先去发现心仪公司，立下战书吧</Text>
+              <Text className='block text-muted-foreground text-sm font-medium mt-1'>还没有副本任务</Text>
+              <Text className='block text-muted-foreground text-xs mt-1' style={{ opacity: 0.6 }}>创建你的第一个副本任务，开始面试挑战</Text>
               <View
                 className='mt-4 px-5 py-2 bg-primary rounded-full btn-press'
-                onClick={() => Taro.navigateTo({ url: '/pages/company/detail?mode=add' })}
+                onClick={() => Taro.navigateTo({ url: '/pages/company/create' })}
               >
-                <Text className='text-sm font-semibold text-primary-foreground'>领任务</Text>
+                <Text className='text-sm font-semibold text-primary-foreground'>创建任务</Text>
               </View>
             </CardContent>
           </Card>
@@ -111,18 +117,20 @@ export default function CompanyHall() {
       ) : (
         <View className='px-4 flex flex-col gap-3 pb-20'>
           {filteredCards.map((card, idx) => {
-            const status = statusMap[card.status] || statusMap.interested
+            const status = statusMap[card.status] || statusMap.pending
             return (
               <Card
                 key={card.id}
                 className={`shadow-card card-hover ${loaded ? `anim-fade-in-up anim-delay-${Math.min(idx + 2, 6)}` : 'opacity-0'}`}
-                onClick={() => Taro.navigateTo({ url: `/pages/company/detail?id=${card.id}` })}
+                onClick={() => handleCardClick(card)}
               >
                 <CardContent className='p-4'>
                   {/* 右上角状态标签 */}
                   <View className='absolute top-4 right-4'>
                     <View className={`px-3 py-1 rounded-full ${status.bgColor}`} style={{ backgroundColor: status.bgColor ? undefined : '#DBEAFE' }}>
-                      <Text className='text-xs font-semibold' style={{ fontSize: '10px', color: status.color }}>{status.label}</Text>
+                      <Text className='text-xs font-semibold' style={{ fontSize: '10px', color: status.color }}>
+                        {status.icon} {status.label}
+                      </Text>
                     </View>
                   </View>
                   {/* 公司名称 + 行业标签 */}
@@ -154,6 +162,12 @@ export default function CompanyHall() {
                         <Text className='text-xs font-medium text-muted-foreground' style={{ fontSize: '10px' }}>{card.education}</Text>
                       </View>
                     )}
+                    {card.interview_rounds && (
+                      <View className='flex flex-row items-center gap-1 px-3 py-1 rounded-full bg-muted'>
+                        <Swords size={10} color='#6B7B74' />
+                        <Text className='text-xs font-medium text-muted-foreground' style={{ fontSize: '10px' }}>{card.interview_rounds}轮</Text>
+                      </View>
+                    )}
                   </View>
                 </CardContent>
               </Card>
@@ -166,11 +180,11 @@ export default function CompanyHall() {
       <View
         className='fixed right-4 bg-primary rounded-full shadow-float px-5 py-3 btn-pulse btn-press'
         style={{ bottom: 80 }}
-        onClick={() => Taro.navigateTo({ url: '/pages/company/detail?mode=add' })}
+        onClick={() => Taro.navigateTo({ url: '/pages/company/create' })}
       >
         <View className='flex flex-row items-center gap-2'>
           <Plus size={16} color='#FFFFFF' />
-          <Text className='text-sm font-semibold text-primary-foreground'>领任务</Text>
+          <Text className='text-sm font-semibold text-primary-foreground'>创建任务</Text>
         </View>
       </View>
     </View>
