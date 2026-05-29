@@ -11,8 +11,6 @@ import { Network } from '@/network'
 import { fetchStream } from '@/utils/stream'
 import { useKeyboardOffset } from '@/lib/hooks/use-keyboard-offset'
 
-const AI_MAX_CHARS = 250
-
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -52,39 +50,23 @@ export default function HrSim() {
     setIsLoading(true)
 
     const newMessages: ChatMessage[] = []
-    let reachedLimit = false
 
     await fetchStream(
       '/api/ai/chat/stream',
       { action: 'hr_sim_response', resume_index: index, conversation: [] },
       {
         onChunk: (content) => {
-          if (reachedLimit) return
           if (newMessages.length === 0) {
             newMessages.push({ role: 'assistant', content: '', streaming: true })
           }
           const msg = newMessages[0]
-          const remaining = AI_MAX_CHARS - msg.content.length
-          if (remaining <= 0) {
-            reachedLimit = true
-            msg.streaming = false
-            newMessages[0] = { ...msg }
-            setMessages([...newMessages])
-            setIsLoading(false)
-            return
-          }
-          msg.content += content.substring(0, remaining)
-          if (msg.content.length >= AI_MAX_CHARS) {
-            reachedLimit = true
-            msg.streaming = false
-          }
+          msg.content += content
           newMessages[0] = { ...msg }
           setMessages([...newMessages])
           scrollToBottom()
         },
         onDone: () => {
           if (newMessages.length > 0) {
-            // Don't replace content if it already exists
             if (!newMessages[0].content || newMessages[0].content.trim() === '') {
               newMessages[0].content = '候选人思考中...'
             }
@@ -97,7 +79,6 @@ export default function HrSim() {
           if (newMessages.length === 0) {
             newMessages.push({ role: 'assistant', content: '候选人准备中，请稍后...' })
           } else if (!newMessages[0].content || newMessages[0].content.trim() === '') {
-            // Only show error if no content was received
             newMessages[0].content = '候选人准备中，请稍后...'
           }
           if (newMessages.length > 0) newMessages[0].streaming = false
@@ -123,8 +104,6 @@ export default function HrSim() {
     const newMessages = [...currentConversation, aiMsg]
     setMessages([...newMessages])
 
-    let reachedLimit = false
-
     await fetchStream(
       '/api/ai/chat/stream',
       {
@@ -134,27 +113,12 @@ export default function HrSim() {
       },
       {
         onChunk: (content) => {
-          if (reachedLimit) return
-          const remaining = AI_MAX_CHARS - aiMsg.content.length
-          if (remaining <= 0) {
-            reachedLimit = true
-            aiMsg.streaming = false
-            newMessages[newMessages.length - 1] = { ...aiMsg }
-            setMessages([...newMessages])
-            setIsLoading(false)
-            return
-          }
-          aiMsg.content += content.substring(0, remaining)
-          if (aiMsg.content.length >= AI_MAX_CHARS) {
-            reachedLimit = true
-            aiMsg.streaming = false
-          }
+          aiMsg.content += content
           newMessages[newMessages.length - 1] = { ...aiMsg }
           setMessages([...newMessages])
           scrollToBottom()
         },
         onDone: () => {
-          // Don't replace content if it already exists
           if (!aiMsg.content || aiMsg.content.trim() === '') {
             aiMsg.content = '候选人思考中...'
           }
@@ -164,7 +128,6 @@ export default function HrSim() {
           setIsLoading(false)
         },
         onError: () => {
-          // Only show error if no content was received
           if (!aiMsg.content || aiMsg.content.trim() === '') {
             aiMsg.content = '候选人暂时无法回复，请稍后再试...'
           }
@@ -337,8 +300,8 @@ export default function HrSim() {
                       {msg.streaming && <Text className="inline-block w-2 h-4 bg-violet-500 ml-1 align-middle cursor-blink" />}
                     </Text>
                     {msg.streaming && (
-                      <Text className="block text-xs mt-1" style={{ color: msg.content.length >= AI_MAX_CHARS * 0.9 ? '#EF4444' : '#9CA3AF' }}>
-                        {msg.content.length}/{AI_MAX_CHARS}
+                      <Text className="block text-xs mt-1" style={{ color: '#9CA3AF' }}>
+                        {msg.content.length}字
                       </Text>
                     )}
                   </CardContent>
